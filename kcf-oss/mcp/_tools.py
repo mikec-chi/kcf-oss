@@ -159,6 +159,14 @@ def capabilities() -> dict:
             "KCF_ELICITATION_GUIDE (or the model_domain `conventions` arg) for the "
             "questions asked; KCF_CODEGEN_OVERRIDES (or codegen_prompt `instructions`) "
             "for how code is generated.",
+        "livingModel": "The model is the source of truth; code is a projection of it. "
+            "Prevent drift: read the model before coding; for any change that alters "
+            "meaning (new field/action/rule/status/relationship) update the .kcf FIRST "
+            "(compile --validate, assess) then generate; if code was vibe-coded "
+            "directly, RECONCILE the model to match before building further (ask when "
+            "intent is ambiguous). Annotate each artifact with the construct it "
+            "realizes. `kcf init` seeds a project wired for this loop; the full "
+            "protocol is codegen/MODEL_SYNC.md.",
     }
 
 

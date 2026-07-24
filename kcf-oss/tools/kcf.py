@@ -19,6 +19,7 @@ from assess import assess as assess_model  # noqa: E402
 from document_profile import check_document, is_conformant, load_document_profiles  # noqa: E402
 from import_mermaid import import_mermaid  # noqa: E402
 from ingest import ingest as ingest_model  # noqa: E402
+from init_project import init_project, PROFILES  # noqa: E402
 from pattern_contracts import load_contracts, report as pattern_report, role_report  # noqa: E402
 from review_queue import by_segment as review_by_segment, review_queue  # noqa: E402
 from scaffold import build_scaffold  # noqa: E402
@@ -136,7 +137,27 @@ def main() -> int:
 
     commands.add_parser("coverage")
     commands.add_parser("check")
+
+    init_command = commands.add_parser("init", help="seed a KCF knowledge application (model as source of truth)")
+    init_command.add_argument("directory", type=Path, help="target project directory")
+    init_command.add_argument("--name", help="model name (default: the directory name)")
+    init_command.add_argument("--profile", default="business-application", choices=PROFILES)
+
     args = parser.parse_args()
+
+    if args.command == "init":
+        name = args.name or "".join(w.capitalize() for w in args.directory.name.replace("-", " ").replace("_", " ").split()) or "App"
+        try:
+            created = init_project(args.directory, name, args.profile)
+        except ValueError as exc:
+            print(f"kcf init: {exc}", file=sys.stderr)
+            return 1
+        print(f"Seeded knowledge application '{name}' ({args.profile}) at {args.directory}:")
+        for path in created:
+            print(f"  + {path}")
+        print("\nNext: point your coding agent at AGENTS.md, then model your domain in "
+              f"model/{name}.kcf and keep code in sync with it (see .kcf/MODEL_SYNC.md).")
+        return 0
 
     if args.command == "compile":
         model = compile_file(args.source)

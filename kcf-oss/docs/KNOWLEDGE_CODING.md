@@ -176,6 +176,31 @@ language:
 The result: you keep the speed and feel of vibe coding, but the app is built on a
 foundation you can see, check, and trust.
 
+## Keep the model true (the living model, no drift)
+
+Knowledge coding only pays off if the model *stays* the source of truth. The moment
+code carries meaning the model doesn't — a stray field, a status, a rule you
+hand-added — you've drifted back to vibe coding. So the loop runs **both ways**, and
+your coding agent enforces it:
+
+- **Generate from the model** — every artifact traces to a construct.
+- **Model-first for meaning changes** — a new entity/field/action/rule/lifecycle
+  goes into the `.kcf` *first* (`kcf compile --validate` → `assess`), then the code.
+- **Reconcile after vibe coding** — if you edited the code directly, the agent's job
+  is to bring the model back into agreement (add the new meaning to the model), so it
+  never lags reality — asking you when intent is ambiguous.
+
+Seed a project wired for this in one command:
+
+```bash
+pip install "kcf-oss"
+kcf init my-app          # creates model/ (source of truth) + AGENTS.md + .kcf/ refs
+```
+
+The generated **`AGENTS.md`** tells your coding agent (Claude Code, Cursor, …) the
+drift rules; the full protocol is [`codegen/MODEL_SYNC.md`](../codegen/MODEL_SYNC.md).
+Point your agent at `AGENTS.md` and vibe-code freely — the model stays true.
+
 ## Make it yours (tune the prompts)
 
 KCF is guidance-driven, so you tune both ends of the loop with plain Markdown —

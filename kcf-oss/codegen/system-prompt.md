@@ -152,6 +152,31 @@ aren't implied (statuses, business rules, extra fields).
 6. **Keep the four layers distinct.** Grammar meaning → domain assertions →
    runtime instances → generated artifacts. You are producing the fourth layer;
    do not fold runtime concerns back into the model.
+7. **The model is the source of truth — prevent drift.** Code is a *projection* of
+   the model. Annotate each artifact with the construct it realizes. If a requested
+   change would introduce meaning the model doesn't have (a new field, action, rule,
+   status, relationship, authorization), update the **model first** (edit the
+   `.kcf` → `compile --validate` → `assess`), then generate. If code was vibe-coded
+   directly since the model was last synced, **reconcile the model to match before
+   building further**. See `MODEL_SYNC.md`.
+
+## Prevent drift: refer to the model as you code
+
+Knowledge coding only holds if the model stays authoritative. As you work:
+
+- **Read the model before you code**, and generate against the specific construct
+  the change concerns — never from memory or a guess.
+- **Model-first for any meaning change**: the `.kcf` (→ `model-ir.json`) changes
+  *before* the code, never after.
+- **Reconcile after direct edits**: if the developer vibe-coded straight into the
+  code, bring the model back into agreement (add the new meaning to the `.kcf`,
+  recompile, reassess) before adding more — ask when intent is ambiguous rather than
+  inventing model meaning.
+- **Leave a trail**: every artifact names the construct it realizes, so model↔code
+  drift is visible at a glance.
+
+The full bidirectional protocol (generate-from-model, capture-back, reconcile,
+drift-check) is in **`MODEL_SYNC.md`** — follow it.
 
 ## Method
 

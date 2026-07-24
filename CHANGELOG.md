@@ -112,6 +112,17 @@ First public release of the open standard. Cut this section to a dated version
   Face (now that HF **Docker Spaces require PRO**).
 - **Playground** — a zero-persistence web app (`kcf-oss/playground/`) that runs
   compile → assess → assemble the LLM codegen prompt, in the browser.
+- **Living model — drift prevention.** The model is the source of truth and coding
+  agents keep code in sync with it, both ways. New `codegen/MODEL_SYNC.md` defines the
+  bidirectional protocol: generate-from-model, **model-first** for any meaning change,
+  and **reconcile the model from code** when a developer vibe-codes directly (ask when
+  intent is ambiguous; never invent model meaning). The codegen `system-prompt.md`
+  gains a model-first non-negotiable rule + a "refer to the model as you code"
+  section, and MCP `capabilities()` gains a `livingModel` entry. **`kcf init`** seeds a
+  *knowledge application* — `model/` (source of truth) + compiled IR + `AGENTS.md`
+  (drift rules for Claude Code / Cursor / …) + `.kcf/` (bundled authoring reference,
+  sync protocol, codegen prompt) + `kcf.project.json` — so a project is wired for the
+  loop out of the box.
 - **Reference model + single-shot examples now construct-complete.** The reference
   `business-application` model gained a **rule** (CONSTRAINT), a **policy**
   (deny-overrides; the commands' `authorization` now resolves to it), a
