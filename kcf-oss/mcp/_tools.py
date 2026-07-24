@@ -90,7 +90,15 @@ the `assess` verdict as you go, and ask before assuming.
    CRUD, a set/bulk op, and a data-transformation per entity where they make sense.
 6. Rules & policies. Capture constraints, permissions, obligations, and derivations
    the user states as `rule`/`policy` — the invariants the app must enforce.
-7. Check & iterate. `compile` to catch syntax, `assess` for the verdict, `coverage`
+7. Supporting dimensions (use when the domain has them). Rich `event`s can classify
+   themselves (`kind`) and **drive a lifecycle** (`affect-lifecycle`); `measure`s
+   capture metrics (`unit`/`aggregation`/`threshold`); `temporal`/`spatial` capture
+   time/geometry; `intent` captures goals; `proposition`/`formula` capture logic/math;
+   and cross-cutting concerns are authored as top-level profile blocks
+   (`integration`/`security`/`lineage`/`architecture`/`experience`/`design`/
+   `analytics`/`ai`). See the authoring reference for the syntax — model these only
+   when the user's domain actually implies them.
+8. Check & iterate. `compile` to catch syntax, `assess` for the verdict, `coverage`
    for the gap to-do list. Fix required gaps; enrich or synthesize the recommended
    ones (see the gap-filling capability). Stop when the user confirms it reflects
    their domain and it is valid.

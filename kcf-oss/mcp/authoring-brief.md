@@ -53,14 +53,54 @@ kcf model <Name> profile <preset> {
 }
 ```
 
+## Beyond the basics (grammar-stack 1.11.0)
+
+All 16 dimensions + the ACTION/RELATIONSHIP algebra are first-class in `.kcf`; the
+full syntax is in [AUTHORING.md](../docs/AUTHORING.md). Reach for these when the
+domain calls for them — when you declare them they're **realized**, not guessed:
+
+```kcf
+  // Rich event — classify it and let it drive a lifecycle:
+  event OrderBreached {
+    kind THRESHOLD;                  // OCCURRENCE|SIGNAL|OBSERVATION|EXCEPTION|THRESHOLD|SCHEDULED|EXTERNAL|DERIVED|CORRECTION|NORMAL
+    trigger <ConceptRef>;
+    affect-lifecycle <LifecycleRef>; // emitting the event drives that lifecycle's transition
+    severity high; expectedness unexpected;
+    correlation-key <field>;
+    match "<condition>";
+  }
+
+  // Quantitative cluster:
+  measure Revenue { kind FINANCIAL; unit USD; aggregation sum; scale ratio; }  // + period/threshold/target/tolerance
+  temporal FiscalPeriod { ... }   calendar BusinessCalendar { ... }
+  spatial Region { geometry POLYGON [ 0 0, 1 0, 1 1 ]; }   route SupplyRoute { ... }
+  intent MaximizeMargin { ... }                       // goals + tradeoffs
+  proposition AllPriced { expression "..."; }   predicate IsLate (x: UUID) { ... }        // LOGIC
+  formula Margin { ... }   function UnitMargin (cost: Decimal, price: Decimal) -> Decimal { ... }  // MATH
+  //   also: optimize / distribution / simulation
+
+  // Cross-cutting PROFILE blocks — top-level; each lands in ir[<section>]:
+  integration { ... }  security { ... }  lineage { ... }
+  architecture { ... }  experience { ... }  design { ... }  analytics { ... }  ai { ... }
+```
+
+Richer core, too: lifecycle states take `entry`/`exit`/`invariant` and transitions
+carry `trigger`/`guard`/`effect`; actors carry `role`/`authority`; work carries a
+`process` (BPMN start/step/gateway/flow).
+
 ## Vocabulary
 
 - **profiles**: `business-application`, `operational-system`,
   `organizational-knowledge`, `event-driven-system`, `ai-application`,
   `analytics-platform`.
-- **concept keywords**: `entity`, `actor`, `work`, `event`, `resource` (plus
-  organizational-knowledge: `information`, `rule`, `policy`, `reasoning`,
-  `organization`).
+- **concept keywords**: `entity`, `actor`, `work`, `event`, `resource`, `intent`,
+  `measure`, `temporal`, `spatial`, `logic`, `math`; knowledge: `information`,
+  `rule`, `policy`, `reasoning`, `organization`, `assertion`. Top-level dimension
+  declarations: `lifecycle`, `relationship`, `command`/`query`/`transform`,
+  `collection`, `calendar`, `route`, `proposition`/`predicate`,
+  `formula`/`function`/`optimize`/`distribution`/`simulation`, `allocation`, `unit`,
+  `authority`, `process`; and the profile blocks (`integration`/`security`/`lineage`/
+  `architecture`/`experience`/`design`/`analytics`/`ai`).
 - **relationship rootKinds**: `CLASSIFICATION`, `COMPOSITION`, `ASSOCIATION`,
   `IDENTITY`, `PARTICIPATION`, `DEPENDENCY`, `TRANSFORMATION`, `CAUSATION`,
   `ORDERING`, `GOVERNANCE`.
