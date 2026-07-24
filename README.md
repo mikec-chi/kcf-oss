@@ -1,4 +1,4 @@
-# KCF — The Framework for Making Knowledge Executable
+# KCF — The Semantic Framework for Making Knowledge Executable
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![CI](https://github.com/OWNER/kcf/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/kcf/actions/workflows/ci.yml)
@@ -13,8 +13,9 @@ semantic spec, then let an LLM build the application from that spec instead of
 guessing from prose — **knowledge coding = semantic modeling + vibe coding**.
 
 > ### 👉 Start here: [**Knowledge Coding — get running in 3 minutes**](kcf-oss/docs/KNOWLEDGE_CODING.md)
-> Connect KCF to Claude, ChatGPT, VS Code, or Cursor and build your first app by
-> just describing it.
+> Two ways in: 🌱 **no install** — point your chat LLM at the hosted connector and
+> just describe your app; or 🛠️ **build for real** — `pip install` + `kcf init` a
+> project where the model stays the source of truth.
 
 KCF turns domain knowledge — entities, relationships, lifecycles, actions,
 events — into a normalized **semantic IR**: a single JSON model that is *valid*
@@ -90,28 +91,33 @@ emitters are part of the separate commercial platform).
 
 ## Use it in your chat LLM (MCP)
 
-The easiest way to use KCF is to plug it into the chat LLM you already use. The
-**[MCP server](kcf-oss/mcp/)** lets **Claude, ChatGPT, or VS Code** build a
-complete, machine-checked model of your domain and generate the app from it —
-instead of vibe-coding against prose.
+Plug KCF into the chat LLM you already use and it builds a complete, machine-checked
+model of your domain, then generates the app from it — instead of vibe-coding
+against prose.
+
+**🌱 No install — connect to the hosted server.** Point your LLM at the hosted
+connector `https://kcf-mcp.onrender.com/mcp`:
 
 ```bash
-pip install "kcf-oss[mcp]"      # provides the `kcf-mcp` command
-claude mcp add kcf -- kcf-mcp   # Claude Code; see kcf-oss/mcp/README.md for Claude Desktop / VS Code / ChatGPT
+claude mcp add --transport http kcf https://kcf-mcp.onrender.com/mcp   # Claude Code
+# ChatGPT: Settings → Connectors → add that URL. (Read-only demo; free tier, sleeps when idle.)
 ```
 
-**Prefer no install?** Point a remote host (e.g. a ChatGPT connector) at the hosted
-demo endpoint: **`https://kcf-mcp.onrender.com/mcp`** (read-only; free tier, sleeps
-when idle). Or host your own free instance — see
-[Host it yourself](kcf-oss/mcp/README.md#host-it-yourself-free).
+**🛠️ Building for real — install locally and seed a project:**
 
-Then just describe your domain — or invoke a guided prompt (**`model_domain`** end to
-end, **`build_model`** to model only, **`generate_app`** to generate only). The
+```bash
+pip install "kcf-oss[mcp]"      # the `kcf` CLI + the `kcf-mcp` server
+kcf init my-app                 # a project where the model is the source of truth
+claude mcp add kcf -- kcf-mcp   # local Claude Code; see kcf-oss/mcp/README.md for other hosts
+```
+
+Either way, describe your domain — or invoke a guided prompt (**`model_domain`** end
+to end, **`build_model`** to model only, **`generate_app`** to generate only). The
 assistant drafts a `.kcf`, checks it, lets you **approve anything it inferred**
 (bulk-accept the confident gaps, or review them one by one), then generates the
 backend and a matching frontend — each proving nothing in your model was dropped.
-See **[Knowledge Coding](kcf-oss/docs/KNOWLEDGE_CODING.md)** for the full five-step
-flow.
+See **[Knowledge Coding](kcf-oss/docs/KNOWLEDGE_CODING.md)** for both paths, step by
+step.
 
 ## Try it in the browser
 
