@@ -54,8 +54,8 @@ it.
 ## Why open-core at all
 
 Standards win by adoption, not by lock-in. Keeping the grammar, analyzer, and IR
-fully open — with a permissive license and a patent grant — is what lets you
-target KCF from your own tools with zero risk. The commercial layer exists to
+fully open under a permissive license is what lets you target KCF from your own
+tools with zero risk. The commercial layer exists to
 fund the standard's development, not to gate it.
 
 Questions about the boundary? Open a
