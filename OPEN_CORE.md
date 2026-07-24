@@ -13,9 +13,6 @@ forever, under [Apache-2.0](LICENSE):
 - **The reference compiler** — `.kcf` text → normalized IR.
 - **The semantic analyzer** — validity, coverage, pattern-proof, role checks
   (`kcf assess`).
-- **The foundational presets** — business-application, operational-system,
-  organizational-knowledge, event-driven-system, ai-application,
-  analytics-platform.
 - **The code-generation pack** — `codegen/`: the tech-stack-agnostic system
   prompt, the per-run templates, the per-construct coverage audit, and the
   single-shot examples across **backend** tiers (each exposing a Swagger/OpenAPI
@@ -34,7 +31,7 @@ analyzer, or emitter against it without permission.
 
 A commercial platform from **Composable Holdings Inc.** composes this standard
 and adds operational capabilities
-on top — for example the deterministic **emitters** (dbml, vertical-slice, and
+on top — for example the deterministic **emitters** (vertical-slice, and
 the tech-stack target/agentic emitters), a persisted semantic knowledge graph,
 additional industry-specific pattern presets, runtime/drift tooling, and an
 execution engine. That product **imports** the open standard; it never copies it
