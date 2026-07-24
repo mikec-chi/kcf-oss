@@ -101,7 +101,7 @@ See `kcf-oss/AGENTS.md` and `.llm/MAINTENANCE.md` for the full maintainer rules.
 ## Development setup
 
 ```bash
-git clone https://github.com/OWNER/kcf-oss.git && cd kcf-oss
+git clone https://github.com/mikec-chi/kcf-oss.git && cd kcf-oss
 python -m venv .venv && . .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -e .            # provides the `kcf` command + jsonschema
 ```

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: kcf check (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Build semantic rule catalogues
+        run: |
+          python semantic-core/tools/build_rules.py
+          python kcf-oss/tools/build_semantic_rules.py
+
+      - name: Conformance gate (kcf check)
+        run: kcf check
+
+      - name: Full stack validation
+        run: |
+          python kcf-oss/tools/validate_stack.py
+          python kcf-oss/tools/lint_stack.py
+
+      - name: Quickstart is reproducible (compile -> assess -> ready)
+        run: |
+          kcf compile kcf-oss/tests/domains/business-application.kcf --output /tmp/model-ir.json --validate
+          kcf assess /tmp/model-ir.json
+          python -c "import json; d=json.load(open('/tmp/model-ir.json')); assert d['concepts'], 'empty IR'"
+
+      - name: Codegen pack is present (OSS stops at the IR)
+        run: |
+          test -f kcf-oss/codegen/system-prompt.md
+          test -f kcf-oss/codegen/stacks/fastapi-sqlmodel-postgres/EXAMPLE.md
+
+      - name: Community models are valid
+        run: python community/models/validate.py

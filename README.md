@@ -1,7 +1,7 @@
 # KCF — The Semantic Framework for Making Knowledge Executable
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![CI](https://github.com/OWNER/kcf/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/kcf/actions/workflows/ci.yml)
+[![CI](https://github.com/mikec-chi/kcf-oss/actions/workflows/ci.yml/badge.svg)](https://github.com/mikec-chi/kcf-oss/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
 *The open **Knowledge Coding Framework** from [Composable Holdings Inc.](#license)*
@@ -55,7 +55,7 @@ was dropped (`dropped: []`).
 pip install kcf-oss        # provides the `kcf` command
 
 # 1. compile a tiny domain model → semantic IR (grab the sample from the repo)
-curl -O https://raw.githubusercontent.com/OWNER/kcf/main/kcf-oss/tests/domains/business-application.kcf
+curl -O https://raw.githubusercontent.com/mikec-chi/kcf-oss/main/kcf-oss/tests/domains/business-application.kcf
 kcf compile business-application.kcf --output model-ir.json --validate
 
 # 2. is it complete enough to generate from?
@@ -85,7 +85,7 @@ KCF **stops at the IR** — a complete, machine-checked model is the deliverable
 Turning it into running code is the LLM codegen pack's job (deterministic
 emitters are part of the separate commercial platform).
 
-> **From source instead:** `git clone https://github.com/OWNER/kcf.git && cd kcf && pip install -e .`
+> **From source instead:** `git clone https://github.com/mikec-chi/kcf-oss.git && cd kcf-oss && pip install -e .`
 > A source checkout also gives you the contributor gate (`kcf check`) and the
 > full-stack tooling, which need the bundled `semantic-core`.
 
