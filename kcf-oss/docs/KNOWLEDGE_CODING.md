@@ -20,7 +20,7 @@ vibe, but from a spec instead of a guess.
 
 Same tools, different depth — pick your path and graduate when you're ready:
 
-| | 🌱 **Path A — vibe-code in your chat LLM** | 🛠️ **Path B — build a real project** |
+| | 🌱 **Path A — knowledge code in your chat LLM** | 🛠️ **Path B — build a real project** |
 |---|---|---|
 | **For** | trying it, prototyping, newcomers | shipping and maintaining an app |
 | **Install** | **none** — connect to the hosted server | `pip install`, then `kcf init` |
