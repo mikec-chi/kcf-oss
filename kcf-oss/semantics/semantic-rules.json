@@ -1,0 +1,2650 @@
+{
+  "$schema": "./semantic-rules.schema.json",
+  "version": "2.2.0",
+  "sources": [
+    "semantic-core/semantics/semantic-rules.json",
+    "kcf-oss/semantics/SEMANTIC_VALIDATION.md"
+  ],
+  "rules": [
+    {
+      "id": "action.audit.mutation",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "warning",
+      "requirement": "Record and set mutations SHOULD capture actor, target, selection or identity, time, outcome, and correlation identifier.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.aggregate-grain",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Measures MUST declare their output grain; combining different grains without an explicit reaggregation is invalid.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.aggregate-type",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Aggregate functions MUST support the input type and define empty-input behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.boundedness",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Operations that require full materialization (for example global sort) MUST NOT run on an unbounded stream without a window or other bound.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.dedup-survivor",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Deduplication MUST define identity key and deterministic survivor selection.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.equality",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Distinct/intersect/except/deduplicate MUST define or infer equality/key semantics compatible with the item type.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.field-resolution",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Referenced fields MUST exist at the current pipeline stage, not merely in the original source.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.filter-boolean",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Filter predicates MUST evaluate to boolean.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.group-key",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Group keys MUST be hashable/comparable under the execution profile and output grouping keys MUST be retained or deliberately discarded.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.input-schema",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Every collection operation MUST receive a known item schema or type.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.join-fanout",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Many-to-many or otherwise fanout-producing joins SHOULD require an explicit expected-cardinality declaration.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.join-inputs",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Both join inputs and join fields MUST resolve.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.join-type",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Join key types, units, null semantics, and cardinalities MUST be compatible.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.map-cardinality",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "`map` MUST preserve item count; `flat-map` MUST declare zero-to-many output cardinality.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.order-total",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "A required deterministic sort MUST provide a total order or stable tie-breaker.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.output-schema",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "The validator MUST derive or verify the output schema after each operation.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.partition",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Partition keys MUST exist and partitioning MUST preserve required grouping/order guarantees.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
+    },
+    {
+      "id": "action.collection.projection-unique",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Projected output field names MUST be unique.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.purity",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "warning",
+      "requirement": "A collection transformation SHOULD be pure. Any external state mutation MUST be declared as a command/effect boundary.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.sample",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Sampling MUST define method, valid size/rate, seed or nondeterminism policy, and stratification keys where applicable.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.set-compatibility",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Union/intersect/except inputs MUST have compatible schemas and equality semantics.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.collection.window",
+      "source": "semantic-core",
+      "section": "Collection queries and relational/set operations",
+      "severity": "error",
+      "requirement": "Windows MUST define type, size/gap, ordering/time field, time zone, lateness/watermark policy for streams, and emission policy.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.compose.compensation",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "warning",
+      "requirement": "Multi-step, nontransactional commands SHOULD define compensation or reconciliation behavior.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.compose.order",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Sequential dependencies MUST be ordered; independent actions MAY run concurrently only when their read/write sets do not conflict.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.compose.saga",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Saga-like flows MUST define forward actions, compensations, durable state, retry policy, and terminal failure behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.concurrency.lost-update",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Read-modify-write actions MUST prevent or explicitly accept lost updates.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.concurrency.version",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Optimistic concurrency MUST identify a version or comparison token and define conflict behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.contract.incomplete",
+      "source": "semantic-core",
+      "section": "Work and action rules",
+      "severity": "error",
+      "requirement": "Every Action contract MUST declare effect, operation, scope, target, input/output cardinality, and command idempotency; fields required by its selected operation/scope MUST also be present.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.destructive.authorization",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Destructive actions MUST require a specific permission; generic read/write permission is insufficient under a strict profile.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.destructive.confirmation",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "warning",
+      "requirement": "Human-facing destructive bulk actions SHOULD require confirmation proportional to impact.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.destructive.explicit",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Delete, bulk-delete, destructive replace, command, firmware, and control actions MUST be explicitly classified as destructive where applicable.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.destructive.recovery",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Recovery, rollback, backup, or irreversibility MUST be declared for material destructive actions.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.destructive.retention",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Deletion MUST respect retention, legal hold, audit, security, and archival rules.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.destructive.scope",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Destructive set actions MUST expose the evaluated target count or preview when technically feasible.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.device.safety",
+      "source": "semantic-core",
+      "section": "Safety and authorization for destructive actions",
+      "severity": "error",
+      "requirement": "Device commands and control actions MUST validate target capability, current state, interlocks, permissives, range, units, acknowledgment, timeout, and fail-safe behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.event.commit-order",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Events describing state changes MUST be emitted only if the corresponding change commits, using an outbox/equivalent guarantee when required.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.event.duplicate",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Event consumers MUST declare duplicate-handling when delivery can be at least once.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.event.payload",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Event payloads MUST reflect the declared before/after semantics and MUST obey classification/minimization policies.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.idempotency.conditional",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Conditionally idempotent actions MUST state the condition/key that makes repetition safe.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.idempotency.create",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Retriable create/bulk-create/upsert operations MUST use a stable idempotency or identity key.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.idempotency.delete",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "warning",
+      "requirement": "Delete SHOULD be idempotent under its not-found policy.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.authorization",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "The caller's actor/role/system MUST be authorized for the action, target, scope, and selection.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.effect-context",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "A query-only context MUST NOT invoke a command. A pure transform MUST NOT invoke an undeclared stateful effect.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.invoke.failure",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Callers MUST handle or propagate declared failure modes.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.input",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Supplied arguments MUST cover required inputs exactly once and match names, types, cardinalities, units, and classifications.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.output",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Consumers MUST handle the declared output shape, including optional, many, stream, and per-item failure results.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.precondition",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "The caller MUST establish or explicitly handle action preconditions.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.recursion",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Recursive action invocation MUST be explicitly allowed and have a bounded/terminating strategy.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.resolved",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Every invoked action MUST resolve to one canonical action contract.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.scope",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "A record-oriented caller MUST NOT invoke a set mutation accidentally through an ambiguous reference.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.timeout-cancel",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "warning",
+      "requirement": "Remote/long-running actions SHOULD define timeout and cancellation behavior.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.invoke.transaction",
+      "source": "semantic-core",
+      "section": "Action invocation and composition",
+      "severity": "error",
+      "requirement": "Nested action transaction requirements MUST be compatible; impossible propagation combinations MUST be errors.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.create-input",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`create` MUST provide every required, noncomputed field not supplied by a default or generation policy.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.create-output",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`create` MUST return or emit the created identity unless the execution profile explicitly defines asynchronous identity delivery.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.create-readonly",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`create` MUST NOT accept client assignments to computed, generated, or unauthorized read-only fields.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.delete-policy",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`delete` MUST identify hard-delete, soft-delete, archive, or tombstone behavior and MUST respect relation/retention policies.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.exists-output",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`exists` MUST return boolean and MUST NOT expose record data as a side effect.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.key",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`read`, `replace`, `update`, `patch`, and `delete` MUST provide a selection that is provably unique. A non-unique predicate makes the operation set-scoped.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.not-found",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "Read/mutation operations MUST define not-found behavior: empty result, domain error, or idempotent success where appropriate.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.patch-format",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`patch` MUST declare its patch dialect and MUST validate every path, operation, and value type.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.postcondition",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "Mutations MUST establish declared field, relation, lifecycle, and invariant postconditions.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.precondition",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "Version, state, ownership, and business preconditions MUST be checked before mutation.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.replace-complete",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`replace` MUST supply every required mutable field. Omitted optional fields MUST follow an explicit clear/preserve policy.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.target",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "A record CRUD action MUST target exactly one entity or record-shaped resource.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.update-fields",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`update` MUST declare which fields may change and MUST NOT mutate fields outside that set.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.record.upsert-key",
+      "source": "semantic-core",
+      "section": "Record CRUD operations",
+      "severity": "error",
+      "requirement": "`upsert` MUST identify a stable conflict key and MUST define behavior when more than one existing record matches.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.retry.bound",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Retries MUST be bounded and use a valid backoff policy.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.retry.classification",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Retry policies MUST distinguish transient from permanent failures.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.retry.side-effects",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Retrying a non-idempotent command without duplicate suppression or compensation MUST be an error.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_integration"
+    },
+    {
+      "id": "action.set.atomicity",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "A set mutation MUST declare `atomic`, `per-record`, or `best-effort` atomicity.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.set.bulk-upsert",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Bulk upsert MUST define duplicate input-key behavior and conflicts among concurrently processed items.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.cascade",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Bulk delete/update cascades MUST be bounded, authorized, and consistent with the consuming stack's declared relation ownership.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.concurrency",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Bulk mutations MUST define conflict handling when records can change between selection and mutation.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.explicit-scope",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "A set operation MUST declare `scope = \"set\"` or another collection scope. It MUST NOT masquerade as record CRUD.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.set.input-shape",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Bulk input records MUST have a uniform compatible schema unless the operation explicitly supports tagged variants.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.invariants",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Entity and cross-record invariants MUST hold at the declared atomicity boundary.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.limit",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Limits MUST be positive; limits without deterministic order SHOULD produce a warning.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.order",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "An operation whose result/effect depends on order MUST declare a stable ordering and tie-breaker.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.output-shape",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Results MUST declare whether they return affected records, keys, count, per-item outcomes, or no value.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.pagination",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Large/unbounded queries MUST declare or inherit pagination, streaming, or bounded materialization behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.partial-failure",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Nonatomic operations MUST expose per-item success and failure results and MUST define retry behavior.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.query-pure",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "`query` and `count` MUST have `effect = \"query\"` and MUST NOT mutate modeled state.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.selection-required",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Bulk update/patch/delete MUST specify a selection. Absence of a selection MUST be an error; selecting every record requires an explicit `all` selection.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.set.synchronize",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "error",
+      "requirement": "Synchronization MUST declare source of truth, identity matching, create/update/delete behavior, and conflict precedence.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.set.unbounded-warning",
+      "source": "semantic-core",
+      "section": "Set-oriented CRUD and bulk operations",
+      "severity": "warning",
+      "requirement": "An unbounded or `all` mutation SHOULD produce a high-severity warning and MAY require explicit approval.",
+      "enforcement": "partially-automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.transaction.external",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "A transaction MUST NOT claim atomicity across systems that cannot provide it; use compensation/outbox/reconciliation semantics instead.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transaction.required",
+      "source": "semantic-core",
+      "section": "Transactions, concurrency, retries, and events",
+      "severity": "error",
+      "requirement": "Multi-record invariants requiring atomicity MUST execute in a compatible transaction boundary.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.classification",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Security/privacy classification MUST propagate unless a validated declassification, masking, anonymization, or aggregation rule applies.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.determinism",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Deterministic transformations MUST not depend on undeclared time, randomness, environment, or mutable external state.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.field-lineage",
+      "source": "semantic-core",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "Every transformed target field MUST identify its contributing source fields, transformation, and execution provenance.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.identity",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Transformations used for synchronization/upsert MUST preserve or explicitly remap identity.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.loss",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Narrowing, truncating, rounding, dropping, lossy encoding, or many-to-one conversion MUST be declared and SHOULD warn.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.null",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Null/missing/error behavior MUST be declared for each transformation that can fail or lose presence information.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.reproducibility",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "warning",
+      "requirement": "Nondeterministic transformations SHOULD record seeds, versions, parameters, and execution context when reproducibility matters.",
+      "enforcement": "profile-dependent",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.required-coverage",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Every required target field MUST be mapped, defaulted, generated, or computed.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.reversibility",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "If a transformation claims reversibility, round-trip validation MUST show that required information is preserved.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.side-effect",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Persistence, messaging, command dispatch, and external calls MUST be modeled separately from the pure transformation or explicitly declared as effects.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.source-target",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Source and target schemas/types MUST resolve.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.time",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Time conversions MUST preserve instant/local-time semantics and explicitly handle time zones and daylight-saving ambiguity.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.totality",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "A transformation MUST declare whether it is total or how unsupported/invalid inputs are handled.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.type",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Field transformations MUST produce values compatible with target types, constraints, units, and cardinality.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.unit",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Unit changes MUST use an explicit valid conversion.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "action.transform.version",
+      "source": "semantic-core",
+      "section": "Data-processing transformations",
+      "severity": "error",
+      "requirement": "Transformation/schema versions MUST be compatible; migrations MUST define supported source and destination versions.",
+      "enforcement": "manual-review",
+      "phase": "actions"
+    },
+    {
+      "id": "ai.feature.keys",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "AI feature identities and keys MUST be unique and resolve in the applicable feature schema.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_ai",
+      "aliases": [
+        "aiml.feature.keys"
+      ]
+    },
+    {
+      "id": "ai.feature.target",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "A training target MUST name a declared feature and MUST be excluded from inputs where inclusion would create leakage.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_ai",
+      "aliases": [
+        "aiml.feature.target"
+      ]
+    },
+    {
+      "id": "ai.pipeline.order",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "AI pipeline steps MUST be uniquely ordered and every input MUST exist before use.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_ai",
+      "aliases": [
+        "aiml.pipeline.order"
+      ]
+    },
+    {
+      "id": "ai.serving.capacity",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Serving capacity and concurrency values MUST be positive and compatible with the deployment runtime.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_ai",
+      "aliases": [
+        "aiml.serving.capacity"
+      ]
+    },
+    {
+      "id": "ai.serving.model",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Served models MUST resolve to deployable governed model versions.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_ai",
+      "aliases": [
+        "aiml.serving.model"
+      ]
+    },
+    {
+      "id": "analytics.binding.kind",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Analytics visual, metric, filter, and action bindings MUST resolve both endpoints to compatible kinds.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_analytics",
+      "aliases": [
+        "irml.binding.kind"
+      ]
+    },
+    {
+      "id": "architecture.deployment.complete",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Required runtime services MUST have compatible deployment targets or an explicit external-runtime declaration.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_architecture",
+      "aliases": [
+        "arch.deployment.complete"
+      ]
+    },
+    {
+      "id": "architecture.reference.kind",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Architecture service, interface, topology, node, boundary, artifact, environment, and capability references MUST resolve to compatible kinds.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_architecture",
+      "aliases": [
+        "arch.reference.kind"
+      ]
+    },
+    {
+      "id": "design.design-system.unique",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Design token, breakpoint, pattern, and constraint identities MUST be unique in their design-system scope.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_design",
+      "aliases": [
+        "wdml.design-system.unique"
+      ]
+    },
+    {
+      "id": "design.page.binding",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Page/view/section bindings MUST resolve to compatible Experience constructs.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_design",
+      "aliases": [
+        "wdml.page.binding"
+      ]
+    },
+    {
+      "id": "design.scale.order",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Ordered numeric scales and breakpoints MUST be finite, unique, and strictly increasing.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_design",
+      "aliases": [
+        "wdml.scale.order"
+      ]
+    },
+    {
+      "id": "experience.action.invoke",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "UI/experience actions MUST resolve to Action contracts applicable to the bound subject; hiding UI never replaces authorization.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_experience",
+      "aliases": [
+        "uxml.action.invoke"
+      ]
+    },
+    {
+      "id": "experience.app.reference",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Experience application entries, views, flows, components, and layouts MUST resolve.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_experience",
+      "aliases": [
+        "uxml.app.reference"
+      ]
+    },
+    {
+      "id": "experience.flow.entry",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Every experience flow MUST declare an entry that resolves to a node in that flow.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_experience",
+      "aliases": [
+        "uxml.flow.entry"
+      ]
+    },
+    {
+      "id": "experience.flow.reachability",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Required experience-flow nodes and a terminal route MUST be reachable from the declared entry.",
+      "enforcement": "partially-automated",
+      "phase": "emitters",
+      "handler": "check_experience",
+      "aliases": [
+        "uxml.flow.reachability"
+      ]
+    },
+    {
+      "id": "experience.flow.transition",
+      "source": "kcf",
+      "section": "Emitter-profile rules",
+      "severity": "error",
+      "requirement": "Every experience-flow transition source and target MUST resolve to nodes in the containing flow.",
+      "enforcement": "automated",
+      "phase": "emitters",
+      "handler": "check_experience",
+      "aliases": [
+        "uxml.flow.transition"
+      ]
+    },
+    {
+      "id": "information.kind",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Every information declaration MUST use a supported information kind.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "information.provenance",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Governed information MUST identify a source, evidence, or source document and its recording time.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "information.reference",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Information subjects, authors, sources, audiences, schemas, freshness policies, reviewers, evidence, and access policies MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "information.temporal",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Information validity intervals MUST be well-formed.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge"
+    },
+    {
+      "id": "integration.contract.schema",
+      "source": "kcf",
+      "section": "Integration profile rules",
+      "severity": "error",
+      "requirement": "Contract inputs and outputs MUST be compatible with the referenced Action contract and Information schemas.",
+      "enforcement": "manual-review",
+      "phase": "integration",
+      "aliases": [
+        "eiml.contract.schema"
+      ]
+    },
+    {
+      "id": "integration.endpoint",
+      "source": "kcf",
+      "section": "Integration profile rules",
+      "severity": "error",
+      "requirement": "Endpoint adapter references and route endpoints MUST resolve within the integration model.",
+      "enforcement": "automated",
+      "phase": "integration",
+      "handler": "check_integration",
+      "aliases": [
+        "dbml.integration.endpoint"
+      ]
+    },
+    {
+      "id": "integration.mapping.coverage",
+      "source": "kcf",
+      "section": "Integration profile rules",
+      "severity": "error",
+      "requirement": "Required target fields MUST have a source mapping, default, or explicit omission policy.",
+      "enforcement": "manual-review",
+      "phase": "integration",
+      "aliases": [
+        "eiml.mapping.coverage"
+      ]
+    },
+    {
+      "id": "integration.protocol",
+      "source": "kcf",
+      "section": "Integration profile rules",
+      "severity": "error",
+      "requirement": "Endpoint operation, address, serialization, authentication, and payload mapping MUST be compatible with the adapter protocol.",
+      "enforcement": "manual-review",
+      "phase": "integration",
+      "aliases": [
+        "dbml.integration.protocol"
+      ]
+    },
+    {
+      "id": "integration.retry.idempotency",
+      "source": "kcf",
+      "section": "Integration profile rules",
+      "severity": "error",
+      "requirement": "A retrying integration MUST require idempotency, duplicate suppression, compensation, or another declared safety mechanism.",
+      "enforcement": "manual-review",
+      "phase": "integration",
+      "aliases": [
+        "eiml.retry.idempotency"
+      ]
+    },
+    {
+      "id": "kcf.concept.abstract",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Abstract or non-instantiable constructs MUST NOT have runtime instances.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "build_symbols"
+    },
+    {
+      "id": "kcf.concept.cardinality",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Attribute and relationship values MUST satisfy declared lower and upper bounds.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.concept.identity",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Every grammar definition, domain assertion, and runtime instance MUST have stable identity within its layer.",
+      "enforcement": "partially-automated",
+      "phase": "concepts",
+      "handler": "build_symbols"
+    },
+    {
+      "id": "kcf.concept.kind-compatible",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Specialization MUST preserve or legally refine primary kind.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.concept.layer",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Grammar definitions, domain assertions, runtime instances, and emitted artifacts MUST NOT be conflated.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.concept.primary-kind",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "A concept MUST have exactly one primary kind unless an approved semantic bridge explicitly supports a composite case.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "build_symbols"
+    },
+    {
+      "id": "kcf.concept.provenance",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Derived, promoted, corrected, or governed semantics MUST retain source, evidence, and approval provenance.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.concept.reference",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Every semantic reference MUST resolve exactly once to a visible construct of the required kind and compatible version.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_refs"
+    },
+    {
+      "id": "kcf.concept.trait",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Applied traits MUST be permitted by the concept kind and all trait constraints MUST hold.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.concept.version",
+      "source": "kcf",
+      "section": "Universal concept rules",
+      "severity": "error",
+      "requirement": "Breaking semantic changes require a new major version; compatible additions require a minor version; clarifications require a patch version.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.emitter.unsupported",
+      "source": "kcf",
+      "section": "Compilation, runtime, and emitter rules",
+      "severity": "error",
+      "requirement": "An emitter MUST diagnose every semantic element it cannot preserve according to the configured error/warn/preserve policy; silent semantic loss is forbidden.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "kcf.event.immutable",
+      "source": "kcf",
+      "section": "Event rules",
+      "severity": "error",
+      "requirement": "Historical event facts MUST be immutable; corrections require a new event, supersession, reconciliation, or provenance update that preserves the original observation.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "kcf.extension.ownership",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Extensions MUST NOT redefine constructs owned by another dimension.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.extension.point",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Extensions MUST use a declared extension point and obey its compatibility/governance policy.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.extension.promotion",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Runtime discoveries promoted into grammar semantics require evidence, review, version impact analysis, and approval.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.profile.import",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Profile imports MUST exist, be version-compatible, and have an acyclic dependency graph except for declared type-only cycles.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.profile.pattern-exclusion",
+      "source": "kcf",
+      "section": "Compilation, runtime, and emitter rules",
+      "severity": "error",
+      "requirement": "A required pattern MUST NOT be excluded; exclusions of recommended patterns SHOULD be explicit and reviewable.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_profile_patterns"
+    },
+    {
+      "id": "kcf.profile.pattern-prohibited",
+      "source": "kcf",
+      "section": "Compilation, runtime, and emitter rules",
+      "severity": "error",
+      "requirement": "A model MUST NOT implement a pattern prohibited by any selected profile.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_profile_patterns"
+    },
+    {
+      "id": "kcf.profile.pattern-required",
+      "source": "kcf",
+      "section": "Compilation, runtime, and emitter rules",
+      "severity": "error",
+      "requirement": "A model using a business-pattern profile MUST explicitly implement every required pattern and model the pattern's semantic obligations.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_profile_patterns"
+    },
+    {
+      "id": "kcf.profile.prohibited",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Prohibited constructs MUST not appear directly or through an unapproved specialization.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.profile.relationship",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Profile relationship restrictions MUST be at least as strict as the underlying definition.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.profile.required",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Every required construct MUST be present.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.profile.term",
+      "source": "kcf",
+      "section": "Profile and extension rules",
+      "severity": "error",
+      "requirement": "Lexical mappings MUST resolve, be locale-aware when needed, and surface ambiguous mappings rather than selecting silently.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.association",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Association is a descriptive fallback and MUST NOT absorb relationships with a more precise root kind.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.canonical",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "One canonical direction MUST be stored; inverse traversal MUST be derived from the declared inverse.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.cardinality",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Assertions and runtime instances MUST obey source and target cardinalities.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.classification",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Classification and identity MUST remain distinct.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.condition",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Conditions MUST be boolean and true in the relevant context before an assertion/instance is applicable.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.dependency",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Dependency MUST NOT imply causation.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.endpoint",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Source and target MUST satisfy kind, concept, trait, and runtime predicate constraints.",
+      "enforcement": "partially-automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "kcf.relationship.inverse",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Forward and inverse verbs MUST express the same relationship with reversed roles.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.ordering",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Ordering MUST declare its dimension, such as workflow, temporal, version, or priority.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.participation",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Participation and governance MUST remain distinct.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.polarity",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Negative, prohibitive, or opposing relations MUST not be treated as positive facts.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.reification",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Reify a relationship only when it needs independent state, evidence, qualifiers, history, or runtime behavior.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.root-kind",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Every relationship MUST specialize exactly one root kind: classification, composition, association, identity, participation, dependency, transformation, causation, ordering, or governance.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "kcf.relationship.strength",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Strength/confidence values MUST be in the configured range and MUST NOT be interpreted as certainty without warrant.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "kcf.relationship.symmetry",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "A symmetric relationship MUST accept swapped endpoints and equivalent meaning. A bidirectional relationship need not be symmetric.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.relationship.temporal",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Effective and runtime validity intervals MUST be well-formed and compatible with endpoint validity.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "kcf.relationship.transitivity",
+      "source": "kcf",
+      "section": "Relationship algebra rules",
+      "severity": "error",
+      "requirement": "Transitive inference is allowed only when explicitly declared and valid for the relationship mode.",
+      "enforcement": "manual-review",
+      "phase": "concepts"
+    },
+    {
+      "id": "kcf.resource.capacity",
+      "source": "kcf",
+      "section": "Resource rules",
+      "severity": "error",
+      "requirement": "Concurrent allocations and reservations MUST NOT exceed available resource capacity under the active scheduling policy.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "knowledge.access.policy",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Classified or confidential knowledge MUST reference an applicable access policy.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_access_policy"
+    },
+    {
+      "id": "knowledge.assertion.contradiction",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Contradiction links MUST resolve to distinct assertions; contradictory assertions MUST coexist for review.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.inference",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Inferred assertions MUST reference the reasoning that derived them.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.provenance",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Asserted, inferred, or disputed statements MUST record evidence or a source document, recording time, and reviewer when produced by automated extraction.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.status",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every assertion MUST retain an explicit epistemic status: asserted, inferred, disputed, superseded, retracted, or unknown.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.subject",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every knowledge assertion subject MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.supersession",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Supersession MUST reference an existing, distinct assertion while preserving the superseded statement.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.assertion.temporal",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Assertion valid-time intervals MUST be well-formed and distinct from recording time.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge"
+    },
+    {
+      "id": "knowledge.bitemporal.recorded",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Governed assertions and extracted knowledge MUST distinguish valid time from recording time.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.graph.complete",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Graph emitters MUST preserve concepts, relationships, organizational knowledge, assertions, provenance, epistemic status, identity reconciliation, and query policy or report unsupported meaning.",
+      "enforcement": "manual-review",
+      "phase": "organizational-knowledge"
+    },
+    {
+      "id": "knowledge.identity.ambiguity",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "The same alias or external identity MUST NOT resolve to multiple active canonical concepts.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.identity.canonical",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every identity resolution MUST reference one canonical concept.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.identity.transition",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Merged identities MUST name merge sources; split identities MUST name split targets; every referenced identity MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.ingestion.trace",
+      "source": "kcf",
+      "section": "Information rules",
+      "severity": "error",
+      "requirement": "Extracted knowledge MUST record source document, source location, extraction method, extraction model, confidence, recording time, and human review.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.query.negation",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Negation-as-failure is valid only under an explicit closed-world assumption.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.query.policy",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every knowledge query MUST declare world assumption, negation, inference, and temporal policies.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "knowledge.query.temporal",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "An as-of query MUST declare its effective timestamp.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "lifecycle.final",
+      "source": "kcf",
+      "section": "Lifecycle rules",
+      "severity": "error",
+      "requirement": "Every terminating lifecycle MUST declare at least one terminal state; intentionally nonterminating lifecycles MUST declare that policy explicitly.",
+      "enforcement": "automated",
+      "phase": "lifecycles",
+      "handler": "check_lifecycles",
+      "aliases": [
+        "dbml.lifecycle.final"
+      ]
+    },
+    {
+      "id": "lifecycle.single-initial",
+      "source": "kcf",
+      "section": "Lifecycle rules",
+      "severity": "error",
+      "requirement": "Every executable lifecycle MUST have exactly one effective initial state after profile composition.",
+      "enforcement": "automated",
+      "phase": "lifecycles",
+      "handler": "check_lifecycles",
+      "aliases": [
+        "dbml.lifecycle.single-initial"
+      ]
+    },
+    {
+      "id": "lineage.binding.schema",
+      "source": "kcf",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "Bound source and target schemas, field types, units, cardinalities, and classifications MUST be compatible.",
+      "enforcement": "manual-review",
+      "phase": "lineage",
+      "aliases": [
+        "irml.binding.schema"
+      ]
+    },
+    {
+      "id": "lineage.binding.unique",
+      "source": "kcf",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "A target declared single-source MUST not have conflicting active bindings.",
+      "enforcement": "automated",
+      "phase": "lineage",
+      "handler": "check_lineage_and_cost",
+      "aliases": [
+        "irml.binding.unique"
+      ]
+    },
+    {
+      "id": "lineage.complete",
+      "source": "kcf",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "Every derived dataset, metric, model output, report, decision, and automated action SHOULD have a lineage path to its origins.",
+      "enforcement": "manual-review",
+      "phase": "lineage",
+      "aliases": [
+        "irml.lineage.complete"
+      ]
+    },
+    {
+      "id": "lineage.cost.nonnegative",
+      "source": "kcf",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "Cost amounts and rates MUST be finite, nonnegative, unit-compatible, and attached to a subject and allocation period where needed.",
+      "enforcement": "automated",
+      "phase": "lineage",
+      "handler": "check_lineage_and_cost",
+      "aliases": [
+        "irml.cost.nonnegative"
+      ]
+    },
+    {
+      "id": "lineage.cycle",
+      "source": "kcf",
+      "section": "Lineage, binding, and cost rules",
+      "severity": "error",
+      "requirement": "Lineage MUST be acyclic unless a documented iterative computation defines convergence, termination, and provenance behavior.",
+      "enforcement": "automated",
+      "phase": "lineage",
+      "handler": "check_lineage_and_cost",
+      "aliases": [
+        "irml.lineage.cycle"
+      ]
+    },
+    {
+      "id": "organization.accountability.distinct",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Responsibility, accountability, ownership, authority, and reporting MUST remain distinct semantics.",
+      "enforcement": "manual-review",
+      "phase": "organizational-knowledge"
+    },
+    {
+      "id": "organization.escalation.path",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Escalation paths MUST contain at least two resolvable, nonrepeating endpoints.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.hierarchy.acyclic",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Organizational parent relationships MUST be acyclic.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.kind",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Every organization declaration MUST use a supported organization kind.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.member.reference",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Members, roles, authority domains, owned subjects, and accountability subjects MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.parent.reference",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "An organizational parent MUST resolve to an organizational concept.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.reporting.reference",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Reporting endpoints MUST resolve to Actor or Organizational concepts.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "organization.reporting.temporal",
+      "source": "kcf",
+      "section": "Actor and organization rules",
+      "severity": "error",
+      "requirement": "Reporting validity intervals MUST be well-formed.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge"
+    },
+    {
+      "id": "process.final",
+      "source": "kcf",
+      "section": "Process orchestration rules",
+      "severity": "error",
+      "requirement": "Each executable process MUST contain at least one end node or a declared nonterminating-service policy.",
+      "enforcement": "automated",
+      "phase": "processes",
+      "handler": "check_processes",
+      "aliases": [
+        "dbml.workflow.final"
+      ]
+    },
+    {
+      "id": "process.reachability",
+      "source": "kcf",
+      "section": "Process orchestration rules",
+      "severity": "error",
+      "requirement": "Every required process node and at least one end node MUST be reachable from the effective start.",
+      "enforcement": "automated",
+      "phase": "processes",
+      "handler": "check_processes",
+      "aliases": [
+        "dbml.workflow.reachability"
+      ]
+    },
+    {
+      "id": "process.single-initial",
+      "source": "kcf",
+      "section": "Process orchestration rules",
+      "severity": "error",
+      "requirement": "Each executable process MUST have exactly one effective start node after profile composition.",
+      "enforcement": "automated",
+      "phase": "processes",
+      "handler": "check_processes",
+      "aliases": [
+        "dbml.workflow.single-initial"
+      ]
+    },
+    {
+      "id": "process.state-unique",
+      "source": "kcf",
+      "section": "Process orchestration rules",
+      "severity": "error",
+      "requirement": "Process node identities MUST be unique in their process scope.",
+      "enforcement": "partially-automated",
+      "phase": "processes",
+      "handler": "check_processes",
+      "aliases": [
+        "dbml.workflow.state-unique"
+      ]
+    },
+    {
+      "id": "process.transition-endpoints",
+      "source": "kcf",
+      "section": "Process orchestration rules",
+      "severity": "error",
+      "requirement": "Every process flow and boundary event MUST reference nodes declared in its process.",
+      "enforcement": "automated",
+      "phase": "processes",
+      "handler": "check_processes",
+      "aliases": [
+        "dbml.workflow.transition-endpoints"
+      ]
+    },
+    {
+      "id": "reasoning.complete",
+      "source": "kcf",
+      "section": "Reasoning rules",
+      "severity": "error",
+      "requirement": "Reasoning MUST declare kind, proposition, and method; inference and fact claims MUST include supporting premises or evidence.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "reasoning.confidence",
+      "source": "kcf",
+      "section": "Reasoning rules",
+      "severity": "error",
+      "requirement": "Reasoning confidence MUST be in `[0,1]`.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "reasoning.contradiction",
+      "source": "kcf",
+      "section": "Reasoning rules",
+      "severity": "error",
+      "requirement": "Contradictions MUST reference a distinct reasoning or assertion identity and remain visible rather than overwriting either claim.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "reasoning.reference",
+      "source": "kcf",
+      "section": "Reasoning rules",
+      "severity": "error",
+      "requirement": "Premises, evidence, contradictions, alternatives, reviewers, and access policies MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "rule.complete",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Rules MUST declare kind, condition, and at least one effect.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "rule.conflict.strategy",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Potentially conflicting permission, prohibition, or obligation rules over the same subject MUST declare a deterministic conflict strategy.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "rule.policy.authority",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every policy authority MUST resolve to an Actor or Organizational concept.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "rule.policy.members",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Every rule selected by a policy MUST resolve to a Rule concept.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "rule.reference",
+      "source": "kcf",
+      "section": "Organizational knowledge rules",
+      "severity": "error",
+      "requirement": "Rule applicability, effects, authority, exceptions, evidence, reviewers, and access policies MUST resolve.",
+      "enforcement": "automated",
+      "phase": "organizational-knowledge",
+      "handler": "check_organizational_knowledge"
+    },
+    {
+      "id": "security.risk.level",
+      "source": "kcf",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "Risk level MUST agree with the configured likelihood and impact method unless an authorized, justified override is recorded.",
+      "enforcement": "automated",
+      "phase": "security",
+      "handler": "check_security",
+      "aliases": [
+        "sdml.risk.level"
+      ]
+    },
+    {
+      "id": "security.risk.mitigation",
+      "source": "kcf",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "High or critical risk MUST have mitigation, transfer, avoidance, or governed acceptance with an owner and expiry/review date.",
+      "enforcement": "automated",
+      "phase": "security",
+      "handler": "check_security",
+      "aliases": [
+        "sdml.risk.mitigation"
+      ]
+    },
+    {
+      "id": "security.risk.references",
+      "source": "kcf",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "Each risk MUST reference a declared threat and asset.",
+      "enforcement": "automated",
+      "phase": "security",
+      "handler": "check_security",
+      "aliases": [
+        "sdml.risk.references"
+      ]
+    },
+    {
+      "id": "stack.governance.audit",
+      "source": "semantic-core",
+      "section": "Security, governance, and observability",
+      "severity": "error",
+      "requirement": "Security-sensitive, approval, policy, and automated actions SHOULD identify an audit or evidence path.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.governance.owner",
+      "source": "semantic-core",
+      "section": "Security, governance, and observability",
+      "severity": "warning",
+      "requirement": "Governed production constructs SHOULD identify an accountable owner.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.graph.cycle-policy",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "error",
+      "requirement": "Cycles MUST be rejected in graphs declared acyclic. Cycles in executable graphs MUST have an explicit exit or termination condition.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.graph.dead-end",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "error",
+      "requirement": "A nonterminal executable node without an outgoing path SHOULD produce a warning or error according to the graph kind.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.graph.edge-unique",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "warning",
+      "requirement": "Duplicate equivalent edges SHOULD be rejected or warned unless parallel edges are meaningful and explicitly distinguished.",
+      "enforcement": "partially-automated",
+      "phase": "structural",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "stack.graph.endpoint-resolved",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "error",
+      "requirement": "Every edge endpoint MUST resolve to a node in the graph or to an explicitly permitted external endpoint.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.graph.no-self-edge",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "error",
+      "requirement": "Self-edges MUST be rejected unless the construct explicitly supports them.",
+      "enforcement": "automated",
+      "phase": "structural",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "stack.graph.reachability",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "error",
+      "requirement": "Required terminal nodes MUST be reachable from a valid entry node.",
+      "enforcement": "partially-automated",
+      "phase": "structural",
+      "handler": "check_processes"
+    },
+    {
+      "id": "stack.graph.unreachable",
+      "source": "semantic-core",
+      "section": "Graphs",
+      "severity": "warning",
+      "requirement": "Unreachable nodes SHOULD produce warnings.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.import.acyclic",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "The module import graph MUST be acyclic, except for an explicitly documented type-only cycle supported by the resolver.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.import.alias-unique",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "Import aliases MUST be unique in a model.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.import.declared",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "Every external grammar reference MUST use a declared import.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.import.resolved",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "Every imported module and production MUST exist.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.module.known",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "Every model module MUST be declared in `grammar-stack.json`.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.kind-compatible",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "error",
+      "requirement": "A reference MUST resolve to the construct kind required by its position. For example, a role reference cannot resolve to an entity.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.qualified-resolved",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "error",
+      "requirement": "A qualified name MUST resolve to exactly one accessible declaration.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.reserved",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "error",
+      "requirement": "Reserved keywords MUST NOT be used as identifiers.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.shadowing",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "warning",
+      "requirement": "Shadowing an imported or enclosing declaration SHOULD produce a warning unless explicitly annotated as intentional.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.unique",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "error",
+      "requirement": "Names MUST be unique among declarations of conflicting kinds in the same lexical scope.",
+      "enforcement": "automated",
+      "phase": "structural",
+      "handler": "build_symbols"
+    },
+    {
+      "id": "stack.name.unused",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "warning",
+      "requirement": "Unreferenced private declarations SHOULD produce a warning.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.name.visibility",
+      "source": "semantic-core",
+      "section": "Names and scopes",
+      "severity": "error",
+      "requirement": "A reference MUST NOT access a declaration outside its permitted or exported scope.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.observability.failure",
+      "source": "semantic-core",
+      "section": "Security, governance, and observability",
+      "severity": "error",
+      "requirement": "Executable integrations, pipelines, and deployments SHOULD define failure reporting and operational observability.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.order.contiguous",
+      "source": "semantic-core",
+      "section": "Ordering, time, and schedules",
+      "severity": "warning",
+      "requirement": "Stage indexes SHOULD be contiguous unless sparse ordering is explicitly supported.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.order.unique",
+      "source": "semantic-core",
+      "section": "Ordering, time, and schedules",
+      "severity": "error",
+      "requirement": "Explicit indexes, priorities, sequence numbers, and ordering keys MUST be unique within their containing scope.",
+      "enforcement": "automated",
+      "phase": "structural",
+      "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "stack.ownership.boundary",
+      "source": "semantic-core",
+      "section": "References and ownership",
+      "severity": "error",
+      "requirement": "A grammar MUST reference, rather than redefine, a construct owned by another grammar. Each consuming stack MUST publish its concrete ownership map and validate every cross-module boundary against it.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.ownership.single",
+      "source": "semantic-core",
+      "section": "References and ownership",
+      "severity": "error",
+      "requirement": "A construct with a single-owner relationship MUST have exactly one owner.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.reference.direction",
+      "source": "semantic-core",
+      "section": "References and ownership",
+      "severity": "error",
+      "requirement": "Source, target, input, output, from, and to references MUST point in the direction required by the construct.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.reference.no-dangling",
+      "source": "semantic-core",
+      "section": "References and ownership",
+      "severity": "error",
+      "requirement": "Removing or deprecating a declaration MUST NOT leave dangling references.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.reference.resolved",
+      "source": "semantic-core",
+      "section": "References and ownership",
+      "severity": "error",
+      "requirement": "Every reference MUST resolve to exactly one declaration.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.schema.valid",
+      "source": "semantic-core",
+      "section": "Schema and representation",
+      "severity": "error",
+      "requirement": "A machine-readable model or manifest MUST conform to its declared versioned schema before deeper semantic validation.",
+      "enforcement": "partially-automated",
+      "phase": "structural",
+      "handler": "check_schema"
+    },
+    {
+      "id": "stack.security.authorization",
+      "source": "semantic-core",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "Every executable command MUST have an applicable authorization rule or an explicit public/system exemption.",
+      "enforcement": "automated",
+      "phase": "structural",
+      "handler": "check_actions"
+    },
+    {
+      "id": "stack.security.boundary",
+      "source": "semantic-core",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "Every data/control crossing of a trust boundary MUST have an applicable security control.",
+      "enforcement": "automated",
+      "phase": "structural",
+      "handler": "check_security"
+    },
+    {
+      "id": "stack.security.least-privilege",
+      "source": "semantic-core",
+      "section": "Security profile rules",
+      "severity": "error",
+      "requirement": "Runtime bindings and emitted permissions MUST grant only the capabilities and data scope required by the action.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.security.secret",
+      "source": "semantic-core",
+      "section": "Security, governance, and observability",
+      "severity": "error",
+      "requirement": "Secrets and credentials MUST NOT appear as literal scalar values; they MUST be references to protected secret material.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.start.valid",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "The configured start production MUST exist.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.time.duration",
+      "source": "semantic-core",
+      "section": "Ordering, time, and schedules",
+      "severity": "error",
+      "requirement": "Durations, intervals, timeouts, backoffs, retention periods, and windows MUST be nonnegative; execution intervals and timeouts that must advance time MUST be greater than zero.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.time.schedule-valid",
+      "source": "semantic-core",
+      "section": "Ordering, time, and schedules",
+      "severity": "error",
+      "requirement": "Schedule expressions MUST parse according to the configured schedule dialect and MUST identify a time zone when interpretation would otherwise be ambiguous.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.time.window-compatible",
+      "source": "semantic-core",
+      "section": "Ordering, time, and schedules",
+      "severity": "error",
+      "requirement": "Windows, sampling frequencies, retention, and aggregation intervals MUST be mutually compatible.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.alias-acyclic",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Type aliases MUST NOT form a cycle.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.assignment",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Assigned and default values MUST be compatible with the destination type.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.collection",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Collection element types and cardinalities MUST be compatible in assignments, mappings, and bindings.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.condition-boolean",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Conditions, guards, filters, and transition predicates MUST evaluate to boolean.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.enum-member",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "An enum value MUST belong to its declared enum.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.known",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Every declared type MUST resolve to a primitive, alias, enum, schema, entity, or other valid type declaration.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.nullability",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "A required value MUST NOT receive a null or missing value. Optionality and cardinality MUST be preserved through mappings.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.type.operator",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Operators MUST accept the operand types supplied and MUST produce the type expected by the surrounding expression.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.value.default-valid",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Defaults MUST satisfy the same validation rules as runtime values.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.value.finite",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Numeric values used for execution, thresholds, weights, or probabilities MUST be finite.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.value.range",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Numeric values MUST satisfy applicable minimum, maximum, positivity, percentage, probability, capacity, duration, and count ranges.",
+      "enforcement": "partially-automated",
+      "phase": "structural",
+      "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "stack.value.unit-compatible",
+      "source": "semantic-core",
+      "section": "Types and values",
+      "severity": "error",
+      "requirement": "Compared, added, assigned, or mapped quantities MUST use compatible units. Conversions MUST be explicit when units differ.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.version.compatible",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "error",
+      "requirement": "Referenced module and construct versions MUST satisfy the importing model's supported version range.",
+      "enforcement": "manual-review",
+      "phase": "structural"
+    },
+    {
+      "id": "stack.version.deprecated",
+      "source": "semantic-core",
+      "section": "Modules, imports, and versions",
+      "severity": "warning",
+      "requirement": "Use of a deprecated construct SHOULD produce a warning and identify its replacement.",
+      "enforcement": "profile-dependent",
+      "phase": "structural"
+    }
+  ]
+}

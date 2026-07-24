@@ -1,0 +1,151 @@
+{
+  "lockVersion": "1.0.0",
+  "grammarStackVersion": "1.3.0",
+  "modules": {
+    "KCF": {
+      "version": "1.0.0",
+      "file": "grammars/core/KCF-v1.0-Semantic-Metagrammar.ebnf",
+      "sha256": "dea9f8bbf58194749b6f67e563a2283371b40d238db1bad26598bc104af7e170"
+    },
+    "RELATIONSHIP": {
+      "version": "1.0.0",
+      "file": "grammars/core/RELATIONSHIP-v1.0-Relationship-Algebra.ebnf",
+      "sha256": "cd960e385b43d9f679af8f29cedbd42c3b470e3ad59b03ca8a32eac54d78965d"
+    },
+    "ACTION": {
+      "version": "1.0.0",
+      "file": "grammars/core/ACTION-v1.0-Action-Contract-Grammar.ebnf",
+      "sha256": "2fc0b2c9926360d79d038408cd9509d4ea1f686bb2679414e2afa902b75e717f"
+    },
+    "ENTITY": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/ENTITY-v1.0-Entity-Grammar.ebnf",
+      "sha256": "403051238d819b9cd350d3395fa1878b4881867e6c0c31f32736234a235310b0"
+    },
+    "ACTOR": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/ACTOR-v1.0-Actor-Grammar.ebnf",
+      "sha256": "c89892ee5abf5a1a62a198a8002405775f641b225f8c5d8fbf9ff131644cbfc7"
+    },
+    "WORK": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/WORK-v1.0-Work-Grammar.ebnf",
+      "sha256": "3403476def419411090fc016f13cfcf64de363f3023cf09f7d0c310d13559a4f"
+    },
+    "EVENT": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/EVENT-v1.0-Event-Grammar.ebnf",
+      "sha256": "bcae0a5a4b8c5e975687e302d26efae64e35315f45070ae28ca2d4b2518eedbb"
+    },
+    "LIFECYCLE": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/LIFECYCLE-v1.0-Lifecycle-Grammar.ebnf",
+      "sha256": "ec6a4bdc03fb3ccb9c2b9dc951ac4f94801a1292fd983d10c7711707de035e17"
+    },
+    "RULE": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/RULE-v1.0-Rule-Grammar.ebnf",
+      "sha256": "409ae94ee8b46fe5b73052e463e4da187ae516cf9719551e3d49da52765c0ffc"
+    },
+    "INFORMATION": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/INFORMATION-v1.0-Information-Grammar.ebnf",
+      "sha256": "ef529f805c3e5291e53682efb17e80c514317bdcad59a05e279d37980358bd78"
+    },
+    "RESOURCE": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/RESOURCE-v1.0-Resource-Grammar.ebnf",
+      "sha256": "2c1797bbb51d0487de477093b9ca2e32b2655b2ea8be52b77f99bbeb39814ac5"
+    },
+    "TEMPORAL": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/TEMPORAL-v1.0-Temporal-Grammar.ebnf",
+      "sha256": "397e7c3793e482e302a91bdcc4cc1f3f0f16f5631ecbb390a5f54dfd6cd26679"
+    },
+    "SPATIAL": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/SPATIAL-v1.0-Spatial-Grammar.ebnf",
+      "sha256": "5cf2afcde65c4d4735e644513490640ea2133dbcfd64e7dd16558fb6846efb6c"
+    },
+    "ORGANIZATION": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/ORGANIZATION-v1.0-Organization-Grammar.ebnf",
+      "sha256": "82f4e7647f03449b6632c370fce57aba85adcd13386f3bc02cc7a8f4d1c9a46a"
+    },
+    "INTENT": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/INTENT-v1.0-Intent-Grammar.ebnf",
+      "sha256": "18a7d831504cf7e51fab1667184c0267d3cfd1d4ca8a58e984ad74228d1c37c5"
+    },
+    "REASONING": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/REASONING-v1.0-Reasoning-Grammar.ebnf",
+      "sha256": "bd4e62cc305abbb9a0d490fbf5a2092e02700de0545f1a44e3235d25e999f3a0"
+    },
+    "MEASURE": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/MEASURE-v1.0-Measure-Grammar.ebnf",
+      "sha256": "3a4c7856265e7064c57d01c654d02683b6191834decd72881f36978afe759596"
+    },
+    "LOGIC": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/LOGIC-v1.0-Logic-Grammar.ebnf",
+      "sha256": "78a612615a44f60f00c40f1741db549e23eee4bb861ff50f0f3e918be962dfea"
+    },
+    "MATH": {
+      "version": "1.0.0",
+      "file": "grammars/dimensions/MATH-v1.0-Math-Grammar.ebnf",
+      "sha256": "e20f1eaf07c4d0f2286acfaa2f974e68b5a4dd346a32597912345956c2da526a"
+    },
+    "COMPILATION": {
+      "version": "1.0.0",
+      "file": "grammars/compilation/COMPILATION-v1.0-Semantic-Compilation-Grammar.ebnf",
+      "sha256": "902155fe440b4645f2a203a3b7dba0a59e44864609934f35d956fd5b13867e6f"
+    },
+    "INTEGRATION": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/operational/INTEGRATION-v1.0-Integration-Profile.ebnf",
+      "sha256": "d67ea4f54a16059f226a90a933c365d00c2041acd7d25fd8f0325d1bd34bb6e4"
+    },
+    "SECURITY": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/operational/SECURITY-v1.0-Security-Profile.ebnf",
+      "sha256": "f1fd81a2fe914d831c7ba37ffa25cd47d0c0187669d413d702dbdc496a94e7dd"
+    },
+    "LINEAGE": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/operational/LINEAGE-v1.0-Lineage-Binding-Cost-Profile.ebnf",
+      "sha256": "935b8c71cfc9f81c88b653b4f2253b968c6e80ca740e4453b81167912bbbb22c"
+    },
+    "ARCHITECTURE": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/emitters/ARCHITECTURE-v1.0-Architecture-Emitter-Profile.ebnf",
+      "sha256": "ec26ba51594ccb25c1053b3a4a9e9f339a7ab45de7764c0782273e5be53ea025"
+    },
+    "EXPERIENCE": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/emitters/EXPERIENCE-v1.0-Experience-Emitter-Profile.ebnf",
+      "sha256": "c7ad4b94b0fc40548e004c28dd00aaea1c6dc2879f6cfad78e79f5f710ff89fb"
+    },
+    "DESIGN": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/emitters/DESIGN-v1.0-Design-Emitter-Profile.ebnf",
+      "sha256": "e97afacf4ad67bca7dc6ac765ffeb190fcbe6ceae1ef9086b37afa6e9d7b7353"
+    },
+    "ANALYTICS": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/emitters/ANALYTICS-v1.0-Analytics-Emitter-Profile.ebnf",
+      "sha256": "9fa712161133eef9b410bb733bb3f2ab4e72ddc3fc35e8f65c37208a15dd6945"
+    },
+    "AI": {
+      "version": "1.0.0",
+      "file": "grammars/profiles/emitters/AI-v1.0-AI-Emitter-Profile.ebnf",
+      "sha256": "826d4fb5bd8f94b6a97ae3b2b4ada33a48f5ff5ea487b50b51e56969fa55a362"
+    },
+    "AUTHORING": {
+      "version": "1.0.0",
+      "file": "grammars/authoring/KCF-AUTHORING-v1.2.ebnf",
+      "sha256": "39ebdc1f7d3c652c0c709170956259e7631c55f4f390b8a07a9dced6bf338974"
+    }
+  }
+}

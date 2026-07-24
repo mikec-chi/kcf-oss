@@ -1,0 +1,16 @@
+(* KCF design-system emitter profile. *)
+design-model = "design", "model", identifier, "{", design-system,
+               { design-system | page-design }, "}" ;
+design-system = "design-system", identifier, "{", token-def,
+                { token-def | breakpoint-def | pattern-def }, "}" ;
+token-def = "token", identifier, ":", token-kind, "=", string, ";" ;
+breakpoint-def = "breakpoint", identifier, ":", number, semantic-ref, ";" ;
+pattern-def = "pattern", identifier, "{", { "constraint", ":", semantic-ref,
+              ";" }, "}" ;
+page-design = "page", identifier, "{", "view", ":", semantic-ref, ";",
+              [ "pattern", ":", semantic-ref, ";" ],
+              { "section", ":", semantic-ref, ";" }, "}" ;
+token-kind = "color" | "space" | "radius" | "shadow" | "font" | "text"
+           | "motion" | "density" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+string = ? KCF string ? ; number = ? KCF number ? ;

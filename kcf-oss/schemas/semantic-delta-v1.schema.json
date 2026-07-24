@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/semantic-delta-v1.schema.json",
+  "type": "object",
+  "required": ["deltaVersion", "recommendedVersionChange", "changes"],
+  "properties": {
+    "deltaVersion": {"const": "1.0.0"},
+    "recommendedVersionChange": {"enum": ["major", "minor", "patch"]},
+    "changes": {"type": "array", "items": {"type": "object", "required": ["classification", "subject", "change"], "properties": {"classification": {"enum": ["breaking", "compatible", "informational"]}, "subject": {"type": "string"}, "change": {"type": "string"}}, "additionalProperties": false}}
+  },
+  "additionalProperties": false
+}

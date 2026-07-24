@@ -1,0 +1,12 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "UnknownTrait",
+  "module": "KCF",
+  "namespace": "core",
+  "concepts": [
+    {"id": "Ledger", "qualifiedName": "core.Ledger", "kind": "ENTITY", "traits": ["auditable", "widget"], "attributes": [
+      {"name": "ledgerId", "type": "UUID", "identity": true}
+    ]}
+  ]
+}

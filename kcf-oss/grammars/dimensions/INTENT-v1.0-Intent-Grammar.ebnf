@@ -1,0 +1,20 @@
+(* KCF Intent Dimension Grammar v1.0. *)
+intent-model = "intent", "model", identifier, "{", intent-def,
+               { intent-def }, "}" ;
+intent-def = "intent", identifier, "{", "kind", ":", intent-kind, ";",
+             "desired-state", ":", condition, ";",
+             { "success", ":", condition, ";" },
+             { "failure", ":", condition, ";" },
+             [ "priority", ":", integer, ";" ],
+             { "stakeholder", ":", semantic-ref, ";" },
+             { "measure", ":", semantic-ref, ";" },
+             [ "time-horizon", ":", semantic-ref, ";" ],
+             { tradeoff-def }, "}" ;
+tradeoff-def = "tradeoff", semantic-ref, "against", semantic-ref,
+               [ "weight", ":", number ], ";" ;
+intent-kind = "GOAL" | "OBJECTIVE" | "OUTCOME" | "REQUEST" | "PREFERENCE"
+            | "PRIORITY" | "SUCCESS_CONDITION" | "FAILURE_CONDITION" ;
+
+identifier = ? KCF identifier ? ; condition = ? KCF condition ? ;
+integer = ? KCF integer ? ; number = ? KCF number ? ;
+semantic-ref = ? KCF semantic-ref ? ;

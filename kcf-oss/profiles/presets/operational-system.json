@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/profile-preset-v1.schema.json",
+  "version": "1.0.0",
+  "id": "operational-system",
+  "description": "Operational work, events, resources, time, space, integration, security, lineage, and architecture.",
+  "requestedModules": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RESOURCE", "TEMPORAL", "SPATIAL", "ORGANIZATION", "RULE", "ACTION", "INTEGRATION", "SECURITY", "LINEAGE", "ARCHITECTURE"],
+  "requiredRuntimeCapabilities": ["Scheduling", "ResourceAllocation", "Messaging", "Authorization", "Observability", "Reconciliation"],
+  "defaultEmitters": ["dbml", "vertical-slice"],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": []
+}

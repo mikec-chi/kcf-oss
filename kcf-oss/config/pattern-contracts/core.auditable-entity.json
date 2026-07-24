@@ -1,0 +1,15 @@
+{
+  "patternContractVersion": "1.0.0",
+  "patternId": "core.auditable-entity",
+  "title": "Auditable entity",
+  "description": "A domain-neutral foundational pattern: any concept tagged with the 'auditable' trait must have an identity, a lifecycle that governs its states, and at least one state-changing action. Referenced by trait only, so it applies to any domain.",
+  "roles": [
+    {"trait": "auditable", "title": "Auditable entity", "description": "An entity whose state changes must be governed and traceable.", "conceptKind": "ENTITY"}
+  ],
+  "obligations": [
+    {"id": "core.auditable-entity.present", "title": "An auditable concept exists", "obligation": "concept-with-trait", "level": "required", "trait": "auditable", "conceptKind": "ENTITY", "dimension": "ENTITY"},
+    {"id": "core.auditable-entity.identity", "title": "Auditable entities are identified", "obligation": "entity-has-identity", "level": "required", "conceptKind": "ENTITY", "dimension": "ENTITY"},
+    {"id": "core.auditable-entity.lifecycle", "title": "Auditable entities have a lifecycle", "obligation": "trait-concept-has-lifecycle", "level": "required", "trait": "auditable", "dimension": "LIFECYCLE"},
+    {"id": "core.auditable-entity.action", "title": "Auditable entities are changed by an explicit action", "obligation": "trait-concept-has-action", "level": "recommended", "trait": "auditable", "effect": "command", "dimension": "ACTION"}
+  ]
+}

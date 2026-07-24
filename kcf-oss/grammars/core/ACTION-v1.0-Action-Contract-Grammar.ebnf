@@ -1,0 +1,61 @@
+(* KCF shared Action Contract Grammar v1.0. *)
+action-model = "action", "model", identifier, "{", action-contract,
+               { action-contract | collection-transform }, "}" ;
+action-contract = "action-contract", identifier, "{",
+                  "effect", ":", action-effect, ";",
+                  "operation", ":", action-operation, ";",
+                  "scope", ":", action-scope, ";",
+                  "target", ":", semantic-ref, ";",
+                  [ "selection", ":", selection-kind,
+                    [ "(", expression, ")" ], ";" ],
+                  "input-cardinality", ":", action-cardinality, ";",
+                  "output-cardinality", ":", action-cardinality, ";",
+                  { "input", ":", semantic-ref, ";" },
+                  { "output", ":", semantic-ref, ";" },
+                  { "mutation", ":", semantic-ref, ";" },
+                  { precondition | postcondition | failure-mode },
+                  [ transaction-policy ], [ concurrency-policy ],
+                  "idempotency", ":", idempotency, ";",
+                  [ "authorization", ":", semantic-ref, ";" ],
+                  [ "audit", ":", semantic-ref, ";" ],
+                  [ "timeout", ":", semantic-ref, ";" ],
+                  [ retry-policy ], "}" ;
+transaction-policy = "transaction", ":", transaction-mode, ",", atomicity, ";" ;
+concurrency-policy = "concurrency", ":", concurrency-mode,
+                     [ "using", semantic-ref ], ";" ;
+retry-policy = "retry", ":", nonnegative-integer,
+               [ "backoff", semantic-ref ], ";" ;
+collection-transform = "collection-transform", identifier, "{",
+                       "operation", ":", collection-operation, ";",
+                       "input", ":", semantic-ref, ";",
+                       "output", ":", semantic-ref, ";",
+                       { "key", ":", semantic-ref, ";" },
+                       [ "predicate", ":", condition, ";" ],
+                       [ "order", ":", semantic-ref, ";" ],
+                       [ "window", ":", semantic-ref, ";" ],
+                       [ "bounded", ":", boolean, ";" ],
+                       [ "deterministic", ":", boolean, ";" ],
+                       { "lineage", ":", semantic-ref, ";" }, "}" ;
+action-effect = "query" | "command" | "transform" ;
+action-operation = "create" | "read" | "replace" | "update" | "patch"
+                 | "delete" | "upsert" | "exists" | "query" | "count"
+                 | "bulk-create" | "bulk-update" | "bulk-patch"
+                 | "bulk-delete" | "bulk-upsert" | "synchronize"
+                 | "invoke" | "emit" | "allocate" | "release" ;
+action-scope = "record" | "set" | "batch" | "stream" | "window" ;
+action-cardinality = "zero" | "one" | "optional-one" | "many" | "stream" ;
+selection-kind = "identity" | "predicate" | "keys" | "relation"
+               | "partition" | "window" | "all" ;
+transaction-mode = "none" | "required" | "requires-new" | "supports" ;
+atomicity = "atomic" | "per-record" | "best-effort" ;
+concurrency-mode = "none" | "optimistic" | "pessimistic" | "serialized" ;
+collection-operation = "select" | "project" | "filter" | "map" | "flat-map"
+                     | "distinct" | "sort" | "group" | "aggregate" | "join"
+                     | "union" | "intersect" | "except" | "window" | "sample"
+                     | "partition" | "deduplicate" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+expression = ? KCF expression ? ; condition = ? KCF condition ? ;
+precondition = ? KCF precondition ? ; postcondition = ? KCF postcondition ? ;
+failure-mode = ? KCF failure-mode ? ; idempotency = ? KCF idempotency ? ;
+nonnegative-integer = ? KCF nonnegative-integer ? ; boolean = ? KCF boolean ? ;

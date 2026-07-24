@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/pattern-report-v1.schema.json",
+  "title": "KCF Pattern Conformance Report v1",
+  "type": "object",
+  "required": ["patternReportVersion", "model", "patternsChecked", "results", "summary"],
+  "properties": {
+    "patternReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "patternsChecked": {"type": "array", "items": {"type": "string"}},
+    "results": {"type": "array", "items": {"$ref": "#/$defs/result"}},
+    "summary": {
+      "type": "object",
+      "required": ["satisfied", "incomplete", "noContract", "claimedButUnproven", "requiredButAbsent", "requiredWithoutContract"],
+      "properties": {
+        "satisfied": {"type": "integer", "minimum": 0},
+        "incomplete": {"type": "integer", "minimum": 0},
+        "noContract": {"type": "integer", "minimum": 0},
+        "claimedButUnproven": {"type": "array", "items": {"type": "string"}},
+        "requiredButAbsent": {"type": "array", "items": {"type": "string"}},
+        "requiredWithoutContract": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "required": ["patternId", "hasContract", "required", "recommended", "claimed", "status", "gaps"],
+      "properties": {
+        "patternId": {"type": "string"},
+        "hasContract": {"type": "boolean"},
+        "required": {"type": "boolean"},
+        "recommended": {"type": "boolean"},
+        "claimed": {"type": "boolean"},
+        "status": {"enum": ["satisfied", "incomplete", "no-contract"]},
+        "gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}}
+      },
+      "additionalProperties": false
+    },
+    "gap": {
+      "type": "object",
+      "required": ["gapId", "level", "subject", "message", "obligation"],
+      "properties": {
+        "gapId": {"type": "string"},
+        "level": {"enum": ["required", "recommended", "info"]},
+        "dimension": {"type": ["string", "null"]},
+        "subject": {"type": "string"},
+        "message": {"type": "string"},
+        "obligation": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "patternContractVersion": "1.0.0",
+  "patternId": "core.related-entities",
+  "title": "Related entities",
+  "description": "A domain-neutral relationship-shape pattern: every concept tagged 'primary' must be connected by a relationship to a concept tagged 'related'. Demonstrates obligations over relationship structure, not just concept presence.",
+  "roles": [
+    {"trait": "primary", "title": "Primary entity", "description": "An entity that must be related to a supporting concept."},
+    {"trait": "related", "title": "Related entity", "description": "The concept a primary must be linked to."}
+  ],
+  "obligations": [
+    {"id": "core.related-entities.primary", "title": "A primary concept exists", "obligation": "concept-with-trait", "level": "required", "trait": "primary", "dimension": "ENTITY"},
+    {"id": "core.related-entities.link", "title": "Primary concepts are linked to a related concept", "obligation": "trait-linked-to-trait", "level": "required", "trait": "primary", "linkedTrait": "related", "dimension": "RELATIONSHIP"}
+  ]
+}

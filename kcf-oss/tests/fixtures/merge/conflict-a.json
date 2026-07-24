@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ConflictA",
+  "module": "KCF",
+  "namespace": "shop",
+  "modules": ["KCF"],
+  "concepts": [
+    {"id": "Customer", "qualifiedName": "shop.Customer", "kind": "ENTITY", "attributes": [
+      {"name": "status", "type": "String"}
+    ]}
+  ]
+}

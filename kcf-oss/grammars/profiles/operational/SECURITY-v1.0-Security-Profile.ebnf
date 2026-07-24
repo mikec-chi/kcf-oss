@@ -1,0 +1,31 @@
+(* KCF security profile; composes Entity, Rule, Information, Actor and Work. *)
+security-model = "security", "model", identifier, "{", security-element,
+                 { security-element }, "}" ;
+security-element = asset-def | threat-def | risk-def | control-def
+                 | risk-treatment-def | trust-boundary-def | security-mapping ;
+asset-def = "asset", identifier, "{", "subject", ":", semantic-ref, ";",
+            "classification", ":", semantic-ref, ";",
+            [ "owner", ":", semantic-ref, ";" ], "}" ;
+threat-def = "threat", identifier, "{", "vector", ":", identifier, ";",
+             { "target", ":", semantic-ref, ";" },
+             [ "actor", ":", semantic-ref, ";" ], "}" ;
+risk-def = "risk", identifier, "{", "threat", ":", semantic-ref, ";",
+           "asset", ":", semantic-ref, ";", "likelihood", ":", number, ";",
+           "impact", ":", number, ";", "level", ":", number, ";", "}" ;
+control-def = "control", identifier, "{", "rule", ":", semantic-ref, ";",
+              { "applies-to", ":", semantic-ref, ";" },
+              [ "implementation", ":", semantic-ref, ";" ],
+              [ "evidence", ":", semantic-ref, ";" ], "}" ;
+risk-treatment-def = "treatment", identifier, "{", "risk", ":", semantic-ref,
+                     ";", "mode", ":", treatment-mode, ";",
+                     [ "control", ":", semantic-ref, ";" ],
+                     [ "owner", ":", semantic-ref, ";" ],
+                     [ temporal-validity ], "}" ;
+trust-boundary-def = "trust-boundary", identifier, "{",
+                     { "contains", ":", semantic-ref, ";" },
+                     { "crossing-control", ":", semantic-ref, ";" }, "}" ;
+security-mapping = "security-map", semantic-ref, "->", semantic-ref,
+                   [ "coverage", ":", number ], ";" ;
+treatment-mode = "mitigate" | "accept" | "transfer" | "avoid" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+number = ? KCF number ? ; temporal-validity = ? KCF temporal-validity ? ;

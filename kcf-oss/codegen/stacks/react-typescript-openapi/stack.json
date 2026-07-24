@@ -1,0 +1,24 @@
+{
+  "stackTargetVersion": "1.0.0",
+  "id": "react-typescript-openapi",
+  "title": "React + TypeScript + TanStack Query + OpenAPI client",
+  "tier": "frontend",
+  "language": "TypeScript",
+  "framework": "React (Vite)",
+  "apiStyle": "rest",
+  "apiDocs": "Types + client generated from the backend OpenAPI via openapi-typescript + openapi-fetch",
+  "testing": "vitest + @testing-library/react",
+  "conventions": [
+    "Generate the typed API layer from the backend OpenAPI: `openapi-typescript openapi.json -o src/api/schema.d.ts`, then a typed `openapi-fetch` client in src/api/client.ts. Never hand-roll fetch calls or invent endpoints the schema does not contain.",
+    "Data access goes through TanStack Query hooks (useQuery for queries, useMutation for command actions) wrapping the openapi-fetch client; invalidate queries after a successful command.",
+    "Layer as src/api/ (generated types + client + hooks) / src/features/<entity>/ (List, Detail, Edit components) / src/lib/ (auth context, lifecycle helpers).",
+    "One list view + one detail view + one edit form per ENTITY; the edit form only submits fields in the action's mutate set.",
+    "Realize each action by its operation: create→create form, read/query→detail/list view, update/patch→edit form, delete→delete control, bulk-*→multi-select bulk action, count/aggregate/collection-transform→summary tiles or filtered/grouped list views — each calling the matching API operation from the OpenAPI client.",
+    "Optimistic concurrency: read the entity's version, send it as expectedVersion on the command, and surface a 409 as a 'reload, it changed' message.",
+    "Lifecycle: render the current state as a badge and offer ONLY the transitions declared legal from that state (compute allowed transitions from the lifecycle in the IR); disable the rest.",
+    "Authorization/ACTOR: gate action controls behind the current user's permissions (hide/disable) for UX only — the server enforces; never treat client checks as security.",
+    "MEASURE/analytics → dashboard tiles/charts (add a charting lib only if present); SPATIAL → a map (only if present); EVENT → a read-only activity feed.",
+    "Everything the server owns (persistence, the full action contract, policy authority) is delegated to the API — the UI calls it and reflects results."
+  ],
+  "example": "EXAMPLE.md"
+}

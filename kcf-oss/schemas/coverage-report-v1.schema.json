@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/coverage-report-v1.schema.json",
+  "title": "KCF Knowledge Coverage Report v1",
+  "type": "object",
+  "required": ["coverageReportVersion", "model", "profiles", "obligationsConsidered", "summary", "gaps"],
+  "properties": {
+    "coverageReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "profiles": {"type": "array", "items": {"type": "string"}},
+    "obligationsConsidered": {"type": "integer", "minimum": 0},
+    "summary": {
+      "type": "object",
+      "required": ["required", "recommended", "info", "totalGaps"],
+      "properties": {
+        "required": {"type": "integer", "minimum": 0},
+        "recommended": {"type": "integer", "minimum": 0},
+        "info": {"type": "integer", "minimum": 0},
+        "totalGaps": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "gaps": {"type": "array", "items": {"$ref": "#/$defs/gap"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "gap": {
+      "type": "object",
+      "required": ["gapId", "level", "subject", "message", "obligation"],
+      "properties": {
+        "gapId": {"type": "string"},
+        "level": {"enum": ["required", "recommended", "info"]},
+        "dimension": {"type": ["string", "null"]},
+        "subject": {"type": "string"},
+        "message": {"type": "string"},
+        "obligation": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

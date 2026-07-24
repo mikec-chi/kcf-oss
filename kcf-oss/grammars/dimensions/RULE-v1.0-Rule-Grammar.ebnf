@@ -1,0 +1,28 @@
+(* KCF Rule Dimension Grammar v1.0. *)
+rule-model = "rule", "model", identifier, "{", rule-def,
+             { rule-def | policy-def }, "}" ;
+rule-def = "rule", identifier, "{", "kind", ":", rule-kind, ";",
+           { "applies-to", ":", semantic-ref, ";" },
+           "condition", ":", condition, ";",
+           rule-effect, { rule-effect },
+           [ "mode", ":", normative-mode, ";" ],
+           [ "priority", ":", integer, ";" ],
+           [ "conflict", ":", conflict-strategy, ";" ],
+           { "exception", ":", semantic-ref, ";" },
+           { "evidence", ":", semantic-ref, ";" },
+           [ temporal-validity ], "}" ;
+rule-effect = "effect", ":", semantic-ref, { qualifier }, ";" ;
+policy-def = "policy", identifier, "{", "authority", ":", semantic-ref, ";",
+             { "rule", ":", semantic-ref, ";" },
+             [ "default-conflict", ":", conflict-strategy, ";" ], "}" ;
+rule-kind = "CONSTRAINT" | "PERMISSION" | "PROHIBITION" | "OBLIGATION"
+          | "ELIGIBILITY" | "CLASSIFICATION" | "DERIVATION" | "DECISION"
+          | "EXCEPTION" ;
+normative-mode = "PERMISSION" | "PROHIBITION" | "OBLIGATION"
+               | "RECOMMENDATION" | "DISCRETION" ;
+conflict-strategy = "priority" | "specificity" | "authority" | "latest"
+                  | "deny-overrides" | "permit-overrides" | "explicit" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+condition = ? KCF condition ? ; qualifier = ? KCF qualifier ? ;
+integer = ? KCF integer ? ; temporal-validity = ? KCF temporal-validity ? ;

@@ -1,0 +1,82 @@
+{
+  "$schema": "../../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "InvalidModel",
+  "module": "KCF",
+  "requiredPatterns": ["case.identity", "case.evidence"],
+  "recommendedPatterns": ["case.correspondence"],
+  "prohibitedPatterns": ["case.evidence-overwrite"],
+  "implementedPatterns": ["case.identity", "case.evidence-overwrite"],
+  "excludedPatterns": ["case.evidence", "unscoped.pattern"],
+  "concepts": [
+    {"id": "Thing", "qualifiedName": "demo.Thing", "kind": "UNKNOWN", "references": ["demo.Missing"]},
+    {"id": "ThingAgain", "qualifiedName": "demo.Thing", "kind": "ENTITY", "abstract": true, "instances": ["x"]}
+  ],
+  "relationships": [
+    {"id": "bad-rel", "definition": "performs", "rootKind": "WRONG", "source": "demo.Thing", "target": "demo.Thing", "strength": 2.0, "validFrom": "2026-12-01", "validTo": "2026-01-01"}
+  ],
+  "lifecycles": [
+    {"id": "BadLifecycle", "states": ["A", "B"], "initial": ["A", "B"], "terminal": [], "transitions": [{"from": "A", "to": "Missing"}]}
+  ],
+  "actions": [
+    {"id": "DangerousBulk", "effect": "command", "operation": "bulk-delete", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "zero", "retry": 3, "idempotency": "non-idempotent"}
+  ],
+  "collectionTransforms": [
+    {"id": "InfiniteSort", "operation": "sort", "inputSchema": "Input", "outputSchema": "Output", "bounded": false},
+    {"id": "UnknownJoin", "operation": "join", "inputSchema": "Input", "outputSchema": "Output", "inputs": ["only-one"]}
+  ],
+  "processes": [
+    {"id": "BrokenProcess", "nodes": [{"id": "A", "type": "step"}], "flows": [{"from": "A", "to": "Missing"}]}
+  ],
+  "integration": {
+    "adapters": [{"id": "Http"}],
+    "endpoints": [{"id": "MissingAdapterEndpoint", "adapter": "NoAdapter"}],
+    "routes": [{"id": "BrokenRoute", "source": "MissingAdapterEndpoint", "target": "NoEndpoint"}],
+    "retryPolicies": [{"id": "UnsafeRetry", "attempts": 3, "requiresIdempotency": false}]
+  },
+  "security": {
+    "highRiskThreshold": 0.5,
+    "assets": [{"id": "Asset1"}],
+    "threats": [{"id": "Threat1"}],
+    "risks": [{"id": "Risk1", "asset": "MissingAsset", "threat": "Threat1", "likelihood": 0.8, "impact": 0.9, "level": 0.8}],
+    "controls": [{"id": "Control1"}],
+    "trustBoundaries": [{"id": "Boundary1", "crossings": ["Flow1"], "crossingControls": []}]
+  },
+  "lineage": {
+    "edges": [{"source": "A", "target": "B"}, {"source": "B", "target": "A"}],
+    "bindings": [{"source": "A", "target": "Target"}, {"source": "B", "target": "Target"}],
+    "costs": [{"id": "NegativeCost", "amount": -1}]
+  },
+  "architecture": {
+    "interfaces": [{"id": "KnownInterface"}],
+    "services": [{"id": "BrokenService", "interfaces": ["MissingInterface"]}],
+    "topologies": [{"id": "BrokenTopology", "nodes": [{"id": "Node1"}], "edges": [{"from": "Node1", "to": "MissingNode"}]}],
+    "deployments": [{"id": "BrokenDeployment", "target": "MissingNode"}]
+  },
+  "experience": {
+    "apps": [{"id": "BrokenApp", "entry": "MissingView", "views": ["MissingView"]}],
+    "views": [{"id": "View1", "actions": ["MissingAction"]}],
+    "flows": [{"id": "BrokenFlow", "entry": "MissingNode", "nodes": [{"id": "Node1"}], "edges": [{"from": "Node1", "to": "MissingNode"}]}]
+  },
+  "design": {
+    "systems": [{"id": "BrokenDesign", "tokens": [{"id": "duplicate"}], "patterns": [{"id": "duplicate"}], "breakpoints": [{"id": "wide", "value": 1200}, {"id": "narrow", "value": 640}]}],
+    "pages": [{"id": "BrokenPage", "view": "MissingView"}]
+  },
+  "analytics": {
+    "semanticLayers": [{"id": "Layer1"}],
+    "reports": [{"id": "BrokenReport", "layer": "MissingLayer"}],
+    "dashboards": [{"id": "BrokenDashboard", "layer": "Layer1", "actions": ["MissingAction"]}]
+  },
+  "ai": {
+    "featureSchemas": [{"id": "Features", "features": [{"id": "x"}, {"id": "x"}], "target": "missing"}],
+    "models": [{"id": "Model1"}],
+    "pipelines": [{"id": "BrokenPipeline", "steps": [{"index": 2}, {"index": 1}, {"index": 1}]}],
+    "serving": [{"id": "BrokenServing", "model": "MissingModel", "capacity": 0}]
+  },
+  "events": [{"id": "ChangedHistory", "mutable": true}],
+  "resources": [{"id": "Capacity", "capacity": 1}],
+  "allocations": [{"id": "TooMuch", "resource": "Capacity", "quantity": 2}],
+  "plans": [{"id": "BadPlan", "steps": [{"index": 1}, {"index": 1}]}],
+  "runtimeRequirements": ["MissingCapability"],
+  "emitters": [{"id": "WeakEmitter", "supports": [], "unsupportedPolicy": "error"}]
+}

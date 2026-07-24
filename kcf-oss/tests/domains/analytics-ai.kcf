@@ -1,0 +1,38 @@
+kcf model RevenueIntelligence profile analytics-platform {
+  use ai-application;
+  namespace intelligence;
+
+  entity Sale {
+    identity saleId: UUID;
+    required amount: Decimal;
+    required occurredAt: DateTime;
+    mutability "read-only";
+  }
+  information SalesDataset {
+    kind RECORD;
+    subject Sale;
+    source Sale;
+    representation json;
+    recorded-at "2026-07-22T12:00:00Z";
+  }
+  measure Revenue { }
+  reasoning RevenueForecast {
+    kind HYPOTHESIS;
+    proposition "historical revenue predicts future revenue";
+    method INDUCTIVE;
+    premise Revenue;
+    confidence 0.8;
+  }
+
+  relationship dataset-describes-sale: ASSOCIATION SalesDataset -> Sale strength 1.0;
+  relationship forecast-uses-revenue: DEPENDENCY RevenueForecast -> Revenue strength 1.0;
+
+  collection MonthlyRevenue {
+    operation aggregate;
+    inputSchema SalesSchema;
+    outputSchema MonthlyRevenueSchema;
+    key month;
+    grain month;
+    bounded true;
+  }
+}

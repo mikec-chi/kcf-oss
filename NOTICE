@@ -1,0 +1,10 @@
+KCF — the open knowledge-coding standard
+Copyright 2026 Composable Holdings Inc.
+
+Created and maintained by Composable Holdings Inc.
+
+This product includes software developed as the open-source `kcf-oss` stack
+(grammars, reference compiler, semantic analyzer, IR/preset/delta schemas, and
+reference emitters) together with the stack-neutral `semantic-core` catalogue.
+
+Licensed under the Apache License, Version 2.0. See LICENSE.

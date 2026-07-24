@@ -1,0 +1,81 @@
+{
+  "coverageModelVersion": "1.0.0",
+  "obligations": [
+    {
+      "id": "coverage.entity.identity",
+      "title": "Every entity has an identity attribute",
+      "obligation": "entity-has-identity",
+      "level": "required",
+      "profiles": ["*"],
+      "conceptKind": "ENTITY",
+      "dimension": "ENTITY"
+    },
+    {
+      "id": "coverage.entity.lifecycle",
+      "title": "Every entity has a lifecycle",
+      "obligation": "concept-kind-has-lifecycle",
+      "level": "recommended",
+      "profiles": ["*"],
+      "conceptKind": "ENTITY",
+      "dimension": "LIFECYCLE"
+    },
+    {
+      "id": "coverage.entity.crud",
+      "title": "Every entity supports create, read, update, and delete operations",
+      "obligation": "concept-kind-has-crud",
+      "level": "recommended",
+      "profiles": ["*"],
+      "conceptKind": "ENTITY",
+      "dimension": "ACTION",
+      "exemptTraits": ["read-only", "reference", "immutable"]
+    },
+    {
+      "id": "coverage.entity.set-operation",
+      "title": "Every entity supports a set/bulk operation",
+      "obligation": "concept-kind-has-set-operation",
+      "level": "recommended",
+      "profiles": ["*"],
+      "conceptKind": "ENTITY",
+      "dimension": "ACTION",
+      "exemptTraits": ["read-only", "reference", "immutable"]
+    },
+    {
+      "id": "coverage.model.transformation",
+      "title": "The model declares at least one data-transformation",
+      "obligation": "at-least-one-transformation",
+      "level": "recommended",
+      "profiles": ["*"],
+      "conceptKind": "ENTITY",
+      "dimension": "ACTION",
+      "exemptTraits": ["read-only", "reference", "immutable"]
+    },
+    {
+      "id": "coverage.action.authorization",
+      "title": "Every state-changing action declares authorization",
+      "obligation": "action-effect-has-fields",
+      "level": "required",
+      "profiles": ["*"],
+      "effects": ["command", "transform"],
+      "fields": ["authorization"],
+      "dimension": "RULE"
+    },
+    {
+      "id": "coverage.actor.present",
+      "title": "A business application identifies at least one actor",
+      "obligation": "at-least-one-concept-kind",
+      "level": "recommended",
+      "profiles": ["business-application"],
+      "conceptKind": "ACTOR",
+      "dimension": "ACTOR"
+    },
+    {
+      "id": "coverage.measure.present",
+      "title": "An analytics platform defines at least one measure",
+      "obligation": "at-least-one-concept-kind",
+      "level": "recommended",
+      "profiles": ["analytics-platform"],
+      "conceptKind": "MEASURE",
+      "dimension": "MEASURE"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+(* KCF integration profile; composes Work, Information, Event, and Resource. *)
+integration-model = "integration", "model", identifier, "{",
+                    integration-element, { integration-element }, "}" ;
+integration-element = adapter-def | endpoint-def | contract-def | mapping-def
+                    | route-def | retry-policy-def | error-policy-def
+                    | event-bridge-def ;
+adapter-def = "adapter", identifier, "{", "protocol", ":", identifier, ";",
+              [ "serialization", ":", identifier, ";" ],
+              [ "authentication", ":", semantic-ref, ";" ],
+              [ "resource", ":", semantic-ref, ";" ], "}" ;
+endpoint-def = "endpoint", identifier, "{", "adapter", ":", semantic-ref, ";",
+               "operation", ":", semantic-ref, ";",
+               [ "address", ":", string, ";" ],
+               [ "timeout", ":", semantic-ref, ";" ],
+               [ "retry", ":", semantic-ref, ";" ], "}" ;
+contract-def = "contract", identifier, "{", "action", ":", semantic-ref, ";",
+               "input", ":", semantic-ref, ";", "output", ":", semantic-ref,
+               ";", { precondition | postcondition | failure-mode }, "}" ;
+mapping-def = "mapping", identifier, "{", "from", ":", semantic-ref, ";",
+              "to", ":", semantic-ref, ";", field-map, { field-map }, "}" ;
+field-map = "map", semantic-ref, "->", semantic-ref,
+            [ "using", semantic-ref ], ";" ;
+route-def = "route", identifier, "{", "source", ":", semantic-ref, ";",
+            "target", ":", semantic-ref, ";",
+            [ "when", ":", condition, ";" ], "}" ;
+retry-policy-def = "retry-policy", identifier, "{", "attempts", ":",
+                   nonnegative-integer, ";", [ "backoff", ":", semantic-ref, ";" ],
+                   "requires-idempotency", ":", boolean, ";", "}" ;
+error-policy-def = "error-policy", identifier, "{",
+                   failure-handler, { failure-handler }, "}" ;
+failure-handler = "on", identifier, "->", semantic-ref, ";" ;
+event-bridge-def = "event-bridge", identifier, "{", "event", ":",
+                   semantic-ref, ";", "endpoint", ":", semantic-ref, ";",
+                   [ "mapping", ":", semantic-ref, ";" ], "}" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+string = ? KCF string ? ; condition = ? KCF condition ? ;
+precondition = ? KCF precondition ? ; postcondition = ? KCF postcondition ? ;
+failure-mode = ? KCF failure-mode ? ; nonnegative-integer = ? KCF nonnegative-integer ? ;
+boolean = ? KCF boolean ? ;

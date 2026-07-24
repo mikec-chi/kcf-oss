@@ -1,0 +1,27 @@
+{
+  "stackTargetVersion": "1.0.0",
+  "id": "django-drf-postgres",
+  "title": "Django + Django REST Framework + Django ORM + PostgreSQL",
+  "tier": "backend",
+  "language": "Python",
+  "framework": "Django + DRF",
+  "orm": "Django ORM",
+  "database": "PostgreSQL",
+  "apiStyle": "rest",
+  "apiDocs": "drf-spectacular: schema at /api/schema, Swagger UI at /api/docs",
+  "testing": "pytest-django",
+  "conventions": [
+    "Expose OpenAPI/Swagger by default with drf-spectacular: SpectacularAPIView at /api/schema and SpectacularSwaggerView at /api/docs; add DEFAULT_SCHEMA_CLASS and annotate views with @extend_schema so every action and resource appears in the document for the frontend to bind to.",
+    "Layer as models.py (Django models + migrations) / serializers.py (DRF request/response) / services.py (command handlers) / views.py (DRF APIViews) / permissions.py (DRF permission classes).",
+    "identity attributes are the Django primary key; UUIDs use models.UUIDField(primary_key=True, default=uuid.uuid4).",
+    "Optimistic concurrency: an IntegerField `version`; UpdateCustomer uses Customer.objects.filter(pk=id, version=expected).update(name=..., version=F('version')+1) and treats a 0-row result as HTTP 409.",
+    "Atomic commands wrap the write in transaction.atomic().",
+    "Conditional idempotency: return 200 unchanged if the mutate-listed fields already match.",
+    "Authorization: a DRF permission class mapping to the named policy (CustomerUpdatePolicy) guards the view.",
+    "Lifecycles map to TextChoices + a transition guard raising ValidationError; only declared transitions are allowed.",
+    "A command may only write the fields in the action's `mutate` set.",
+    "Realize each action by its operation+scope: record CRUD (create→POST, read/exists/count→GET, replace→PUT, patch/update→PATCH, delete→DELETE, upsert→idempotent PUT); bulk-*/scope=set → a batch endpoint honoring atomicity (transaction.atomic vs per-record); each collectionTransforms entry (filter/map/group/aggregate/join/…) → a query/aggregate endpoint or a DB view. Annotate each so it appears in the drf-spectacular schema.",
+    "Tests use pytest-django with @pytest.mark.django_db, covering happy path, illegal transition, and stale-version 409."
+  ],
+  "example": "EXAMPLE.md"
+}

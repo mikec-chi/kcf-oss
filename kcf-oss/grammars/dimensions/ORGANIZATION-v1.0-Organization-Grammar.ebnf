@@ -1,0 +1,21 @@
+(* KCF Organizational Dimension Grammar v1.0. *)
+organization-model = "organization", "model", identifier, "{",
+                     organization-def, { organization-def }, "}" ;
+organization-def = "organization", identifier, "{", "kind", ":",
+                   organization-kind, ";",
+                   [ "parent", ":", semantic-ref, ";" ],
+                   { "member", ":", semantic-ref, ";" },
+                   { "role", ":", semantic-ref, ";" },
+                   { "authority-domain", ":", semantic-ref, ";" },
+                   { "owns", ":", semantic-ref, ";" },
+                   { "accountable-for", ":", semantic-ref, ";" },
+                   { reporting-def }, { escalation-def }, "}" ;
+reporting-def = "reports", semantic-ref, "to", semantic-ref,
+                [ temporal-validity ], ";" ;
+escalation-def = "escalation", "[", semantic-ref,
+                 { "->", semantic-ref }, "]", ";" ;
+organization-kind = "ORGANIZATION" | "UNIT" | "DEPARTMENT" | "TEAM"
+                  | "POSITION" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+temporal-validity = ? KCF temporal-validity ? ;

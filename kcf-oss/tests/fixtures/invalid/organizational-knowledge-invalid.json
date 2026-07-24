@@ -1,0 +1,98 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "InvalidOrganizationalKnowledge",
+  "module": "KCF",
+  "namespace": "bad",
+  "concepts": [
+    {"id": "A", "qualifiedName": "bad.A", "kind": "ORGANIZATIONAL", "references": []},
+    {"id": "B", "qualifiedName": "bad.B", "kind": "ORGANIZATIONAL", "references": []},
+    {"id": "C", "qualifiedName": "bad.C", "kind": "ORGANIZATIONAL", "references": []},
+    {"id": "Person", "qualifiedName": "bad.Person", "kind": "ACTOR", "references": []},
+    {"id": "Info", "qualifiedName": "bad.Info", "kind": "INFORMATION", "references": []},
+    {"id": "RuleOne", "qualifiedName": "bad.RuleOne", "kind": "RULE", "references": []},
+    {"id": "RuleTwo", "qualifiedName": "bad.RuleTwo", "kind": "RULE", "references": []},
+    {"id": "Reason", "qualifiedName": "bad.Reason", "kind": "REASONING", "references": []}
+  ],
+  "organizations": [
+    {
+      "id": "A", "organizationKind": "UNKNOWN", "parent": "bad.B",
+      "members": ["bad.Missing"], "roles": [], "authorityDomains": [], "owns": [], "accountableFor": [],
+      "reporting": [{"source": "bad.Info", "target": "bad.RuleOne", "validFrom": "2027", "validTo": "2026"}],
+      "escalations": [["bad.Person", "bad.Person"]]
+    },
+    {
+      "id": "B", "organizationKind": "TEAM", "parent": "bad.A",
+      "members": [], "roles": [], "authorityDomains": [], "owns": [], "accountableFor": [],
+      "reporting": [], "escalations": []
+    },
+    {
+      "id": "C", "organizationKind": "UNIT", "parent": "bad.Missing",
+      "members": [], "roles": [], "authorityDomains": [], "owns": [], "accountableFor": [],
+      "reporting": [], "escalations": []
+    }
+  ],
+  "information": [
+    {
+      "id": "Info", "informationKind": "UNKNOWN", "subjects": ["bad.Missing"],
+      "authors": [], "sources": [], "audiences": [], "evidence": [],
+      "validFrom": "2027", "validTo": "2026", "confidentiality": "Secret",
+      "sourceLocation": "page 1", "extractionMethod": "llm"
+    }
+  ],
+  "rules": [
+    {
+      "id": "RuleOne", "ruleKind": "UNKNOWN", "condition": "", "effects": [],
+      "appliesTo": ["bad.Info"], "mode": "PERMISSION"
+    },
+    {
+      "id": "RuleTwo", "ruleKind": "PROHIBITION", "condition": "true",
+      "effects": ["bad.Missing"], "appliesTo": ["bad.Info"], "mode": "PROHIBITION"
+    }
+  ],
+  "policies": [
+    {"id": "BrokenPolicy", "authority": "bad.Info", "rules": ["bad.Missing"]}
+  ],
+  "reasoning": [
+    {
+      "id": "Reason", "reasoningKind": "UNKNOWN", "proposition": "",
+      "method": "DEDUCTIVE", "premises": ["bad.Missing"], "evidence": [],
+      "contradictions": ["bad.Reason"], "alternatives": [], "confidence": 2
+    }
+  ],
+  "assertions": [
+    {
+      "id": "Claim", "qualifiedName": "bad.Claim", "subject": "bad.Missing",
+      "predicate": "owns", "object": "bad.Info", "status": "invalid",
+      "validFrom": "2027", "validTo": "2026", "supersedes": "bad.Claim",
+      "contradicts": ["bad.Claim"], "classification": "Secret"
+    },
+    {
+      "id": "InferredClaim", "qualifiedName": "bad.InferredClaim",
+      "subject": "bad.A", "predicate": "dependsOn", "object": "bad.B",
+      "status": "inferred", "contradicts": []
+    }
+  ],
+  "identityResolutions": [
+    {
+      "id": "IdentityOne", "canonical": "bad.A", "aliases": ["shared"],
+      "externalIds": [], "sameAs": ["bad.Missing"], "mergeSources": [],
+      "splitTargets": [], "status": "merged"
+    },
+    {
+      "id": "IdentityTwo", "canonical": "bad.B", "aliases": ["shared"],
+      "externalIds": [], "sameAs": [], "mergeSources": [], "splitTargets": [], "status": "active"
+    },
+    {
+      "id": "IdentityThree", "canonical": "bad.Missing", "aliases": [],
+      "externalIds": [], "sameAs": [], "mergeSources": [], "splitTargets": [], "status": "active"
+    }
+  ],
+  "knowledgeQueries": [
+    {
+      "id": "BrokenQuery", "selectKind": "RULE", "where": "",
+      "world": "open", "negation": "failure", "inference": "declared",
+      "temporal": "as-of"
+    }
+  ]
+}

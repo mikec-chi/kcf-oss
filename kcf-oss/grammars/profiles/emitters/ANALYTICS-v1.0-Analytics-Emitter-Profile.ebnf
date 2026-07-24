@@ -1,0 +1,19 @@
+(* KCF analytics emitter profile. *)
+analytics-model = "analytics", "model", identifier, "{", analytics-element,
+                  { analytics-element }, "}" ;
+analytics-element = dataset-def | semantic-layer-def | report-def | dashboard-def ;
+dataset-def = "dataset", identifier, "{", "source", ":", semantic-ref, ";",
+              { "transform", ":", semantic-ref, ";" }, "}" ;
+semantic-layer-def = "semantic-layer", identifier, "{",
+                     { "dimension", ":", semantic-ref, ";" },
+                     { "measure", ":", semantic-ref, ";" }, "}" ;
+report-def = "report", identifier, "{", "layer", ":", semantic-ref, ";",
+             visualization, { visualization },
+             [ "output", ":", semantic-ref, ";" ], "}" ;
+dashboard-def = "dashboard", identifier, "{", "layer", ":", semantic-ref, ";",
+                visualization, { visualization },
+                { "filter", ":", semantic-ref, ";" },
+                { "action", ":", semantic-ref, ";" }, "}" ;
+visualization = "visual", identifier, "{", "kind", ":", identifier, ";",
+                { "field", ":", semantic-ref, ";" }, "}" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/source-coverage-report-v1.schema.json",
+  "title": "KCF Source Coverage Report v1",
+  "description": "Bidirectional traceability between validated prose and the extracted model: prose that produced no construct (missed extraction) and constructs grounded in no prose (ungrounded additions), plus dangling-trace integrity.",
+  "type": "object",
+  "required": ["sourceCoverageReportVersion", "document", "model", "counts", "uncoveredSegments", "unsourcedConstructs", "danglingSegments", "danglingConstructs"],
+  "properties": {
+    "sourceCoverageReportVersion": {"const": "1.0.0"},
+    "document": {"type": "string"},
+    "model": {"type": "string"},
+    "counts": {
+      "type": "object",
+      "required": ["segments", "constructs", "coveredSegments", "sourcedConstructs"],
+      "properties": {
+        "segments": {"type": "integer", "minimum": 0},
+        "constructs": {"type": "integer", "minimum": 0},
+        "coveredSegments": {"type": "integer", "minimum": 0},
+        "sourcedConstructs": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "uncoveredSegments": {"type": "array", "items": {"type": "string"}, "description": "Segments that produced no construct - potential missed extraction."},
+    "unsourcedConstructs": {"type": "array", "items": {"type": "string"}, "description": "Constructs citing no segment - potential ungrounded additions."},
+    "danglingSegments": {"type": "array", "items": {"type": "string"}, "description": "Trace segmentIds not present in the source document."},
+    "danglingConstructs": {"type": "array", "items": {"type": "string"}, "description": "Trace construct identities not present in the model."}
+  },
+  "additionalProperties": false
+}

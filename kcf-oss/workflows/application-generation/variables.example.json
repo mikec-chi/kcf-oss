@@ -1,0 +1,14 @@
+{
+  "DOMAIN": "Replace with the domain name",
+  "REQUIREMENTS_PATH": "requirements/",
+  "PROJECT_ROOT": "generated-application/",
+  "TECH_STACK": "Replace with the target application stack",
+  "PROFILE_PRESET": "business-application",
+  "KNOWLEDGE_SOURCES": ["requirements/"],
+  "MODEL_VERSION": "1.0.0",
+  "REGISTRY_PACKAGE": "replace.domain",
+  "CONFORMANCE_LEVEL": 5,
+  "CAPABILITY_ID": "Replace for each generated vertical slice",
+  "RUNTIME_MANIFEST": "runtime/runtime-manifest.json",
+  "DEPLOYMENT_ENVIRONMENT": "development"
+}

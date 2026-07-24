@@ -1,0 +1,73 @@
+(* KCF Semantic Compilation and Runtime Planning Grammar v1.0. *)
+compilation-model = "compilation", "model", identifier, "{",
+                    compilation-element, { compilation-element }, "}" ;
+compilation-element = semantic-ir-def | validation-plan-def
+                    | reasoning-plan-def | execution-plan-def
+                    | emitter-def | grammar-package-def | registry-entry-def ;
+semantic-ir-def = "semantic-ir", identifier, "{",
+                  "grammar-version", ":", string, ";",
+                  [ "profile-version", ":", string, ";" ],
+                  { ir-concept | ir-relationship | ir-constraint
+                  | runtime-requirement }, [ provenance ], "}" ;
+ir-concept = "ir-concept", qualified-name, "{", "kind", ":", concept-kind,
+             ";", [ "abstract", ":", boolean, ";" ],
+             [ "instantiable", ":", boolean, ";" ],
+             { "inherits", ":", semantic-ref, ";" },
+             { "attribute", ":", semantic-ref, ";" },
+             { "relationship", ":", semantic-ref, ";" },
+             { "constraint", ":", semantic-ref, ";" },
+             { "validation-plan", ":", semantic-ref, ";" },
+             { "reasoning-plan", ":", semantic-ref, ";" },
+             { "execution-plan", ":", semantic-ref, ";" }, "}" ;
+ir-relationship = "ir-relationship", identifier, "{",
+                  "definition", ":", semantic-ref, ";",
+                  "source", ":", semantic-ref, ";",
+                  "target", ":", semantic-ref, ";",
+                  "root-kind", ":", identifier, ";",
+                  { qualifier }, { "condition", ":", condition, ";" },
+                  { "validation-plan", ":", semantic-ref, ";" },
+                  { "reasoning-plan", ":", semantic-ref, ";" },
+                  { "execution-plan", ":", semantic-ref, ";" }, "}" ;
+ir-constraint = "ir-constraint", identifier, ":", condition, ";" ;
+runtime-requirement = "requires-runtime", semantic-ref, ";" ;
+
+validation-plan-def = "validation-plan", identifier, "{", plan-step,
+                      { plan-step }, "}" ;
+reasoning-plan-def = "reasoning-plan", identifier, "{", plan-step,
+                     { plan-step }, [ "provenance-required", ":", boolean, ";" ],
+                     "}" ;
+execution-plan-def = "execution-plan", identifier, "{", plan-step,
+                     { plan-step }, { "compensation", ":", semantic-ref, ";" },
+                     "}" ;
+plan-step = "step", nonnegative-integer, ":", semantic-ref, "{",
+            { "input", ":", semantic-ref, ";" },
+            { "output", ":", semantic-ref, ";" },
+            { "requires", ":", semantic-ref, ";" },
+            { "on-failure", ":", semantic-ref, ";" }, "}" ;
+
+emitter-def = "emitter", identifier, "{", "target", ":", identifier, ";",
+              "supports", ":", version-range, ";",
+              { "semantic", ":", semantic-ref, ";" },
+              { "requires", ":", semantic-ref, ";" },
+              "unsupported", ":", unsupported-policy, ";", "}" ;
+unsupported-policy = "error" | "warn" | "preserve" ;
+grammar-package-def = "package", identifier, "{", "version", ":",
+                      semantic-version, ";", { "module", ":", semantic-ref, ";" },
+                      { "dependency", ":", semantic-ref, ";" },
+                      [ "profile", ":", semantic-ref, ";" ],
+                      { "binding", ":", semantic-ref, ";" }, "}" ;
+registry-entry-def = "registry-entry", qualified-name, "{",
+                     "version", ":", semantic-version, ";",
+                     "location", ":", string, ";",
+                     [ "checksum", ":", string, ";" ],
+                     { "dependency", ":", semantic-ref, ";" },
+                     [ "status", ":", registry-status, ";" ], "}" ;
+registry-status = "draft" | "approved" | "deprecated" | "retired" ;
+
+identifier = ? KCF identifier ? ; qualified-name = ? KCF qualified-name ? ;
+semantic-ref = ? KCF semantic-ref ? ; concept-kind = ? KCF concept-kind ? ;
+boolean = ? KCF boolean ? ; provenance = ? KCF provenance ? ;
+qualifier = ? KCF qualifier ? ; condition = ? KCF condition ? ;
+nonnegative-integer = ? KCF nonnegative-integer ? ;
+version-range = ? KCF version-range ? ; semantic-version = ? KCF semantic-version ? ;
+string = ? KCF string ? ;

@@ -1,0 +1,18 @@
+# Data files bundled into the wheel. The importable package `kcf_oss` maps to
+# the `kcf-oss/` directory; these globs ship the grammars, schemas, presets,
+# config, generated catalogues, and the reference tool/compiler/emitter sources
+# that the toolchain reads by path at runtime.
+recursive-include kcf-oss *.py
+recursive-include kcf-oss *.json
+recursive-include kcf-oss *.ebnf
+recursive-include kcf-oss *.md
+recursive-include kcf-oss *.kcf
+recursive-include kcf-oss *.html
+
+# Exclude build/dev-only material from the distribution.
+prune kcf-oss/tests
+prune kcf-oss/tmp
+prune kcf-oss/packaging
+global-exclude __pycache__ *.py[cod]
+
+include LICENSE NOTICE README.md

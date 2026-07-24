@@ -1,0 +1,18 @@
+{
+  "documentProfileVersion": "1.0.0",
+  "documentKind": "org-chart",
+  "title": "Organization chart",
+  "description": "A hierarchy of positions and units connected by reporting lines. Maps almost directly onto the ORGANIZATION dimension.",
+  "segmentKinds": ["position", "unit", "reporting-line"],
+  "targetDimensions": ["ORGANIZATION", "ACTOR"],
+  "mapping": [
+    {"segmentKind": "unit", "producesKind": "ORGANIZATION", "notes": "a department/team/division becomes an organization record"},
+    {"segmentKind": "position", "producesKind": "ACTOR", "notes": "a role/position becomes an actor and a member/role of its unit"},
+    {"segmentKind": "reporting-line", "producesKind": "ORGANIZATION.reporting", "notes": "a line becomes a reporting entry (source reports to target); dotted lines are secondary reporting"}
+  ],
+  "guidance": [
+    "Capture every reporting line as a reporting entry (source -> target); escalation chains become escalations.",
+    "Distinguish solid (primary) from dotted (secondary) reporting.",
+    "A box is both a position (actor) and a member/role of the unit that contains it."
+  ]
+}

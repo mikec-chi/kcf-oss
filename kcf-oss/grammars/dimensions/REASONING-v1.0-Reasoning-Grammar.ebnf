@@ -1,0 +1,23 @@
+(* KCF Reasoning Dimension Grammar v1.0. *)
+reasoning-model = "reasoning", "model", identifier, "{", reasoning-def,
+                  { reasoning-def }, "}" ;
+reasoning-def = "reasoning", identifier, "{", "kind", ":", reasoning-kind, ";",
+                "proposition", ":", condition, ";",
+                { "premise", ":", semantic-ref, ";" },
+                { "evidence", ":", semantic-ref, ";" },
+                [ "conclusion", ":", condition, ";" ],
+                "method", ":", reasoning-method, ";",
+                [ "confidence", ":", confidence, ";" ],
+                { "assumption", ":", condition, ";" },
+                { "contradiction", ":", semantic-ref, ";" },
+                { "alternative", ":", semantic-ref, ";" },
+                [ provenance ], "}" ;
+reasoning-kind = "CLAIM" | "FACT" | "HYPOTHESIS" | "ASSUMPTION"
+               | "INFERENCE" | "EXPLANATION" | "RECOMMENDATION"
+               | "CONTRADICTION" ;
+reasoning-method = "DEDUCTIVE" | "INDUCTIVE" | "ABDUCTIVE" | "CAUSAL"
+                 | "PROBABILISTIC" | "ANALOGICAL" | "CONSTRAINT_BASED" ;
+
+identifier = ? KCF identifier ? ; condition = ? KCF condition ? ;
+semantic-ref = ? KCF semantic-ref ? ; confidence = ? KCF confidence ? ;
+provenance = ? KCF provenance ? ;

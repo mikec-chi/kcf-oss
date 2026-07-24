@@ -1,0 +1,53 @@
+(* KCF Entity Dimension Grammar v1.0. *)
+entity-model = "entity", "model", identifier, "{",
+               entity-def, { entity-def | collection-def }, "}" ;
+entity-def = [ "abstract" ], "entity", identifier, "{", identity-def,
+             { attribute-def | composition-def | reference-def
+             | collection-use | mutation-def | constraint-use },
+             [ "lifecycle", ":", semantic-ref, ";" ], "}" ;
+identity-def = "identity", "{", identity-component,
+               { ",", identity-component }, "}" ;
+identity-component = identifier, [ ":", type-ref ],
+                     [ "generated", ":", boolean ] ;
+attribute-def = "attribute", identifier, ":", type-ref,
+                [ cardinality ], { qualifier }, ";" ;
+composition-def = "compose", identifier, ":", semantic-ref,
+                  cardinality, [ "orphan", ":", orphan-policy ], ";" ;
+reference-def = "reference", identifier, ":", semantic-ref,
+                cardinality, [ "inverse", ":", identifier ], ";" ;
+collection-def = "collection", identifier, "of", semantic-ref, "{",
+                 [ "identity", ":", semantic-ref, ";" ],
+                 [ "order-by", ":", semantic-ref, ";" ],
+                 { constraint-use }, "}" ;
+collection-use = "collection", identifier, ":", semantic-ref, ";" ;
+mutation-def = "mutation", identifier, "{", "subject", ":", semantic-ref, ";",
+               "operation", ":", mutation-operation, ";",
+               "scope", ":", mutation-scope, ";",
+               [ selection-def ],
+               mutation-change, { mutation-change },
+               { "precondition", ":", condition, ";" },
+               { "postcondition", ":", condition, ";" },
+               { "emit", ":", semantic-ref, ";" },
+               [ "atomicity", ":", atomicity, ";" ],
+               [ "concurrency", ":", concurrency-policy, ";" ],
+               [ "version-field", ":", semantic-ref, ";" ],
+               [ "idempotency", ":", idempotency, ";" ], "}" ;
+mutation-change = "change", semantic-ref, "from", operand, "to", operand, ";"
+                | "add", operand, "to", semantic-ref, ";"
+                | "remove", operand, "from", semantic-ref, ";"
+                | "archive", semantic-ref, ";" ;
+selection-def = "selection", ":", ( "identity" | "predicate" | "keys"
+              | "partition" | "all" ), [ "(", operand, ")" ], ";" ;
+mutation-operation = "create" | "replace" | "update" | "patch" | "delete"
+                   | "upsert" | "archive" | "assign-reference"
+                   | "add-member" | "remove-member" | "synchronize" ;
+mutation-scope = "record" | "set" | "batch" | "stream" ;
+atomicity = "atomic" | "per-record" | "best-effort" ;
+concurrency-policy = "none" | "optimistic" | "pessimistic" | "serialized" ;
+orphan-policy = "restrict" | "cascade" | "detach" | "archive" ;
+
+identifier = ? KCF identifier ? ; type-ref = ? KCF type-ref ? ;
+semantic-ref = ? KCF semantic-ref ? ; cardinality = ? KCF cardinality ? ;
+qualifier = ? KCF qualifier ? ; constraint-use = ? KCF constraint-use ? ;
+condition = ? KCF condition ? ; operand = ? KCF operand ? ;
+idempotency = ? KCF idempotency ? ; boolean = ? KCF boolean ? ;

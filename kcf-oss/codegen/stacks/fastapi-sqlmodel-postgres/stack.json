@@ -1,0 +1,27 @@
+{
+  "stackTargetVersion": "1.0.0",
+  "id": "fastapi-sqlmodel-postgres",
+  "title": "FastAPI + SQLModel + PostgreSQL",
+  "tier": "backend",
+  "language": "Python",
+  "framework": "FastAPI",
+  "orm": "SQLModel",
+  "database": "PostgreSQL",
+  "apiStyle": "rest",
+  "apiDocs": "FastAPI built-in Swagger UI at /docs and OpenAPI JSON at /openapi.json",
+  "testing": "pytest",
+  "conventions": [
+    "OpenAPI/Swagger is ON by default: FastAPI serves Swagger UI at /docs and the schema at /openapi.json. Give every route a response_model and typed request body so the generated schema is complete and the frontend can bind to it.",
+    "Layer as models.py (SQLModel tables) / schemas.py (request/response) / repository.py / service.py (command handlers) / api.py (routers).",
+    "identity attributes are the SQLModel primary key; UUIDs use uuid.UUID with default_factory.",
+    "Optimistic concurrency: a `version` integer column; UpdateCustomer requires the caller's version and bumps it in a single UPDATE ... WHERE id=? AND version=?; a 0-row update raises 409 Conflict.",
+    "Atomic commands run in one DB transaction (session.begin()).",
+    "Conditional idempotency: no-op if the mutated fields already equal the requested values (return 200 without bumping version).",
+    "Authorization: enforce the named policy via a FastAPI dependency (require_policy('customer.CustomerUpdatePolicy')) before the handler runs.",
+    "Lifecycles map to a str Enum column + a transition guard that raises on undeclared transitions; only declared transitions are allowed.",
+    "A command may only write the fields listed in the action's `mutate` set.",
+    "Realize each action by its operation+scope: record CRUD (create→POST, read/exists/count→GET, replace→PUT, patch/update→PATCH, delete→DELETE, upsert→idempotent PUT); bulk-*/scope=set → a batch endpoint honoring atomicity; each collectionTransforms entry (filter/map/group/aggregate/join/…) → a query/aggregate endpoint or SQL view. All appear in /openapi.json.",
+    "Tests use pytest with an in-memory/SQLite session fixture; cover the happy path, an illegal lifecycle transition, and a stale-version 409."
+  ],
+  "example": "EXAMPLE.md"
+}

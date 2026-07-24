@@ -1,0 +1,41 @@
+// A minimal, VALID starter model — copy this folder to community/models/<your-domain>/
+// and rebuild it for your domain. Keep only what the domain really means.
+// Check it with:  python community/models/validate.py
+
+kcf model Bookshelf profile business-application {
+  namespace shelf;
+
+  // Actors are the people / roles who act in the domain.
+  actor Reader { }
+
+  // Every `entity` needs an `identity` (its key). `required` / `optional` fields
+  // capture what the domain actually tracks — nothing more. Mark reference/lookup
+  // data `mutability "read-only";` to exempt it from CRUD expectations.
+  entity Book {
+    identity isbn: UUID;
+    required title: String;
+    optional summary: String;
+  }
+
+  // A `command` changes state, so it MUST declare `authorization`
+  // (a namespaced policy reference — the policy itself lives in your app).
+  command AddBook {
+    operation create;
+    scope record;
+    target Book;
+    input one;
+    output one;
+    idempotency conditional;
+    atomicity atomic;
+    authorization shelf.ManageBooks;
+  }
+
+  // A `query` reads state; no authorization required.
+  query ListBooks {
+    operation query;
+    scope set;
+    target Book;
+    input zero;
+    output many;
+  }
+}

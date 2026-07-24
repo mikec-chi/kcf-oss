@@ -1,0 +1,26 @@
+(* KCF AI/ML emitter profile. *)
+ai-model = "ai", "model", identifier, "{", ai-element,
+           { ai-element }, "}" ;
+ai-element = feature-schema | dataset-def | model-def | pipeline-def
+           | serving-def | governance-def ;
+feature-schema = "features", identifier, "{", feature-def,
+                 { feature-def }, [ "target", ":", semantic-ref, ";" ], "}" ;
+feature-def = "feature", identifier, ":", semantic-ref,
+              [ "lineage", ":", semantic-ref ], ";" ;
+dataset-def = "dataset", identifier, "{", "information", ":", semantic-ref,
+              ";", "schema", ":", semantic-ref, ";", "}" ;
+model-def = "model", identifier, "{", "input", ":", semantic-ref, ";",
+            "output", ":", semantic-ref, ";", "method", ":", identifier, ";",
+            { "metric", ":", semantic-ref, ";" }, "}" ;
+pipeline-def = "pipeline", identifier, "{", pipeline-step,
+               { pipeline-step }, "}" ;
+pipeline-step = "step", nonnegative-integer, ":", semantic-ref, ";" ;
+serving-def = "serving", identifier, "{", "model", ":", semantic-ref, ";",
+              "runtime", ":", semantic-ref, ";",
+              [ "capacity", ":", semantic-ref, ";" ], "}" ;
+governance-def = "governance", identifier, "{",
+                 { "policy", ":", semantic-ref, ";" },
+                 { "evidence", ":", semantic-ref, ";" },
+                 { "explanation", ":", semantic-ref, ";" }, "}" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+nonnegative-integer = ? KCF nonnegative-integer ? ;

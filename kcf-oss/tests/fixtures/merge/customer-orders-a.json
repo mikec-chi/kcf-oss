@@ -1,0 +1,20 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CommerceCustomers",
+  "module": "KCF",
+  "namespace": "shop",
+  "modules": ["KCF"],
+  "concepts": [
+    {"id": "Customer", "qualifiedName": "shop.Customer", "kind": "ENTITY", "attributes": [
+      {"name": "customerId", "type": "UUID", "identity": true},
+      {"name": "name", "type": "String", "required": true}
+    ]},
+    {"id": "Order", "qualifiedName": "shop.Order", "kind": "ENTITY", "attributes": [
+      {"name": "orderId", "type": "UUID", "identity": true}
+    ]}
+  ],
+  "relationships": [
+    {"id": "customer-places-order", "rootKind": "ASSOCIATION", "source": "shop.Customer", "target": "shop.Order"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "documentProfileVersion": "1.0.0",
+  "documentKind": "form",
+  "title": "Form / structured input",
+  "description": "A data-capture form: sections grouping fields, each field a typed attribute, with validation rules and the form itself a governed information artifact.",
+  "segmentKinds": ["section", "field", "validation"],
+  "targetDimensions": ["ENTITY", "RULE", "INFORMATION"],
+  "mapping": [
+    {"segmentKind": "field", "producesKind": "ENTITY.attribute", "notes": "a field becomes an attribute with a type; required markers set required=true; identity fields set identity=true"},
+    {"segmentKind": "validation", "producesKind": "RULE", "notes": "a validation constraint becomes a rule applying to the entity"},
+    {"segmentKind": "section", "producesKind": "INFORMATION", "notes": "the form/section becomes an information record with sourceDocument provenance"}
+  ],
+  "guidance": [
+    "Each field becomes an attribute; capture its type, requiredness, and any allowed values.",
+    "Validation notes and constraints become rules, not free text.",
+    "Record the form as an information artifact so its origin and freshness are governed."
+  ]
+}

@@ -1,0 +1,23 @@
+(* KCF Event Dimension Grammar v1.0. *)
+event-model = "event", "model", identifier, "{", event-def,
+              { event-def }, "}" ;
+event-def = "event", identifier, "{", "kind", ":", event-kind, ";",
+            { "subject", ":", semantic-ref, ";" },
+            { "source", ":", semantic-ref, ";" },
+            { "observer", ":", semantic-ref, ";" },
+            [ "occurrence-time", ":", semantic-ref, ";" ],
+            [ "detection-time", ":", semantic-ref, ";" ],
+            { "correlation-key", ":", semantic-ref, ";" },
+            [ "severity", ":", severity, ";" ],
+            [ "expectedness", ":", expectedness, ";" ],
+            { "trigger", ":", semantic-ref, ";" },
+            { "affect-lifecycle", ":", semantic-ref, ";" },
+            { "evidence", ":", semantic-ref, ";" },
+            [ "match", ":", condition, ";" ], "}" ;
+event-kind = "OCCURRENCE" | "SIGNAL" | "OBSERVATION" | "NORMAL"
+           | "EXCEPTION" | "THRESHOLD" | "SCHEDULED" | "EXTERNAL"
+           | "DERIVED" | "CORRECTION" ;
+expectedness = "expected" | "unexpected" | "unknown" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+severity = ? KCF severity ? ; condition = ? KCF condition ? ;

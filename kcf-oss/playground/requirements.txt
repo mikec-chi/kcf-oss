@@ -1,0 +1,4 @@
+# KCF playground runtime deps (the toolchain itself only needs jsonschema).
+fastapi>=0.110
+uvicorn[standard]>=0.29
+jsonschema>=4.0

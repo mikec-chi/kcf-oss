@@ -1,0 +1,68 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ShopFromProse",
+  "module": "KCF",
+  "namespace": "shop",
+  "concepts": [
+    {
+      "id": "Customer",
+      "qualifiedName": "shop.Customer",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "Order",
+      "qualifiedName": "shop.Order",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "Product",
+      "qualifiedName": "shop.Product",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "sku",
+          "type": "String",
+          "identity": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "customer-places-order",
+      "rootKind": "ASSOCIATION",
+      "source": "shop.Customer",
+      "target": "shop.Order"
+    },
+    {
+      "id": "order-contains-product",
+      "rootKind": "COMPOSITION",
+      "source": "shop.Order",
+      "target": "shop.Product"
+    }
+  ]
+}

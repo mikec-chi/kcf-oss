@@ -1,0 +1,26 @@
+(* KCF Temporal Dimension Grammar v1.0. *)
+temporal-model = "temporal", "model", identifier, "{", temporal-def,
+                 { temporal-def | calendar-def }, "}" ;
+temporal-def = "temporal", identifier, "{", "kind", ":", temporal-kind, ";",
+               [ "start", ":", temporal-value, ";" ],
+               [ "end", ":", temporal-value, ";" ],
+               [ "duration", ":", duration-value, ";" ],
+               [ "recurrence", ":", recurrence, ";" ],
+               [ "calendar", ":", semantic-ref, ";" ],
+               [ "timezone", ":", string, ";" ],
+               [ "calculation", ":", expression, ";" ],
+               { constraint-use }, "}" ;
+calendar-def = "calendar", identifier, "{", "timezone", ":", string, ";",
+               { "working-day", ":", identifier, ";" },
+               { "holiday", ":", string, ";" }, "}" ;
+duration-value = number, duration-unit ;
+recurrence = string ;
+temporal-kind = "INSTANT" | "INTERVAL" | "DURATION" | "DEADLINE"
+              | "SCHEDULE" | "RECURRENCE" | "EFFECTIVE_PERIOD" ;
+duration-unit = "millisecond" | "second" | "minute" | "hour" | "day"
+              | "week" | "month" | "year" ;
+
+identifier = ? KCF identifier ? ; temporal-value = ? KCF temporal-value ? ;
+semantic-ref = ? KCF semantic-ref ? ; expression = ? KCF expression ? ;
+constraint-use = ? KCF constraint-use ? ; number = ? KCF number ? ;
+string = ? KCF string ? ;

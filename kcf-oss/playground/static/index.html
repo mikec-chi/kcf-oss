@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KCF Playground</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --panel: #ffffff; --ink: #1a1d24; --muted: #5c6470;
+    --border: #e2e6ec; --accent: #2f6feb; --ok: #1a7f4b; --warn: #b25e00;
+    --bad: #c0362c; --code-bg: #f2f4f7; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --panel: #171b21; --ink: #e6e9ee; --muted: #9aa4b2;
+      --border: #262c35; --accent: #5b8dff; --ok: #46c98a; --warn: #e0a24a;
+      --bad: #ff6b5e; --code-bg: #0b0e12;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 18px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .2px; }
+  header .tag { color: var(--muted); font-size: 13px; }
+  header a { color: var(--accent); text-decoration: none; font-size: 13px; margin-left: auto; }
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 22px; max-width: 1400px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .panel > .head { padding: 10px 14px; border-bottom: 1px solid var(--border);
+    font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+  textarea { width: 100%; min-height: 440px; border: 0; padding: 14px; resize: vertical;
+    background: var(--code-bg); color: var(--ink); font-family: var(--mono); font-size: 13px; line-height: 1.5; }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .bar { padding: 12px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    border-top: 1px solid var(--border); }
+  button { background: var(--accent); color: #fff; border: 0; border-radius: 7px;
+    padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .55; cursor: default; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+  .hint { color: var(--muted); font-size: 12px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; }
+  .badge { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); display: inline-flex; gap: 6px; align-items: center; }
+  .badge.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); }
+  .badge.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); }
+  .badge.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, var(--border)); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .tabs { display: flex; gap: 2px; padding: 0 8px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .tab { padding: 9px 12px; font-size: 12.5px; color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent; font-family: var(--mono); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+  pre { margin: 0; padding: 14px; overflow-x: auto; background: var(--code-bg);
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.55; max-height: 460px; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+  .diag { padding: 12px 14px; }
+  .diag .row { font-family: var(--mono); font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .sev-error { color: var(--bad); } .sev-warning { color: var(--warn); } .sev-info { color: var(--muted); }
+  .err { padding: 14px; color: var(--bad); font-family: var(--mono); font-size: 13px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>KCF Playground</h1>
+  <span class="tag">paste a <code>.kcf</code> model → compile · assess · generate code</span>
+  <a href="https://github.com/OWNER/kcf" target="_blank" rel="noopener">GitHub ↗</a>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="head">model.kcf</div>
+    <textarea id="src" spellcheck="false" aria-label="KCF model source"></textarea>
+    <div class="bar">
+      <button id="run">Run ▸</button>
+      <button id="reset" class="ghost">Reset example</button>
+      <span class="hint" id="status"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="head">result</div>
+    <div id="badges" class="badges"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="output"><div class="empty">Run a model to see its IR, readiness verdict, and generated artifacts.</div></div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let last = null, activeTab = null, STACKS = [], codegenCache = {};
+
+async function loadExample() {
+  const r = await fetch("api/example");
+  const d = await r.json();
+  $("src").value = d.source;
+}
+
+async function loadStacks() {
+  try { STACKS = (await (await fetch("api/stacks")).json()).stacks || []; }
+  catch { STACKS = []; }
+}
+
+function badge(cls, label) {
+  return `<span class="badge ${cls}"><span class="dot"></span>${label}</span>`;
+}
+
+function renderBadges(res) {
+  const b = [];
+  if (res.ok === false && res.stage !== "assess") {
+    b.push(badge("bad", res.stage + " error"));
+  } else {
+    const a = res.assess || {};
+    b.push(a.valid ? badge("ok", "valid") : badge("bad", "invalid"));
+    b.push(a.ready ? badge("ok", "ready ✓") : badge("warn", "not ready"));
+    const cov = (a.checks && a.checks.coverage) || {};
+    if (cov.requiredGaps != null)
+      b.push(badge(cov.requiredGaps ? "warn" : "ok", cov.requiredGaps + " required gaps"));
+  }
+  $("badges").innerHTML = b.join("");
+}
+
+function buildTabs(res) {
+  const tabs = [];
+  if (res.ok === false && res.stage === "compile") { render(res); return; }
+  tabs.push(["assess", "assess"]);
+  if (res.ir && STACKS.length) tabs.push(["codegen", "generate code"]);
+  if (res.diagnostics && res.diagnostics.length) tabs.push(["diagnostics", `diagnostics (${res.diagnostics.length})`]);
+  tabs.push(["ir", "ir"]);
+  activeTab = activeTab && tabs.some(t => t[0] === activeTab) ? activeTab : tabs[0][0];
+  $("tabs").innerHTML = tabs.map(([k, label]) =>
+    `<span class="tab ${k === activeTab ? "active" : ""}" data-k="${k}">${label}</span>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach(el =>
+    el.onclick = () => { activeTab = el.dataset.k; renderTab(res); paintTabs(); });
+}
+function paintTabs() {
+  $("tabs").querySelectorAll(".tab").forEach(el =>
+    el.classList.toggle("active", el.dataset.k === activeTab));
+}
+
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+function renderTab(res) {
+  const out = $("output");
+  if (activeTab === "assess") {
+    out.innerHTML = `<pre>${esc(JSON.stringify(res.assess, null, 2))}</pre>`;
+  } else if (activeTab === "diagnostics") {
+    out.innerHTML = `<div class="diag">` + res.diagnostics.map(d =>
+      `<div class="row sev-${d.severity}">[${d.severity}] ${esc(d.ruleId || d.rule || "")} — ${esc(d.message || "")}</div>`
+    ).join("") + `</div>`;
+  } else if (activeTab === "ir") {
+    out.innerHTML = `<pre>${esc(JSON.stringify(res.ir, null, 2))}</pre>`;
+  } else if (activeTab === "codegen") {
+    renderCodegen();
+  }
+}
+
+function renderCodegen() {
+  const byTier = (t) => STACKS.filter(s => (s.tier || "backend") === t)
+    .map(s => `<option value="${s.id}">${esc(s.title)}</option>`).join("");
+  const group = (t, label) => byTier(t) ? `<optgroup label="${label}">${byTier(t)}</optgroup>` : "";
+  const opts = group("backend", "Backend (with Swagger)") + group("frontend", "Frontend (binds to OpenAPI)");
+  $("output").innerHTML = `
+    <div class="diag">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+        <span class="hint">KCF stops at the IR — pick a stack and paste this prompt into your own LLM:</span>
+        <select id="stackSel" style="padding:6px 8px;border-radius:6px">${opts}</select>
+        <button id="buildPrompt">Build prompt ▸</button>
+      </div>
+      <details style="margin-bottom:6px">
+        <summary class="hint" style="cursor:pointer">House conventions (optional — tune the generated code)</summary>
+        <textarea id="cgInstr" placeholder="Highest-priority instructions injected into the prompt, e.g.&#10;- use async SQLAlchemy and Pydantic v2&#10;- JWT bearer auth; snake_case tables&#10;- add OpenTelemetry spans on every command"
+          style="width:100%;min-height:74px;margin-top:6px;padding:8px;border-radius:6px;font-family:inherit;font-size:12.5px"></textarea>
+      </details>
+      <div id="cgOut" class="hint">Select a stack to assemble the ready-to-paste prompt (system prompt + this model's IR + the stack's single-shot example).</div>
+    </div>`;
+  $("buildPrompt").onclick = buildPrompt;
+}
+
+async function buildPrompt() {
+  const stack = $("stackSel").value;
+  const cg = $("cgOut");
+  cg.textContent = "assembling…";
+  try {
+    const r = await fetch("api/codegen", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: $("src").value, stack, instructions: ($("cgInstr") ? $("cgInstr").value : "") })
+    });
+    const d = await r.json();
+    if (!d.ok) { cg.innerHTML = `<div class="err">${esc(d.error || "error")}</div>`; return; }
+    cg.innerHTML = `
+      ${copyBlock("System prompt (install once)", d.systemPrompt)}
+      ${copyBlock("User prompt (send with each generation)", d.userPrompt)}`;
+    cg.querySelectorAll("[data-copy]").forEach(btn =>
+      btn.onclick = () => { navigator.clipboard.writeText(btn.nextElementSibling.textContent); btn.textContent = "copied ✓"; });
+  } catch (e) { cg.innerHTML = `<div class="err">${esc(String(e))}</div>`; }
+}
+
+function copyBlock(label, text) {
+  return `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center">
+    <strong style="font-size:12.5px">${esc(label)}</strong>
+    <button class="ghost" data-copy style="padding:4px 10px;font-size:12px">copy</button></div>
+    <pre style="max-height:260px">${esc(text)}</pre></div>`;
+}
+
+function render(res) {
+  renderBadges(res);
+  if (res.ok === false && (res.stage === "compile" || res.stage === "input")) {
+    $("tabs").innerHTML = "";
+    $("output").innerHTML = `<div class="err">${esc(res.error || "error")}</div>`;
+    return;
+  }
+  buildTabs(res);
+  renderTab(res);
+}
+
+async function run() {
+  $("run").disabled = true; $("status").textContent = "running…";
+  try {
+    const r = await fetch("api/run", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: $("src").value })
+    });
+    last = await r.json();
+    render(last);
+    $("status").textContent = "done";
+  } catch (e) {
+    $("status").textContent = "request failed: " + e;
+  } finally {
+    $("run").disabled = false;
+  }
+}
+
+$("run").onclick = run;
+$("reset").onclick = async () => { await loadExample(); $("status").textContent = ""; };
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run();
+});
+loadExample();
+loadStacks();
+</script>
+</body>
+</html>

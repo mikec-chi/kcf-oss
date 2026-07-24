@@ -1,0 +1,25 @@
+(* KCF Measure Dimension Grammar v1.0. *)
+measure-model = "measure", "model", identifier, "{", unit-def,
+                { unit-def | measure-def }, measure-def,
+                { unit-def | measure-def }, "}" ;
+unit-def = "unit", identifier, "{", "dimension", ":", identifier, ";",
+           [ "symbol", ":", string, ";" ],
+           [ "base", ":", semantic-ref, ";" ],
+           [ "factor", ":", number, ";" ], "}" ;
+measure-def = "measure", identifier, "{", "kind", ":", measure-kind, ";",
+              "subject", ":", semantic-ref, ";",
+              "unit", ":", semantic-ref, ";",
+              [ "scale", ":", scale-kind, ";" ],
+              [ "calculation", ":", semantic-ref, ";" ],
+              [ "aggregation", ":", aggregation-kind, ";" ],
+              [ "period", ":", semantic-ref, ";" ],
+              [ "threshold", ":", number, ";" ],
+              [ "target", ":", number, ";" ],
+              [ "tolerance", ":", number, ";" ], "}" ;
+measure-kind = "QUANTITY" | "METRIC" | "KPI" | "THRESHOLD" | "SCORE" ;
+scale-kind = "nominal" | "ordinal" | "interval" | "ratio" ;
+aggregation-kind = "sum" | "average" | "minimum" | "maximum" | "count"
+                 | "distinct-count" | "none" ;
+
+identifier = ? KCF identifier ? ; string = ? KCF string ? ;
+semantic-ref = ? KCF semantic-ref ? ; number = ? KCF number ? ;

@@ -1,0 +1,173 @@
+(* KCF ergonomic domain-authoring grammar v1.2. *)
+authoring-model = [ "kcf" ], "model", identifier,
+                  [ "profile", identifier ], "{",
+                  [ namespace-decl ], { profile-use },
+                  { pattern-claim },
+                  authoring-declaration, { authoring-declaration }, "}" ;
+namespace-decl = "namespace", qualified-name, ";" ;
+profile-use = "use", identifier, ";" ;
+pattern-claim = ( "implements" | "excludes" ), qualified-name, ";" ;
+authoring-declaration = concept-decl | organization-decl | information-decl
+                      | rule-decl | policy-decl | reasoning-decl
+                      | assertion-decl | identity-resolution-decl
+                      | knowledge-query-decl | relationship-decl
+                      | lifecycle-decl | action-decl | collection-decl ;
+
+concept-decl = concept-keyword, identifier, concept-body
+             | "event", identifier, "immutable", ";" ;
+concept-keyword = "entity" | "actor" | "work" | "event" | "resource"
+                | "intent" | "measure" | "temporal"
+                | "spatial" | "logic" | "math" ;
+concept-body = "{", { concept-member }, "}" ;
+concept-member = attribute-decl | reference-decl | trait-decl
+               | abstract-decl | property-decl ;
+attribute-decl = attribute-modifier, identifier, ":", qualified-name,
+                 [ "=", scalar ], ";" ;
+attribute-modifier = "identity" | "required" | "optional" | "field" ;
+reference-decl = "ref", semantic-ref, ";" ;
+trait-decl = "trait", semantic-ref, ";" ;
+abstract-decl = "abstract", ";" ;
+property-decl = identifier, scalar, ";" ;
+
+organization-decl = "organization", identifier, "{",
+                    "kind", organization-kind, ";",
+                    { organization-member | knowledge-metadata }, "}" ;
+organization-member = "parent", semantic-ref, ";"
+                    | "member", semantic-ref, ";"
+                    | "role", semantic-ref, ";"
+                    | "authority-domain", semantic-ref, ";"
+                    | "owns", semantic-ref, ";"
+                    | "accountable-for", semantic-ref, ";"
+                    | "reports", semantic-ref, "to", semantic-ref,
+                      [ validity-inline ], ";"
+                    | "escalation", "[", semantic-ref,
+                      { "->", semantic-ref }, "]", ";" ;
+organization-kind = "ORGANIZATION" | "UNIT" | "DEPARTMENT" | "TEAM"
+                  | "POSITION" ;
+
+information-decl = "information", identifier, "{",
+                   "kind", information-kind, ";",
+                   { information-member | knowledge-metadata }, "}" ;
+information-member = "subject", semantic-ref, ";"
+                   | "author", semantic-ref, ";"
+                   | "source", semantic-ref, ";"
+                   | "audience", semantic-ref, ";"
+                   | "schema", semantic-ref, ";"
+                   | "representation", identifier, ";"
+                   | "confidentiality", identifier, ";"
+                   | "freshness", semantic-ref, ";"
+                   | "completeness", number, ";" ;
+information-kind = "DOCUMENT" | "MESSAGE" | "RECORD" | "MODEL" | "EVIDENCE"
+                 | "INSTRUCTION" | "REPORT" | "SEMANTIC_PACKET" ;
+
+rule-decl = "rule", identifier, "{", "kind", rule-kind, ";",
+            "condition", scalar, ";", rule-effect, { rule-effect },
+            { rule-member | knowledge-metadata }, "}" ;
+rule-effect = "effect", semantic-ref, ";" ;
+rule-member = "applies-to", semantic-ref, ";"
+            | "mode", normative-mode, ";"
+            | "priority", integer, ";"
+            | "conflict", conflict-strategy, ";"
+            | "authority", semantic-ref, ";"
+            | "exception", semantic-ref, ";"
+            | "evidence", semantic-ref, ";" ;
+policy-decl = "policy", identifier, "{", "authority", semantic-ref, ";",
+              "rule", semantic-ref, ";", { "rule", semantic-ref, ";" },
+              [ "default-conflict", conflict-strategy, ";" ],
+              { knowledge-metadata }, "}" ;
+rule-kind = "CONSTRAINT" | "PERMISSION" | "PROHIBITION" | "OBLIGATION"
+          | "ELIGIBILITY" | "CLASSIFICATION" | "DERIVATION" | "DECISION"
+          | "EXCEPTION" ;
+normative-mode = "PERMISSION" | "PROHIBITION" | "OBLIGATION"
+               | "RECOMMENDATION" | "DISCRETION" ;
+conflict-strategy = "priority" | "specificity" | "authority" | "latest"
+                  | "deny-overrides" | "permit-overrides" | "explicit" ;
+
+reasoning-decl = "reasoning", identifier, "{", "kind", reasoning-kind, ";",
+                 "proposition", scalar, ";", "method", reasoning-method, ";",
+                 { reasoning-member | knowledge-metadata }, "}" ;
+reasoning-member = "premise", semantic-ref, ";"
+                 | "evidence", semantic-ref, ";"
+                 | "conclusion", scalar, ";"
+                 | "confidence", number, ";"
+                 | "assumption", scalar, ";"
+                 | "contradiction", semantic-ref, ";"
+                 | "alternative", semantic-ref, ";" ;
+reasoning-kind = "CLAIM" | "FACT" | "HYPOTHESIS" | "ASSUMPTION"
+               | "INFERENCE" | "EXPLANATION" | "RECOMMENDATION"
+               | "CONTRADICTION" ;
+reasoning-method = "DEDUCTIVE" | "INDUCTIVE" | "ABDUCTIVE" | "CAUSAL"
+                 | "PROBABILISTIC" | "ANALOGICAL" | "CONSTRAINT_BASED" ;
+
+assertion-decl = "assertion", identifier, "{",
+                 "subject", semantic-ref, ";", "predicate", scalar, ";",
+                 ( "object", scalar | "object-ref", semantic-ref ), ";",
+                 "status", epistemic-status, ";",
+                 { assertion-member | knowledge-metadata }, "}" ;
+assertion-member = "supersedes", semantic-ref, ";"
+                 | "contradicts", semantic-ref, ";"
+                 | "derived-by", semantic-ref, ";" ;
+epistemic-status = "asserted" | "inferred" | "disputed" | "superseded"
+                 | "retracted" | "unknown" ;
+
+identity-resolution-decl = "identity-resolution", identifier, "{",
+                           "canonical", semantic-ref, ";",
+                           { identity-member | knowledge-metadata }, "}" ;
+identity-member = "alias", scalar, ";"
+                | "external-id", scalar, ";"
+                | "same-as", semantic-ref, ";"
+                | "merge-source", semantic-ref, ";"
+                | "split-target", semantic-ref, ";"
+                | "status", identity-status, ";" ;
+identity-status = "active" | "merged" | "split" | "retired" ;
+
+knowledge-query-decl = "knowledge-query", identifier, "{",
+                       "select", identifier, ";", "where", scalar, ";",
+                       "world", world-assumption, ";",
+                       "negation", negation-policy, ";",
+                       "inference", inference-policy, ";",
+                       "temporal", temporal-query-policy, ";",
+                       [ "as-of", scalar, ";" ], "}" ;
+world-assumption = "open" | "closed" ;
+negation-policy = "explicit" | "failure" ;
+inference-policy = "none" | "declared" | "materialized" ;
+temporal-query-policy = "current" | "as-of" | "all-history" ;
+
+knowledge-metadata = "valid-from", scalar, ";"
+                   | "valid-to", scalar, ";"
+                   | "recorded-at", scalar, ";"
+                   | "source-document", scalar, ";"
+                   | "source-location", scalar, ";"
+                   | "extraction-method", identifier, ";"
+                   | "extraction-model", scalar, ";"
+                   | "confidence", number, ";"
+                   | "reviewed-by", semantic-ref, ";"
+                   | "evidence", semantic-ref, ";"
+                   | "classification", identifier, ";"
+                   | "access-policy", semantic-ref, ";" ;
+validity-inline = "valid-from", scalar, [ "valid-to", scalar ] ;
+
+relationship-decl = "relationship", identifier, ":", identifier,
+                    semantic-ref, "->", semantic-ref,
+                    { identifier, scalar }, ";" ;
+lifecycle-decl = "lifecycle", identifier, [ "for", semantic-ref ], "{",
+                 lifecycle-member, { lifecycle-member }, "}" ;
+lifecycle-member = state-decl | transition-decl ;
+state-decl = ( "state" | "initial" | "terminal" ), identifier, ";" ;
+transition-decl = "transition", identifier, "->", identifier,
+                  [ "using", semantic-ref ], ";" ;
+
+action-decl = action-effect, identifier, "{", action-member,
+              { action-member }, "}" ;
+action-effect = "command" | "query" | "transform" ;
+action-member = identifier, scalar, ";" ;
+collection-decl = "collection", identifier, "{", collection-member,
+                  { collection-member }, "}" ;
+collection-member = identifier, scalar, ";" ;
+
+identifier = ? KCF identifier ? ;
+qualified-name = ? KCF qualified-name ? ;
+semantic-ref = ? KCF semantic-ref ? ;
+scalar = ? KCF scalar ? ;
+number = ? KCF number ? ;
+integer = ? KCF integer ? ;

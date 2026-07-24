@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/profile-preset-v1.schema.json",
+  "version": "1.0.0",
+  "id": "ai-application",
+  "description": "Governed feature, model, reasoning, lineage, security, serving, and monitoring semantics.",
+  "requestedModules": ["ENTITY", "INFORMATION", "MEASURE", "MATH", "LOGIC", "REASONING", "ACTION", "LINEAGE", "SECURITY", "AI", "ARCHITECTURE"],
+  "requiredRuntimeCapabilities": ["FeatureStore", "ModelRegistry", "Training", "Serving", "Lineage", "Authorization", "DriftMonitoring"],
+  "defaultEmitters": ["vertical-slice"],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": []
+}

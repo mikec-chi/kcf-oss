@@ -1,0 +1,50 @@
+(* KCF Root Relationship Algebra v1.0. *)
+relationship-grammar = "relationship", "grammar", identifier, "{",
+                       relationship-def, { relationship-def }, "}" ;
+relationship-def = "relationship", identifier, "{",
+                   "root-kind", ":", root-relationship-kind, ";",
+                   "source", ":", endpoint-constraint, ";",
+                   "target", ":", endpoint-constraint, ";",
+                   "forward", ":", string, ";",
+                   "inverse", ":", string, ";",
+                   "directionality", ":", directionality, ";",
+                   "cardinality", ":", relationship-cardinality, ";",
+                   [ "transitive", ":", boolean, ";" ],
+                   [ "symmetric", ":", boolean, ";" ],
+                   [ "mode", ":", identifier, ";" ],
+                   [ "source-role", ":", identifier, ";" ],
+                   [ "target-role", ":", identifier, ";" ],
+                   [ "polarity", ":", polarity, ";" ],
+                   [ "strength", ":", number, ";" ],
+                   { "condition", ":", condition, ";" },
+                   [ temporal-validity ],
+                   { "validate", ":", semantic-ref, ";" },
+                   { "infer", ":", inference-semantics, ";" },
+                   { "execute", ":", semantic-ref, ";" },
+                   [ provenance ], [ version-info ], "}" ;
+endpoint-constraint = "kind", "(", concept-kind, { "|", concept-kind }, ")"
+                    | "concept", "(", semantic-ref, { "|", semantic-ref }, ")"
+                    | "trait", "(", semantic-ref, { "|", semantic-ref }, ")"
+                    | "where", "(", condition, ")" ;
+root-relationship-kind = "CLASSIFICATION" | "COMPOSITION" | "ASSOCIATION"
+                       | "IDENTITY" | "PARTICIPATION" | "DEPENDENCY"
+                       | "TRANSFORMATION" | "CAUSATION" | "ORDERING"
+                       | "GOVERNANCE" ;
+directionality = "directed" | "bidirectional" | "symmetric" ;
+relationship-cardinality = cardinality, "to", cardinality ;
+polarity = "affirm" | "deny" | "support" | "oppose"
+         | "permit" | "prohibit" ;
+inference-semantics = "none" | "inverse" | "transitive" | "inherit"
+                    | "qualify" | "causal" ;
+
+identifier = ? KCF identifier ? ;
+semantic-ref = ? KCF semantic-ref ? ;
+concept-kind = ? KCF concept-kind ? ;
+cardinality = ? KCF cardinality ? ;
+condition = ? KCF condition ? ;
+temporal-validity = ? KCF temporal-validity ? ;
+provenance = ? KCF provenance ? ;
+version-info = ? KCF version-info ? ;
+string = ? KCF string ? ;
+number = ? KCF number ? ;
+boolean = ? KCF boolean ? ;

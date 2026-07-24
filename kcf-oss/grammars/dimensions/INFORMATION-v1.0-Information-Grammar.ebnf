@@ -1,0 +1,27 @@
+(* KCF Information Dimension Grammar v1.0. *)
+information-model = "information", "model", identifier, "{",
+                    information-def, { information-def | schema-def }, "}" ;
+information-def = "information", identifier, "{", "kind", ":",
+                  information-kind, ";", { "subject", ":", semantic-ref, ";" },
+                  { "author", ":", semantic-ref, ";" },
+                  { "source", ":", semantic-ref, ";" },
+                  { "audience", ":", semantic-ref, ";" },
+                  [ "schema", ":", semantic-ref, ";" ],
+                  [ "representation", ":", representation, ";" ],
+                  [ "trust", ":", confidence, ";" ],
+                  [ "confidentiality", ":", identifier, ";" ],
+                  [ "freshness", ":", semantic-ref, ";" ],
+                  [ "completeness", ":", confidence, ";" ],
+                  [ temporal-validity ], [ provenance ], "}" ;
+schema-def = "schema", identifier, "{", field-def, { field-def }, "}" ;
+field-def = "field", identifier, ":", type-ref, [ cardinality ],
+            { constraint-use }, ";" ;
+information-kind = "DOCUMENT" | "MESSAGE" | "RECORD" | "MODEL" | "EVIDENCE"
+                 | "INSTRUCTION" | "REPORT" | "SEMANTIC_PACKET" ;
+representation = "text" | "json" | "xml" | "binary" | "image" | "audio"
+               | "video" | identifier ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+confidence = ? KCF confidence ? ; temporal-validity = ? KCF temporal-validity ? ;
+provenance = ? KCF provenance ? ; type-ref = ? KCF type-ref ? ;
+cardinality = ? KCF cardinality ? ; constraint-use = ? KCF constraint-use ? ;

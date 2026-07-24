@@ -1,0 +1,31 @@
+(* KCF Math Dimension Grammar v1.0. *)
+math-model = "math", "model", identifier, "{", math-def,
+             { math-def }, "}" ;
+math-def = formula-def | function-def | optimization-def
+         | distribution-def | simulation-def ;
+formula-def = "formula", identifier, "{", "result", ":", semantic-ref, ";",
+              "expression", ":", math-expression, ";", "}" ;
+function-def = "function", identifier, "(", [ parameter-def,
+               { ",", parameter-def } ], ")", "->", type-ref, "{",
+               "expression", ":", math-expression, ";", "}" ;
+optimization-def = "optimize", identifier, "{", "objective", ":",
+                   ( "minimize" | "maximize" ), math-expression, ";",
+                   { "variable", ":", identifier, ";" },
+                   { "constraint", ":", condition, ";" }, "}" ;
+distribution-def = "distribution", identifier, "{", "family", ":",
+                   identifier, ";", { qualifier }, "}" ;
+simulation-def = "simulation", identifier, "{", "model", ":", semantic-ref,
+                 ";", "trials", ":", nonnegative-integer, ";",
+                 [ "seed", ":", nonnegative-integer, ";" ], "}" ;
+parameter-def = identifier, ":", type-ref ;
+math-expression = additive ;
+additive = multiplicative, { ( "+" | "-" ), multiplicative } ;
+multiplicative = power, { ( "*" | "/" ), power } ;
+power = unary, [ "^", power ] ;
+unary = [ "+" | "-" ], math-primary ;
+math-primary = number | semantic-ref | "(", math-expression, ")" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+type-ref = ? KCF type-ref ? ; condition = ? KCF condition ? ;
+qualifier = ? KCF qualifier ? ; number = ? KCF number ? ;
+nonnegative-integer = ? KCF nonnegative-integer ? ;

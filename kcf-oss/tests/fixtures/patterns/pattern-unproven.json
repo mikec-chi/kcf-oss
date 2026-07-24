@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "AuditableUnproven",
+  "module": "KCF",
+  "namespace": "core",
+  "implementedPatterns": ["core.auditable-entity"],
+  "concepts": [
+    {"id": "Ledger", "qualifiedName": "core.Ledger", "kind": "ENTITY", "traits": ["auditable"], "attributes": [
+      {"name": "ledgerId", "type": "UUID", "identity": true}
+    ]}
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CustomerCommerce",
+  "module": "KCF",
+  "namespace": "shop",
+  "modules": [
+    "KCF"
+  ],
+  "concepts": [
+    {
+      "id": "Customer",
+      "qualifiedName": "shop.Customer",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "Order",
+      "qualifiedName": "shop.Order",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true
+        }
+      ]
+    },
+    {
+      "id": "Product",
+      "qualifiedName": "shop.Product",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "sku",
+          "type": "String",
+          "identity": true
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "customer-places-order",
+      "rootKind": "ASSOCIATION",
+      "source": "shop.Customer",
+      "target": "shop.Order"
+    },
+    {
+      "id": "order-contains-product",
+      "rootKind": "COMPOSITION",
+      "source": "shop.Order",
+      "target": "shop.Product"
+    }
+  ],
+  "lifecycles": [],
+  "actions": [],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": []
+}

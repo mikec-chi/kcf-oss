@@ -1,0 +1,3305 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "oldId": "action.audit.mutation",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.audit.mutation"
+    },
+    {
+      "oldId": "action.collection.aggregate-grain",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.aggregate-grain"
+    },
+    {
+      "oldId": "action.collection.aggregate-type",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.aggregate-type"
+    },
+    {
+      "oldId": "action.collection.boundedness",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.boundedness"
+    },
+    {
+      "oldId": "action.collection.dedup-survivor",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.dedup-survivor"
+    },
+    {
+      "oldId": "action.collection.equality",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.equality"
+    },
+    {
+      "oldId": "action.collection.field-resolution",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.field-resolution"
+    },
+    {
+      "oldId": "action.collection.filter-boolean",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.filter-boolean"
+    },
+    {
+      "oldId": "action.collection.group-key",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.group-key"
+    },
+    {
+      "oldId": "action.collection.input-schema",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.input-schema"
+    },
+    {
+      "oldId": "action.collection.join-fanout",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.join-fanout"
+    },
+    {
+      "oldId": "action.collection.join-inputs",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.join-inputs"
+    },
+    {
+      "oldId": "action.collection.join-type",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.join-type"
+    },
+    {
+      "oldId": "action.collection.map-cardinality",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.map-cardinality"
+    },
+    {
+      "oldId": "action.collection.order-total",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.order-total"
+    },
+    {
+      "oldId": "action.collection.output-schema",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.output-schema"
+    },
+    {
+      "oldId": "action.collection.partition",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.partition"
+    },
+    {
+      "oldId": "action.collection.projection-unique",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.projection-unique"
+    },
+    {
+      "oldId": "action.collection.purity",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.purity"
+    },
+    {
+      "oldId": "action.collection.sample",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.sample"
+    },
+    {
+      "oldId": "action.collection.set-compatibility",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.set-compatibility"
+    },
+    {
+      "oldId": "action.collection.window",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.collection.window"
+    },
+    {
+      "oldId": "action.compose.compensation",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.compose.compensation"
+    },
+    {
+      "oldId": "action.compose.order",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.compose.order"
+    },
+    {
+      "oldId": "action.compose.saga",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.compose.saga"
+    },
+    {
+      "oldId": "action.concurrency.lost-update",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.concurrency.lost-update"
+    },
+    {
+      "oldId": "action.concurrency.version",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.concurrency.version"
+    },
+    {
+      "oldId": "action.contract.incomplete",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.contract.incomplete"
+    },
+    {
+      "oldId": "action.destructive.authorization",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.authorization"
+    },
+    {
+      "oldId": "action.destructive.confirmation",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.confirmation"
+    },
+    {
+      "oldId": "action.destructive.explicit",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.explicit"
+    },
+    {
+      "oldId": "action.destructive.recovery",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.recovery"
+    },
+    {
+      "oldId": "action.destructive.retention",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.retention"
+    },
+    {
+      "oldId": "action.destructive.scope",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.destructive.scope"
+    },
+    {
+      "oldId": "action.device.safety",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.device.safety"
+    },
+    {
+      "oldId": "action.event.commit-order",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.event.commit-order"
+    },
+    {
+      "oldId": "action.event.duplicate",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.event.duplicate"
+    },
+    {
+      "oldId": "action.event.payload",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.event.payload"
+    },
+    {
+      "oldId": "action.idempotency.conditional",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.idempotency.conditional"
+    },
+    {
+      "oldId": "action.idempotency.create",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.idempotency.create"
+    },
+    {
+      "oldId": "action.idempotency.delete",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.idempotency.delete"
+    },
+    {
+      "oldId": "action.invoke.authorization",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.authorization"
+    },
+    {
+      "oldId": "action.invoke.effect-context",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.effect-context"
+    },
+    {
+      "oldId": "action.invoke.failure",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.failure"
+    },
+    {
+      "oldId": "action.invoke.input",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.input"
+    },
+    {
+      "oldId": "action.invoke.output",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.output"
+    },
+    {
+      "oldId": "action.invoke.precondition",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.precondition"
+    },
+    {
+      "oldId": "action.invoke.recursion",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.recursion"
+    },
+    {
+      "oldId": "action.invoke.resolved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.resolved"
+    },
+    {
+      "oldId": "action.invoke.scope",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.scope"
+    },
+    {
+      "oldId": "action.invoke.timeout-cancel",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.timeout-cancel"
+    },
+    {
+      "oldId": "action.invoke.transaction",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.invoke.transaction"
+    },
+    {
+      "oldId": "action.module.adml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.adml"
+    },
+    {
+      "oldId": "action.module.aiml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.aiml"
+    },
+    {
+      "oldId": "action.module.blml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.blml"
+    },
+    {
+      "oldId": "action.module.dbml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.dbml"
+    },
+    {
+      "oldId": "action.module.eiml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.eiml"
+    },
+    {
+      "oldId": "action.module.irml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.irml"
+    },
+    {
+      "oldId": "action.module.lrml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.lrml"
+    },
+    {
+      "oldId": "action.module.otml-ctml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.otml-ctml"
+    },
+    {
+      "oldId": "action.module.poml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.poml"
+    },
+    {
+      "oldId": "action.module.uxml-wdml",
+      "owner": "dbml",
+      "disposition": "retain-in-dbml",
+      "newId": "action.module.uxml-wdml"
+    },
+    {
+      "oldId": "action.record.create-input",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.create-input"
+    },
+    {
+      "oldId": "action.record.create-output",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.create-output"
+    },
+    {
+      "oldId": "action.record.create-readonly",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.create-readonly"
+    },
+    {
+      "oldId": "action.record.delete-policy",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.delete-policy"
+    },
+    {
+      "oldId": "action.record.exists-output",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.exists-output"
+    },
+    {
+      "oldId": "action.record.key",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.key"
+    },
+    {
+      "oldId": "action.record.not-found",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.not-found"
+    },
+    {
+      "oldId": "action.record.patch-format",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.patch-format"
+    },
+    {
+      "oldId": "action.record.postcondition",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.postcondition"
+    },
+    {
+      "oldId": "action.record.precondition",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.precondition"
+    },
+    {
+      "oldId": "action.record.replace-complete",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.replace-complete"
+    },
+    {
+      "oldId": "action.record.target",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.target"
+    },
+    {
+      "oldId": "action.record.update-fields",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.update-fields"
+    },
+    {
+      "oldId": "action.record.upsert-key",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.record.upsert-key"
+    },
+    {
+      "oldId": "action.retry.bound",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.retry.bound"
+    },
+    {
+      "oldId": "action.retry.classification",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.retry.classification"
+    },
+    {
+      "oldId": "action.retry.side-effects",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.retry.side-effects"
+    },
+    {
+      "oldId": "action.set.atomicity",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.atomicity"
+    },
+    {
+      "oldId": "action.set.bulk-upsert",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.bulk-upsert"
+    },
+    {
+      "oldId": "action.set.cascade",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.cascade"
+    },
+    {
+      "oldId": "action.set.concurrency",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.concurrency"
+    },
+    {
+      "oldId": "action.set.explicit-scope",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.explicit-scope"
+    },
+    {
+      "oldId": "action.set.input-shape",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.input-shape"
+    },
+    {
+      "oldId": "action.set.invariants",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.invariants"
+    },
+    {
+      "oldId": "action.set.limit",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.limit"
+    },
+    {
+      "oldId": "action.set.order",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.order"
+    },
+    {
+      "oldId": "action.set.output-shape",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.output-shape"
+    },
+    {
+      "oldId": "action.set.pagination",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.pagination"
+    },
+    {
+      "oldId": "action.set.partial-failure",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.partial-failure"
+    },
+    {
+      "oldId": "action.set.query-pure",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.query-pure"
+    },
+    {
+      "oldId": "action.set.selection-required",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.selection-required"
+    },
+    {
+      "oldId": "action.set.synchronize",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.synchronize"
+    },
+    {
+      "oldId": "action.set.unbounded-warning",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.set.unbounded-warning"
+    },
+    {
+      "oldId": "action.transaction.external",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transaction.external"
+    },
+    {
+      "oldId": "action.transaction.required",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transaction.required"
+    },
+    {
+      "oldId": "action.transform.classification",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.classification"
+    },
+    {
+      "oldId": "action.transform.determinism",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.determinism"
+    },
+    {
+      "oldId": "action.transform.field-lineage",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.field-lineage"
+    },
+    {
+      "oldId": "action.transform.identity",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.identity"
+    },
+    {
+      "oldId": "action.transform.loss",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.loss"
+    },
+    {
+      "oldId": "action.transform.null",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.null"
+    },
+    {
+      "oldId": "action.transform.reproducibility",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.reproducibility"
+    },
+    {
+      "oldId": "action.transform.required-coverage",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.required-coverage"
+    },
+    {
+      "oldId": "action.transform.reversibility",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.reversibility"
+    },
+    {
+      "oldId": "action.transform.side-effect",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.side-effect"
+    },
+    {
+      "oldId": "action.transform.source-target",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.source-target"
+    },
+    {
+      "oldId": "action.transform.time",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.time"
+    },
+    {
+      "oldId": "action.transform.totality",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.totality"
+    },
+    {
+      "oldId": "action.transform.type",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.type"
+    },
+    {
+      "oldId": "action.transform.unit",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.unit"
+    },
+    {
+      "oldId": "action.transform.version",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "action.transform.version"
+    },
+    {
+      "oldId": "adml.complexity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.contract.boolean",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.contract.satisfiable",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.emit",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.inference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.io.direction",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.io.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.io.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.iterator.bounds",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.mapping",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.metadata",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.name.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.step.dataflow",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.step.order",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.step.write-conflict",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "adml.termination",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.canary.rollback",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.canary.traffic",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.dataset.join-key",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.dataset.schema",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.datasource.field-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.datasource.frequency",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.drift.feature",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.drift.threshold",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.explainability.model",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.feature.keys",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "ai.feature.keys"
+    },
+    {
+      "oldId": "aiml.feature.target",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "ai.feature.target"
+    },
+    {
+      "oldId": "aiml.governance.evidence",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.metric.direction",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.model.hyperparameter",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.model.labels",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.model.schema",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.pipeline.leakage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.pipeline.order",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "ai.pipeline.order"
+    },
+    {
+      "oldId": "aiml.registry.model",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.retraining.trigger",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.sensor.features",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.sensor.window",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.serving.capacity",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "ai.serving.capacity"
+    },
+    {
+      "oldId": "aiml.serving.model",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "ai.serving.model"
+    },
+    {
+      "oldId": "aiml.transform.io",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "aiml.tuning.search",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.capability.service",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.channel.protocol",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.dependency.cycle",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.deployment.complete",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "architecture.deployment.complete"
+    },
+    {
+      "oldId": "arch.deployment.environment",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.interaction.interface",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.interface.service",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.layer.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.network.boundary",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.pipeline.stage-order",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.reference.kind",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "architecture.reference.kind"
+    },
+    {
+      "oldId": "arch.single-source",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "arch.topology.hosting",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.cpt-coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.cpt-sum",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.edge",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.inference-output",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.node-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.bayes.probability-range",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.constraint.resolved",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.decision.coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.decision.input-output",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.decision.overlap",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.dependency.cycle",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.expression.divide-zero",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.expression.power-domain",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.expression.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.function.arity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.function.parameter-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.function.recursion",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.function.return-type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.matrix.shape",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.optimizer.objective",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.optimizer.variable",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "blml.policy.rule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.arch-deployment",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.blml-condition.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.classification.propagation",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.dbml-poml.action",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.dbml-uxml.binding",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.eiml-contract",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.hopl-approval",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.lineage.end-to-end",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.lrml-source",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.otml-ctml.signal",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.sdml-enforcement",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.unit.propagation",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.uxml-wdml.ownership",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "cross.version.compatibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.alarm.otml",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.block.parameter",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.connection.endpoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.connection.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.connection.writer",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.control.algebraic-cycle",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.interlock.fail-safe",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.mode.state",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.name.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.program.initial",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.program.reachability",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.timer.range",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.transition.condition",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.transition.nondeterminism",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.transition.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.variable.direction",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "ctml.variable.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.action.entity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.action.handler",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.action.inputs-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.effect",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.event",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.idempotency",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.loop",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.schedule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.automation.trigger",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.entity.category-kind",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.entity.field-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.entity.member-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.event.entity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.event.kind-compatible",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.computed-default",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.computed-write",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.default-type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.enum",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.precision-scale",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.readonly-write",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.required-default",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.type-resolved",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.field.unique-index",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.integration.endpoint",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "integration.endpoint"
+    },
+    {
+      "oldId": "dbml.integration.protocol",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "integration.protocol"
+    },
+    {
+      "oldId": "dbml.lifecycle.entity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.lifecycle.final",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lifecycle.final"
+    },
+    {
+      "oldId": "dbml.lifecycle.single-initial",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lifecycle.single-initial"
+    },
+    {
+      "oldId": "dbml.lifecycle.state-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.mapping.compatible",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.mapping.coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.mapping.fields",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.mapping.types",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.metric.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.metric.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.permission.conflict",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.permission.name",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.permission.role",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.process.next",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.process.step-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.process.termination",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.cardinality",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.composition-acyclic",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.delete-policy",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.endpoints",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.inheritance-acyclic",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.junction",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.relation.owner",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.workflow.final",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "process.final"
+    },
+    {
+      "oldId": "dbml.workflow.nondeterminism",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.workflow.reachability",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "process.reachability"
+    },
+    {
+      "oldId": "dbml.workflow.single-initial",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "process.single-initial"
+    },
+    {
+      "oldId": "dbml.workflow.state-unique",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "process.state-unique"
+    },
+    {
+      "oldId": "dbml.workflow.transition-action",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "dbml.workflow.transition-endpoints",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "process.transition-endpoints"
+    },
+    {
+      "oldId": "dbml.workflow.transition-role",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.adapter.protocol-auth",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.context.binding",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.contract.rule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.contract.schema",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "integration.contract.schema"
+    },
+    {
+      "oldId": "eiml.contract.subject",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.endpoint.adapter",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.endpoint.method",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.endpoint.timeout",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.event-bridge",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.failure.coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.mapping.coverage",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "integration.mapping.coverage"
+    },
+    {
+      "oldId": "eiml.mapping.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.orchestration.workflow",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.retry.idempotency",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "integration.retry.idempotency"
+    },
+    {
+      "oldId": "eiml.retry.range",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.route.endpoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.route.loop",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.schema.field-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.schema.inheritance",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.transform.compatible",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.workflow.reachability",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "eiml.workflow.step",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.ai.allowed-disjoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.approval.quorum",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.escalation.cycle",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.escalation.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.model-status",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.organization.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.policy.owner",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.policy.rule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.procedure.evidence",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.procedure.order",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.procedure.role",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.role.authority-target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.role.conflict",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.separation-of-duties",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "hopl.version.rule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.agent.state",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.aggregate.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.binding.kind",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "analytics.binding.kind"
+    },
+    {
+      "oldId": "irml.binding.schema",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lineage.binding.schema"
+    },
+    {
+      "oldId": "irml.binding.unique",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lineage.binding.unique"
+    },
+    {
+      "oldId": "irml.cost.nonnegative",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lineage.cost.nonnegative"
+    },
+    {
+      "oldId": "irml.dataset.field-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.dataset.partition-index",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.dimension.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.execution.edge",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.execution.node",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.execution.schedule",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.lineage.complete",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lineage.complete"
+    },
+    {
+      "oldId": "irml.lineage.cycle",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "lineage.cycle"
+    },
+    {
+      "oldId": "irml.metric.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.model.io",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.operation.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.operation.output-schema",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.permission.resource",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.policy.scope",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.relation.fields",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "irml.transform.input",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "kcf.concept.abstract",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.abstract"
+    },
+    {
+      "oldId": "kcf.concept.cardinality",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.cardinality"
+    },
+    {
+      "oldId": "kcf.concept.identity",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.identity"
+    },
+    {
+      "oldId": "kcf.concept.kind-compatible",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.kind-compatible"
+    },
+    {
+      "oldId": "kcf.concept.layer",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.layer"
+    },
+    {
+      "oldId": "kcf.concept.primary-kind",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.primary-kind"
+    },
+    {
+      "oldId": "kcf.concept.provenance",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.provenance"
+    },
+    {
+      "oldId": "kcf.concept.reference",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.reference"
+    },
+    {
+      "oldId": "kcf.concept.trait",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.trait"
+    },
+    {
+      "oldId": "kcf.concept.version",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.concept.version"
+    },
+    {
+      "oldId": "kcf.emitter.unsupported",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.emitter.unsupported"
+    },
+    {
+      "oldId": "kcf.event.immutable",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.event.immutable"
+    },
+    {
+      "oldId": "kcf.extension.ownership",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.extension.ownership"
+    },
+    {
+      "oldId": "kcf.extension.point",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.extension.point"
+    },
+    {
+      "oldId": "kcf.extension.promotion",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.extension.promotion"
+    },
+    {
+      "oldId": "kcf.profile.import",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.profile.import"
+    },
+    {
+      "oldId": "kcf.profile.prohibited",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.profile.prohibited"
+    },
+    {
+      "oldId": "kcf.profile.relationship",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.profile.relationship"
+    },
+    {
+      "oldId": "kcf.profile.required",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.profile.required"
+    },
+    {
+      "oldId": "kcf.profile.term",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.profile.term"
+    },
+    {
+      "oldId": "kcf.relationship.association",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.association"
+    },
+    {
+      "oldId": "kcf.relationship.canonical",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.canonical"
+    },
+    {
+      "oldId": "kcf.relationship.cardinality",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.cardinality"
+    },
+    {
+      "oldId": "kcf.relationship.classification",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.classification"
+    },
+    {
+      "oldId": "kcf.relationship.condition",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.condition"
+    },
+    {
+      "oldId": "kcf.relationship.dependency",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.dependency"
+    },
+    {
+      "oldId": "kcf.relationship.endpoint",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.endpoint"
+    },
+    {
+      "oldId": "kcf.relationship.inverse",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.inverse"
+    },
+    {
+      "oldId": "kcf.relationship.ordering",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.ordering"
+    },
+    {
+      "oldId": "kcf.relationship.participation",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.participation"
+    },
+    {
+      "oldId": "kcf.relationship.polarity",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.polarity"
+    },
+    {
+      "oldId": "kcf.relationship.reification",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.reification"
+    },
+    {
+      "oldId": "kcf.relationship.root-kind",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.root-kind"
+    },
+    {
+      "oldId": "kcf.relationship.strength",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.strength"
+    },
+    {
+      "oldId": "kcf.relationship.symmetry",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.symmetry"
+    },
+    {
+      "oldId": "kcf.relationship.temporal",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.temporal"
+    },
+    {
+      "oldId": "kcf.relationship.transitivity",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.relationship.transitivity"
+    },
+    {
+      "oldId": "kcf.resource.capacity",
+      "owner": "kcf",
+      "disposition": "retain",
+      "newId": "kcf.resource.capacity"
+    },
+    {
+      "oldId": "lrml.aggregation.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.binding.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.dimension.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.filter.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.hierarchy.level",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.interaction.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.join.fanout",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.join.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.kpi.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.measure.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.metric.cycle",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.output.format",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.privacy",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.report.layer",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.source.resolved",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.transform.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.visual.compatibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "lrml.visual.field",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.alarm.threshold",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.boundary.gateway",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.command.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.connection.direction",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.connection.endpoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.control.owner",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.dataflow.graph",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.datapoint.range",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.datapoint.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.deployment.compatibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.device.identity-unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.device.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.execution.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.firmware.compatibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.health.state",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.historian.source",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.network.protocol",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.redundancy",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.safety.security",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.state.transition",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.system.member",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.telemetry.sampling",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.time.clock",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "otml.zone.member",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.boundary.attachment",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.call.recursion",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.call.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.deadlock-livelock",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.duration",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.end.exists",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.exception.coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.flow.endpoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.flow.incoming",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.flow.outgoing",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.flow.reachability",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.gateway.exclusive",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.gateway.parallel",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.gateway.structure",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.lane.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.message.boundary",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.node.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.queue.capacity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.reference.kind",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.start.exists",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.state.transition",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.task.authorization",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "poml.task.io",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.asset.classification",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.asset.owner",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.boundary.control",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.component.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.control.implementation",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.control.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.mapping.coverage",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.mapping.references",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.mapping.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.nist.mapping",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.policy.requirement",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.risk.level",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "security.risk.level"
+    },
+    {
+      "oldId": "sdml.risk.mitigation",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "security.risk.mitigation"
+    },
+    {
+      "oldId": "sdml.risk.references",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "security.risk.references"
+    },
+    {
+      "oldId": "sdml.threat.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "sdml.workflow.role",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "stack.governance.audit",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.governance.audit"
+    },
+    {
+      "oldId": "stack.governance.owner",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.governance.owner"
+    },
+    {
+      "oldId": "stack.graph.cycle-policy",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.cycle-policy"
+    },
+    {
+      "oldId": "stack.graph.dead-end",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.dead-end"
+    },
+    {
+      "oldId": "stack.graph.edge-unique",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.edge-unique"
+    },
+    {
+      "oldId": "stack.graph.endpoint-resolved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.endpoint-resolved"
+    },
+    {
+      "oldId": "stack.graph.no-self-edge",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.no-self-edge"
+    },
+    {
+      "oldId": "stack.graph.reachability",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.reachability"
+    },
+    {
+      "oldId": "stack.graph.unreachable",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.graph.unreachable"
+    },
+    {
+      "oldId": "stack.import.acyclic",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.import.acyclic"
+    },
+    {
+      "oldId": "stack.import.alias-unique",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.import.alias-unique"
+    },
+    {
+      "oldId": "stack.import.declared",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.import.declared"
+    },
+    {
+      "oldId": "stack.import.resolved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.import.resolved"
+    },
+    {
+      "oldId": "stack.module.known",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.module.known"
+    },
+    {
+      "oldId": "stack.name.kind-compatible",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.kind-compatible"
+    },
+    {
+      "oldId": "stack.name.qualified-resolved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.qualified-resolved"
+    },
+    {
+      "oldId": "stack.name.reserved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.reserved"
+    },
+    {
+      "oldId": "stack.name.shadowing",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.shadowing"
+    },
+    {
+      "oldId": "stack.name.unique",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.unique"
+    },
+    {
+      "oldId": "stack.name.unused",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.unused"
+    },
+    {
+      "oldId": "stack.name.visibility",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.name.visibility"
+    },
+    {
+      "oldId": "stack.observability.failure",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.observability.failure"
+    },
+    {
+      "oldId": "stack.order.contiguous",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.order.contiguous"
+    },
+    {
+      "oldId": "stack.order.unique",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.order.unique"
+    },
+    {
+      "oldId": "stack.ownership.boundary",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.ownership.boundary"
+    },
+    {
+      "oldId": "stack.ownership.single",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.ownership.single"
+    },
+    {
+      "oldId": "stack.reference.direction",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.reference.direction"
+    },
+    {
+      "oldId": "stack.reference.no-dangling",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.reference.no-dangling"
+    },
+    {
+      "oldId": "stack.reference.resolved",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.reference.resolved"
+    },
+    {
+      "oldId": "stack.security.authorization",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.security.authorization"
+    },
+    {
+      "oldId": "stack.security.boundary",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.security.boundary"
+    },
+    {
+      "oldId": "stack.security.least-privilege",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.security.least-privilege"
+    },
+    {
+      "oldId": "stack.security.secret",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.security.secret"
+    },
+    {
+      "oldId": "stack.start.valid",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.start.valid"
+    },
+    {
+      "oldId": "stack.time.duration",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.time.duration"
+    },
+    {
+      "oldId": "stack.time.schedule-valid",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.time.schedule-valid"
+    },
+    {
+      "oldId": "stack.time.window-compatible",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.time.window-compatible"
+    },
+    {
+      "oldId": "stack.type.alias-acyclic",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.alias-acyclic"
+    },
+    {
+      "oldId": "stack.type.assignment",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.assignment"
+    },
+    {
+      "oldId": "stack.type.collection",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.collection"
+    },
+    {
+      "oldId": "stack.type.condition-boolean",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.condition-boolean"
+    },
+    {
+      "oldId": "stack.type.enum-member",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.enum-member"
+    },
+    {
+      "oldId": "stack.type.known",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.known"
+    },
+    {
+      "oldId": "stack.type.nullability",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.nullability"
+    },
+    {
+      "oldId": "stack.type.operator",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.type.operator"
+    },
+    {
+      "oldId": "stack.value.default-valid",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.value.default-valid"
+    },
+    {
+      "oldId": "stack.value.finite",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.value.finite"
+    },
+    {
+      "oldId": "stack.value.range",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.value.range"
+    },
+    {
+      "oldId": "stack.value.unit-compatible",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.value.unit-compatible"
+    },
+    {
+      "oldId": "stack.version.compatible",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.version.compatible"
+    },
+    {
+      "oldId": "stack.version.deprecated",
+      "owner": "semantic-core",
+      "disposition": "move-to-core",
+      "newId": "stack.version.deprecated"
+    },
+    {
+      "oldId": "uxml.accessibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.action.invoke",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "experience.action.invoke"
+    },
+    {
+      "oldId": "uxml.app.reference",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "experience.app.reference"
+    },
+    {
+      "oldId": "uxml.binding.required",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.binding.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.binding.type",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.channel.entry",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.component.prop",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.component.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.component.slot",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.flow.entry",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "experience.flow.entry"
+    },
+    {
+      "oldId": "uxml.flow.nondeterminism",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.flow.reachability",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "experience.flow.reachability"
+    },
+    {
+      "oldId": "uxml.flow.transition",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "experience.flow.transition"
+    },
+    {
+      "oldId": "uxml.guard.redirect",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.layout.slot",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.locale.unique",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.logic.context",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.logic.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.region.slot",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.security.visibility",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.theme.token",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "uxml.view.entity",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.accessibility.contrast",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.accessibility.focus",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.component.variant",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.constraint.conflict",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.constraint.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.design-system.unique",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "design.design-system.unique"
+    },
+    {
+      "oldId": "wdml.fluid.range",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.form.binding",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.form.required",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.interaction.action",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.layout.region",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.mapping.source",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.navigation.target",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.page.binding",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "design.page.binding"
+    },
+    {
+      "oldId": "wdml.responsive.breakpoint",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.responsive.completeness",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.scale.order",
+      "owner": "kcf",
+      "disposition": "migrate",
+      "newId": "design.scale.order"
+    },
+    {
+      "oldId": "wdml.site.design-system",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.table.column",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.token.reference",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    },
+    {
+      "oldId": "wdml.token.value",
+      "owner": "dbml",
+      "disposition": "exclude-from-kcf",
+      "newId": null
+    }
+  ]
+}

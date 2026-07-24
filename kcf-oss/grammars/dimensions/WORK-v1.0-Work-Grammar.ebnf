@@ -1,0 +1,48 @@
+(* KCF Work Dimension Grammar v1.0. *)
+work-model = "work", "model", identifier, "{", work-def,
+             { work-def | capability-def | process-def }, "}" ;
+work-def = "work", identifier, "{", "kind", ":", work-kind, ";",
+           { "subject", ":", semantic-ref, ";" },
+           { "performer", ":", semantic-ref, ";" },
+           { "input", ":", semantic-ref, ";" },
+           { "output", ":", semantic-ref, ";" },
+           { "outcome", ":", semantic-ref, ";" },
+           { precondition | postcondition },
+           { "completion", ":", condition, ";" },
+           { "failure", ":", condition, ";" },
+           { "requires-capability", ":", semantic-ref, ";" },
+           { "requires-skill", ":", semantic-ref, ";" },
+           { "requires-resource", ":", semantic-ref, ";" },
+           { "requires-tool", ":", semantic-ref, ";" },
+           { "governed-by", ":", semantic-ref, ";" },
+           { "triggered-by", ":", semantic-ref, ";" },
+           { "emit", ":", semantic-ref, ";" },
+           { "compensate-with", ":", semantic-ref, ";" },
+           { "temporal", ":", semantic-ref, ";" }, "}" ;
+capability-def = "capability", identifier, "{",
+                 { "outcome", ":", semantic-ref, ";" },
+                 { "requires-skill", ":", semantic-ref, ";" },
+                 { "implemented-by", ":", semantic-ref, ";" }, "}" ;
+process-def = "process", identifier, "{", process-node,
+              { process-node | process-flow | boundary-event | lane-def }, "}" ;
+process-node = start-event | end-event | step-def | gateway-def
+             | call-activity | intermediate-event ;
+start-event = "start", identifier, [ "triggered-by", semantic-ref ], ";" ;
+end-event = "end", identifier, [ "outcome", semantic-ref ], ";" ;
+intermediate-event = "event", identifier, "uses", semantic-ref, ";" ;
+step-def = "step", identifier, ":", semantic-ref,
+           [ "in", identifier ], ";" ;
+gateway-def = "gateway", identifier, ":", gateway-kind, ";" ;
+call-activity = "call", identifier, ":", semantic-ref, ";" ;
+process-flow = "flow", identifier, "->", identifier,
+               [ "when", condition ], [ "priority", integer ], ";" ;
+boundary-event = "boundary", identifier, "on", identifier, "uses",
+                 semantic-ref, ";" ;
+lane-def = "lane", identifier, "{", "performer", ":", semantic-ref, ";",
+           { "contains", ":", identifier, ";" }, "}" ;
+gateway-kind = "exclusive" | "inclusive" | "parallel" | "event-based" ;
+work-kind = "ACTION" | "DECISION" | "TASK" | "ACTIVITY" | "PROCESS" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+condition = ? KCF condition ? ; precondition = ? KCF precondition ? ;
+postcondition = ? KCF postcondition ? ; integer = ? KCF integer ? ;

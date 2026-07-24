@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/role-report-v1.schema.json",
+  "title": "KCF Role Resolution Report v1",
+  "description": "Checks a model's concept traits against the role vocabulary declared by the loaded pattern libraries - the boundary between organizational knowledge (instance) and business patterns (library).",
+  "type": "object",
+  "required": ["roleReportVersion", "model", "declaredRoles", "usage", "unknownTraits"],
+  "properties": {
+    "roleReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "declaredRoles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trait", "patterns"],
+        "properties": {
+          "trait": {"type": "string"},
+          "patterns": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "usage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trait", "concepts", "declaredBy"],
+        "properties": {
+          "trait": {"type": "string"},
+          "concepts": {"type": "array", "items": {"type": "string"}},
+          "declaredBy": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "unknownTraits": {"type": "array", "items": {"type": "string"}, "description": "Traits used by the instance that no loaded pattern library declares."}
+  },
+  "additionalProperties": false
+}

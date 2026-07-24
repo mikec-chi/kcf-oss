@@ -1,0 +1,8 @@
+{
+  "sourceTraceVersion": "1.0.0",
+  "documentId": "shop-process-notes",
+  "model": "ShopFromProse",
+  "links": [
+    {"segmentId": "s1", "constructs": ["shop.Customer", "customer-places-order"]}
+  ]
+}

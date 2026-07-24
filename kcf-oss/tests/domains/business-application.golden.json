@@ -1,0 +1,352 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CustomerService",
+  "module": "KCF",
+  "namespace": "customer",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Customer",
+      "qualifiedName": "customer.Customer",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "ServiceAgent",
+      "qualifiedName": "customer.ServiceAgent",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "UpdateCustomerWork",
+      "qualifiedName": "customer.UpdateCustomerWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "CustomerUpdated",
+      "qualifiedName": "customer.CustomerUpdated",
+      "kind": "EVENT",
+      "references": []
+    }
+  ],
+  "relationships": [
+    {
+      "id": "agent-performs-update",
+      "rootKind": "PARTICIPATION",
+      "source": "customer.ServiceAgent",
+      "target": "customer.UpdateCustomerWork",
+      "strength": 1.0,
+      "definition": "agent-performs-update"
+    },
+    {
+      "id": "update-changes-customer",
+      "rootKind": "TRANSFORMATION",
+      "source": "customer.UpdateCustomerWork",
+      "target": "customer.Customer",
+      "strength": 1.0,
+      "definition": "update-changes-customer"
+    }
+  ],
+  "lifecycles": [
+    {
+      "id": "CustomerLifecycle",
+      "subject": "customer.Customer",
+      "states": [
+        "Active",
+        "Suspended",
+        "Archived"
+      ],
+      "initial": "Active",
+      "terminal": [
+        "Archived"
+      ],
+      "transitions": [
+        {
+          "from": "Active",
+          "to": "Suspended"
+        },
+        {
+          "from": "Suspended",
+          "to": "Active"
+        },
+        {
+          "from": "Active",
+          "to": "Archived"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "UpdateCustomer",
+      "effect": "command",
+      "mutations": [
+        "name"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "customer.Customer",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "authorization": "customer.CustomerUpdatePolicy"
+    },
+    {
+      "id": "CreateCustomer",
+      "effect": "command",
+      "mutations": [],
+      "operation": "create",
+      "scope": "record",
+      "target": "customer.Customer",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "customer.CustomerUpdatePolicy"
+    },
+    {
+      "id": "GetCustomer",
+      "effect": "query",
+      "mutations": [],
+      "operation": "read",
+      "scope": "record",
+      "target": "customer.Customer",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    },
+    {
+      "id": "DeleteCustomer",
+      "effect": "command",
+      "mutations": [],
+      "operation": "delete",
+      "scope": "record",
+      "target": "customer.Customer",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "zero",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "customer.CustomerUpdatePolicy"
+    },
+    {
+      "id": "BulkUpdateCustomers",
+      "effect": "command",
+      "mutations": [],
+      "operation": "bulk-update",
+      "scope": "set",
+      "target": "customer.Customer",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "conditional",
+      "atomicity": "best-effort",
+      "concurrency": "optimistic",
+      "authorization": "customer.CustomerUpdatePolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [
+    {
+      "id": "CustomerUpdated",
+      "mutable": false
+    }
+  ],
+  "resources": [],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [
+    {
+      "id": "dbml",
+      "supports": [
+        "Identity",
+        "Persistence",
+        "Authorization",
+        "Audit",
+        "Transaction",
+        "UserExperience"
+      ],
+      "unsupportedPolicy": "error"
+    },
+    {
+      "id": "vertical-slice",
+      "supports": [
+        "Identity",
+        "Persistence",
+        "Authorization",
+        "Audit",
+        "Transaction",
+        "UserExperience"
+      ],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "customer.Customer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 4,
+      "column": 3,
+      "endLine": 8,
+      "endColumn": 4
+    },
+    "customer.ServiceAgent": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 10,
+      "endColumn": 25
+    },
+    "customer.UpdateCustomerWork": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 30
+    },
+    "customer.CustomerUpdated": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 12,
+      "column": 3,
+      "endLine": 12,
+      "endColumn": 35
+    },
+    "agent-performs-update": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 14,
+      "column": 3,
+      "endLine": 14,
+      "endColumn": 101
+    },
+    "update-changes-customer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 15,
+      "endColumn": 100
+    },
+    "CustomerLifecycle": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 17,
+      "column": 3,
+      "endLine": 24,
+      "endColumn": 4
+    },
+    "UpdateCustomer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 26,
+      "column": 3,
+      "endLine": 38,
+      "endColumn": 4
+    },
+    "CreateCustomer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 40,
+      "column": 3,
+      "endLine": 49,
+      "endColumn": 4
+    },
+    "GetCustomer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 51,
+      "column": 3,
+      "endLine": 58,
+      "endColumn": 4
+    },
+    "DeleteCustomer": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 60,
+      "column": 3,
+      "endLine": 70,
+      "endColumn": 4
+    },
+    "BulkUpdateCustomers": {
+      "source": "tests/domains/business-application.kcf",
+      "line": 72,
+      "column": 3,
+      "endLine": 83,
+      "endColumn": 4
+    }
+  }
+}

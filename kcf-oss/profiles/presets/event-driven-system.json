@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/profile-preset-v1.schema.json",
+  "version": "1.0.0",
+  "id": "event-driven-system",
+  "description": "Event-oriented application with process, integration, lineage, security, and runtime semantics.",
+  "requestedModules": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "INFORMATION", "RESOURCE", "TEMPORAL", "ACTION", "INTEGRATION", "SECURITY", "LINEAGE", "ARCHITECTURE"],
+  "requiredRuntimeCapabilities": ["Messaging", "Correlation", "Idempotency", "EventStore", "Authorization", "Observability"],
+  "defaultEmitters": ["dbml", "vertical-slice"],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": []
+}

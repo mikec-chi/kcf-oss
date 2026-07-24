@@ -1,0 +1,101 @@
+kcf model OrganizationalKnowledge profile organizational-knowledge {
+  namespace acme;
+
+  entity Discount {
+    identity discountId: UUID;
+    mutability "read-only";
+  }
+
+  actor LegalOfficer { }
+  actor SalesAnalyst { }
+  work ApproveDiscountWork { }
+
+  organization Acme {
+    kind ORGANIZATION;
+    member SalesAnalyst;
+    role LegalOfficer;
+    authority-domain KnowledgeAccessPolicy;
+    owns SalesHandbook;
+    accountable-for DiscountPolicy;
+  }
+
+  information SalesHandbook {
+    kind DOCUMENT;
+    subject Discount;
+    author LegalOfficer;
+    source Discount;
+    audience SalesAnalyst;
+    representation text;
+    confidentiality Internal;
+    source-document "sales-handbook.pdf";
+    source-location "page 14";
+    extraction-method llm;
+    extraction-model "knowledge-extractor-v1";
+    confidence 0.96;
+    recorded-at "2026-07-22T12:00:00Z";
+    reviewed-by LegalOfficer;
+    access-policy KnowledgeAccessPolicy;
+  }
+
+  rule KnowledgeAccessPolicy {
+    kind PERMISSION;
+    condition "requester is authorized";
+    effect ApproveDiscountWork;
+    applies-to SalesHandbook;
+    authority LegalOfficer;
+    evidence SalesHandbook;
+    mode PERMISSION;
+    conflict deny-overrides;
+  }
+
+  rule DiscountPolicy {
+    kind CONSTRAINT;
+    condition "discount percentage is at most 20";
+    effect ApproveDiscountWork;
+    applies-to Discount;
+    authority LegalOfficer;
+    evidence SalesHandbook;
+  }
+
+  policy SalesPolicy {
+    authority LegalOfficer;
+    rule DiscountPolicy;
+    default-conflict deny-overrides;
+  }
+
+  reasoning DiscountRationale {
+    kind FACT;
+    proposition "discounts over the standard threshold require approval";
+    method DEDUCTIVE;
+    evidence SalesHandbook;
+    confidence 0.93;
+  }
+
+  assertion DiscountApprovalClaim {
+    subject Discount;
+    predicate "requiresApproval";
+    object-ref LegalOfficer;
+    status asserted;
+    evidence SalesHandbook;
+    recorded-at "2026-07-22T12:00:00Z";
+    reviewed-by LegalOfficer;
+    classification Internal;
+    access-policy KnowledgeAccessPolicy;
+  }
+
+  identity-resolution SalesAnalystIdentity {
+    canonical SalesAnalyst;
+    alias "sales analyst";
+    external-id "HR-42";
+    status active;
+  }
+
+  knowledge-query CurrentDiscountPolicies {
+    select RULE;
+    where "appliesTo == Discount";
+    world open;
+    negation explicit;
+    inference declared;
+    temporal current;
+  }
+}

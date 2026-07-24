@@ -1,0 +1,84 @@
+kcf model CustomerService profile business-application {
+  namespace customer;
+
+  entity Customer {
+    identity customerId: UUID;
+    required name: String;
+    optional email: String;
+  }
+
+  actor ServiceAgent { }
+  work UpdateCustomerWork { }
+  event CustomerUpdated immutable;
+
+  relationship agent-performs-update: PARTICIPATION ServiceAgent -> UpdateCustomerWork strength 1.0;
+  relationship update-changes-customer: TRANSFORMATION UpdateCustomerWork -> Customer strength 1.0;
+
+  lifecycle CustomerLifecycle for Customer {
+    initial Active;
+    state Suspended;
+    terminal Archived;
+    transition Active -> Suspended;
+    transition Suspended -> Active;
+    transition Active -> Archived;
+  }
+
+  command UpdateCustomer {
+    operation update;
+    scope record;
+    target Customer;
+    selection identity;
+    input one;
+    output one;
+    mutate name;
+    idempotency conditional;
+    atomicity atomic;
+    concurrency optimistic;
+    authorization customer.CustomerUpdatePolicy;
+  }
+
+  command CreateCustomer {
+    operation create;
+    scope record;
+    target Customer;
+    input one;
+    output one;
+    idempotency conditional;
+    atomicity atomic;
+    authorization customer.CustomerUpdatePolicy;
+  }
+
+  query GetCustomer {
+    operation read;
+    scope record;
+    target Customer;
+    selection identity;
+    input one;
+    output one;
+  }
+
+  command DeleteCustomer {
+    operation delete;
+    scope record;
+    target Customer;
+    selection identity;
+    input one;
+    output zero;
+    idempotency conditional;
+    atomicity atomic;
+    authorization customer.CustomerUpdatePolicy;
+  }
+
+  command BulkUpdateCustomers {
+    operation bulk-update;
+    scope set;
+    target Customer;
+    selection predicate;
+    input many;
+    output many;
+    idempotency conditional;
+    atomicity best-effort;
+    concurrency optimistic;
+    authorization customer.CustomerUpdatePolicy;
+  }
+}

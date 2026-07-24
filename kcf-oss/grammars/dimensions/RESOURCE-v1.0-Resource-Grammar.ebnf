@@ -1,0 +1,25 @@
+(* KCF Resource Dimension Grammar v1.0. *)
+resource-model = "resource", "model", identifier, "{", resource-def,
+                 { resource-def | allocation-def }, "}" ;
+resource-def = "resource", identifier, "{", "kind", ":", resource-kind, ";",
+               [ "capacity", ":", number, semantic-ref, ";" ],
+               [ "availability", ":", condition, ";" ],
+               [ "location", ":", semantic-ref, ";" ],
+               [ "owner", ":", semantic-ref, ";" ],
+               [ "allocation-policy", ":", semantic-ref, ";" ],
+               [ "reservation-policy", ":", semantic-ref, ";" ],
+               [ "consumption", ":", consumption-mode, ";" ],
+               [ "replenishment", ":", semantic-ref, ";" ],
+               [ "cost", ":", semantic-ref, ";" ], "}" ;
+allocation-def = "allocation", identifier, "{", "resource", ":",
+                 semantic-ref, ";", "consumer", ":", semantic-ref, ";",
+                 "quantity", ":", number, ";",
+                 [ "reservation", ":", semantic-ref, ";" ],
+                 [ temporal-validity ], "}" ;
+resource-kind = "CONSUMABLE" | "RENEWABLE" | "CAPACITY" | "TOOL"
+              | "FACILITY" | "COMPUTE" | "FINANCIAL" ;
+consumption-mode = "consume" | "reserve" | "borrow" | "share" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+number = ? KCF number ? ; condition = ? KCF condition ? ;
+temporal-validity = ? KCF temporal-validity ? ;

@@ -1,0 +1,18 @@
+{
+  "documentProfileVersion": "1.0.0",
+  "documentKind": "flowchart",
+  "title": "Flowchart / process diagram",
+  "description": "A process expressed as steps connected by arrows. Each node is an activity or decision; each edge is a sequencing (ordering) relationship whose label may carry a branch condition.",
+  "segmentKinds": ["node", "decision", "edge"],
+  "targetDimensions": ["WORK", "RELATIONSHIP"],
+  "mapping": [
+    {"segmentKind": "node", "producesKind": "WORK", "notes": "an activity/step becomes a WORK concept"},
+    {"segmentKind": "decision", "producesKind": "WORK", "notes": "a decision gateway becomes a WORK concept; branch conditions live on outgoing edges"},
+    {"segmentKind": "edge", "producesKind": "RELATIONSHIP", "notes": "an arrow becomes an ORDERING relationship; capture every arrow, that is where sequencing and conditions live"}
+  ],
+  "guidance": [
+    "Segment every node AND every edge - arrows carry the sequencing and are the easiest to drop.",
+    "Model nodes as identity-bearing WORK concepts and edges as identity-bearing ORDERING relationships so each is independently traceable.",
+    "Swimlanes assign an actor to the steps in the lane; capture the actor and its participation."
+  ]
+}

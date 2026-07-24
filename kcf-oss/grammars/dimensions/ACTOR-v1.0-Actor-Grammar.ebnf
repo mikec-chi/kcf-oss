@@ -1,0 +1,30 @@
+(* KCF Actor Dimension Grammar v1.0. *)
+actor-model = "actor", "model", identifier, "{", actor-def,
+              { actor-def | skill-def | authority-def }, "}" ;
+actor-def = "actor", identifier, "{", "kind", ":", actor-kind, ";",
+            { "role", ":", semantic-ref, ";" },
+            { "capability", ":", semantic-ref, ";" },
+            { "skill", ":", semantic-ref, ";" },
+            { "authority", ":", semantic-ref, ";" },
+            { "responsible-for", ":", semantic-ref, ";" },
+            { "accountable-for", ":", semantic-ref, ";" },
+            { "member-of", ":", semantic-ref, ";" },
+            [ "availability", ":", condition, ";" ],
+            [ "communication", ":", semantic-ref, ";" ], "}" ;
+skill-def = "skill", identifier, "{", [ "level", ":", identifier, ";" ],
+            { "requires", ":", semantic-ref, ";" },
+            { constraint-use }, "}" ;
+authority-def = "authority", identifier, "{",
+                "mode", ":", authority-mode, ";",
+                "subject", ":", semantic-ref, ";",
+                "target", ":", semantic-ref, ";",
+                { "when", ":", condition, ";" },
+                [ temporal-validity ], "}" ;
+actor-kind = "PERSON" | "ROLE" | "TEAM" | "ORGANIZATION" | "SYSTEM"
+           | "AI_AGENT" | "MACHINE" | "EXTERNAL_PARTY" ;
+authority-mode = "may-perform" | "may-approve" | "may-delegate"
+               | "may-escalate" | "must-not-perform" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+condition = ? KCF condition ? ; constraint-use = ? KCF constraint-use ? ;
+temporal-validity = ? KCF temporal-validity ? ;

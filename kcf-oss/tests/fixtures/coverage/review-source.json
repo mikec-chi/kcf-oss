@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ReviewSource",
+  "module": "KCF",
+  "namespace": "fin",
+  "concepts": [
+    {"id": "Invoice", "qualifiedName": "fin.Invoice", "kind": "ENTITY", "traits": ["payment"], "metadata": {"extractionMethod": "llm", "extractionModel": "domain-llm-v1", "confidence": 0.92, "seededFrom": "finance.payment"}, "attributes": [
+      {"name": "invoiceId", "type": "UUID", "identity": true}
+    ]},
+    {"id": "Ledger", "qualifiedName": "fin.Ledger", "kind": "ENTITY", "attributes": [
+      {"name": "ledgerId", "type": "UUID", "identity": true}
+    ]}
+  ],
+  "rules": [
+    {"id": "MatchRule", "qualifiedName": "fin.MatchRule", "ruleKind": "OBLIGATION", "condition": "payment requires a three-way match", "effects": ["fin.Invoice"], "extractionMethod": "llm", "extractionModel": "domain-llm-v1", "confidence": 0.95, "seededFrom": "finance.three-way-match"}
+  ],
+  "assertions": [
+    {"id": "ThresholdClaim", "qualifiedName": "fin.ThresholdClaim", "subject": "fin.Invoice", "predicate": "requiresApproval", "object": true, "status": "inferred", "extractionMethod": "llm", "extractionModel": "domain-llm-v1", "confidence": 0.55, "seededFrom": "procurement.approval"},
+    {"id": "HumanFact", "qualifiedName": "fin.HumanFact", "subject": "fin.Invoice", "predicate": "isTaxable", "object": true, "status": "asserted", "reviewedBy": "sme:jane", "recordedAt": "2026-07-01T00:00:00Z"}
+  ]
+}

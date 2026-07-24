@@ -1,0 +1,24 @@
+(* KCF operational lineage, binding and cost profile. *)
+lineage-model = "lineage", "model", identifier, "{", lineage-element,
+                { lineage-element }, "}" ;
+lineage-element = lineage-edge | field-lineage | semantic-binding | cost-model ;
+lineage-edge = "lineage", identifier, "{", "source", ":", semantic-ref, ";",
+               "target", ":", semantic-ref, ";",
+               [ "transformation", ":", semantic-ref, ";" ],
+               [ "execution", ":", semantic-ref, ";" ],
+               [ provenance ], "}" ;
+field-lineage = "field-lineage", semantic-ref, "->", semantic-ref,
+                [ "using", semantic-ref ], ";" ;
+semantic-binding = "binding", identifier, "{", "source", ":", semantic-ref,
+                   ";", "target", ":", semantic-ref, ";",
+                   "kind", ":", binding-kind, ";",
+                   [ "condition", ":", condition, ";" ], "}" ;
+cost-model = "cost", identifier, "{", "subject", ":", semantic-ref, ";",
+             "amount", ":", number, ";", "unit", ":", semantic-ref, ";",
+             [ "period", ":", semantic-ref, ";" ],
+             [ "allocation", ":", semantic-ref, ";" ], "}" ;
+binding-kind = "data" | "field" | "metric" | "filter" | "action"
+             | "visual" | "runtime" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+provenance = ? KCF provenance ? ; condition = ? KCF condition ? ;
+number = ? KCF number ? ;

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/review-queue-v1.schema.json",
+  "title": "KCF SME Review Queue v1",
+  "description": "Tiers synthetic (LLM-proposed) knowledge for human review so the SME decides on uncertainty, not textbook structure: low-confidence items are reviewed individually, high-confidence items can be bulk-confirmed. Nothing is auto-confirmed.",
+  "type": "object",
+  "required": ["reviewQueueVersion", "model", "counts", "decisions"],
+  "properties": {
+    "reviewQueueVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "highConfidenceThreshold": {"type": "number"},
+    "counts": {
+      "type": "object",
+      "required": ["review", "bulk", "total"],
+      "properties": {"review": {"type": "integer"}, "bulk": {"type": "integer"}, "total": {"type": "integer"}},
+      "additionalProperties": false
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "collection", "tier", "confidence", "summary"],
+        "properties": {
+          "id": {"type": "string"},
+          "collection": {"type": "string"},
+          "tier": {"enum": ["review", "bulk"]},
+          "confidence": {"type": ["number", "null"]},
+          "summary": {"type": "string"},
+          "seededFrom": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

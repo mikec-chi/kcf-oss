@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "rules"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "version": {"type": "string"},
+    "sources": {"type": "array", "items": {"type": "string"}},
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "section", "severity", "requirement"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"},
+          "source": {"const": "semantic-core"},
+          "section": {"type": "string"},
+          "severity": {"enum": ["error", "warning", "info"]},
+          "requirement": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

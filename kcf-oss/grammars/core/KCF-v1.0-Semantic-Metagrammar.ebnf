@@ -1,0 +1,171 @@
+(* KCF Semantic Metagrammar v1.0 - ISO/IEC 14977 EBNF. *)
+kcf-model = "kcf", "model", identifier, "{", { import-def },
+                semantic-element, { semantic-element }, "}" ;
+semantic-element = dimension-def | concept-kind-def | construct-def
+                 | relationship-def | trait-def | constraint-def
+                 | enumeration-def | runtime-capability-def
+                 | extension-point-def | profile-def | concept-assertion
+                 | relationship-assertion | concept-instance
+                 | relationship-instance | capability-binding ;
+
+import-def = "import", module-ref, [ "as", identifier ], ";" ;
+module-ref = qualified-name, [ "@", version-range ] ;
+dimension-def = "dimension", identifier, "{", "kind", ":", concept-kind, ";",
+                { "construct", ":", semantic-ref, ";" },
+                { "depends", ":", module-ref, ";" },
+                { "permits", ":", semantic-ref, ";" },
+                { semantic-clause }, [ extension-policy ], "}" ;
+concept-kind-def = "concept-kind", concept-kind, "{", [ metadata ],
+                   [ "parent", ":", concept-kind, ";" ],
+                   { "capability", ":", semantic-ref, ";" }, "}" ;
+construct-def = [ "abstract" ], "construct", identifier, "in", semantic-ref,
+                "{", [ "instantiable", ":", boolean, ";" ], [ metadata ],
+                { attribute-def | relationship-use | constraint-use
+                | semantic-clause }, "}" ;
+attribute-def = "attribute", identifier, ":", type-ref,
+                [ cardinality ], [ "default", ":", scalar, ";" ],
+                { constraint-use } ;
+trait-def = "trait", identifier, "{", [ metadata ],
+            { attribute-def | constraint-use | semantic-clause }, "}" ;
+constraint-def = "constraint", identifier, "{", "condition", ":", condition,
+                 ";", [ "severity", ":", severity, ";" ],
+                 [ "message", ":", string, ";" ], "}" ;
+enumeration-def = "enum", identifier, "{", identifier,
+                  { ",", identifier }, "}" ;
+runtime-capability-def = "runtime-capability", identifier, "{", [ metadata ],
+                         { "input-kind", ":", concept-kind, ";" },
+                         { "output-kind", ":", concept-kind, ";" },
+                         { precondition | postcondition | failure-mode },
+                         "side-effects", ":", side-effect-policy, ";",
+                         "idempotency", ":", idempotency, ";",
+                         { "authorization", ":", semantic-ref, ";" },
+                         { "evidence", ":", semantic-ref, ";" }, "}" ;
+extension-point-def = "extension-point", identifier, "{",
+                      "owner", ":", module-ref, ";",
+                      { "permits", ":", identifier, ";" },
+                      [ extension-policy ], "}" ;
+extension-policy = "extension-policy", ":",
+                   ( "closed" | "compatible" | "governed" | "open" ), ";" ;
+
+profile-def = "profile", identifier, "{", [ metadata ],
+              { "import", ":", module-ref, ";" },
+              { "require", ":", semantic-ref, ";" },
+              { "prohibit", ":", semantic-ref, ";" },
+              { specialization }, { lexical-binding },
+              { "runtime-binding", ":", semantic-ref, ";" },
+              { "policy-default", ":", semantic-ref, ";" }, "}" ;
+specialization = "specialize", semantic-ref, "from", semantic-ref, ";" ;
+lexical-binding = "term", string, "maps-to", semantic-ref,
+                  [ "locale", ":", string, ";" ],
+                  [ "confidence", ":", confidence, ";" ], ";" ;
+
+concept-assertion = "concept", qualified-name, "kind", concept-kind, "{",
+                    [ "specializes", ":", semantic-ref, ";" ],
+                    { "trait", ":", semantic-ref, ";" },
+                    { attribute-value | relationship-use | constraint-use },
+                    [ provenance ], [ version-info ], "}" ;
+relationship-assertion = "assert", semantic-ref, "(", semantic-ref, ",",
+                         semantic-ref, ")", "{", { qualifier },
+                         { "when", ":", condition, ";" },
+                         [ temporal-validity ], [ provenance ],
+                         [ version-info ], "}" ;
+concept-instance = "instance", qualified-name, "of", semantic-ref, "{",
+                   [ "status", ":", identifier, ";" ],
+                   { attribute-value }, { "evidence", ":", semantic-ref, ";" },
+                   [ confidence-value ], [ provenance ], "}" ;
+relationship-instance = "relationship-instance", qualified-name, "{",
+                        "assertion", ":", semantic-ref, ";",
+                        "source-instance", ":", semantic-ref, ";",
+                        "target-instance", ":", semantic-ref, ";",
+                        "status", ":", identifier, ";",
+                        [ temporal-validity ],
+                        [ "conditions-satisfied", ":", boolean, ";" ],
+                        { "evidence", ":", semantic-ref, ";" },
+                        [ confidence-value ],
+                        [ "created-by", ":", semantic-ref, ";" ],
+                        [ "created-at", ":", temporal-value, ";" ], "}" ;
+capability-binding = "bind", semantic-ref, "to", implementation-ref, "{",
+                     [ "environment", ":", string, ";" ],
+                     [ "supports", ":", version-range, ";" ],
+                     { qualifier }, "}" ;
+
+relationship-def = ? RELATIONSHIP relationship-def ? ;
+relationship-use = "relate", semantic-ref, "to", semantic-ref,
+                   { qualifier }, ";" ;
+constraint-use = "constrained-by", semantic-ref, ";" ;
+attribute-value = identifier, ":", value, ";" ;
+semantic-clause = ( "validate" | "reason" | "execute" ), ":",
+                  semantic-ref, ";" ;
+precondition = "precondition", ":", condition, ";" ;
+postcondition = "postcondition", ":", condition, ";" ;
+failure-mode = "failure", ":", semantic-ref, ";" ;
+qualifier = identifier, ":", value, ";" ;
+metadata = "metadata", "{", [ "label", ":", string, ";" ],
+           [ "description", ":", string, ";" ], { annotation }, "}" ;
+annotation = "@", qualified-name, [ "(", [ value, { ",", value } ], ")" ], ";" ;
+provenance = "provenance", "{", [ "source", ":", semantic-ref, ";" ],
+             [ "contributor", ":", semantic-ref, ";" ],
+             { "evidence", ":", semantic-ref, ";" },
+             [ "approved-by", ":", semantic-ref, ";" ],
+             [ "created-at", ":", temporal-value, ";" ], "}" ;
+version-info = "version", semantic-version,
+               [ "supersedes", semantic-ref ], ";" ;
+temporal-validity = "valid", "from", temporal-value,
+                    [ "to", temporal-value ], ";" ;
+
+condition = expression ;
+expression = implication ;
+implication = disjunction, [ "implies", implication ] ;
+disjunction = conjunction, { "or", conjunction } ;
+conjunction = negation, { "and", negation } ;
+negation = [ "not" ], comparison ;
+comparison = additive, [ comparator, additive ] ;
+additive = multiplicative, { ( "+" | "-" ), multiplicative } ;
+multiplicative = unary, { ( "*" | "/" | "%" ), unary } ;
+unary = [ "+" | "-" ], primary ;
+primary = value | reference-expression | function-call | quantified-expression
+        | "(", expression, ")" ;
+operand = primary ;
+reference-expression = semantic-ref, { ".", identifier } ;
+function-call = semantic-ref, "(", [ expression, { ",", expression } ], ")" ;
+quantified-expression = quantifier, identifier, "in", expression,
+                        ":", expression ;
+quantifier = "all" | "any" | "exists" | "none" ;
+comparator = "==" | "!=" | "<" | "<=" | ">" | ">=" | "in"
+           | "contains" | "matches" | "is" | "before" | "after"
+           | "within" ;
+
+cardinality = "[", cardinality-bound, "..", cardinality-bound, "]" ;
+cardinality-bound = nonnegative-integer | "*" ;
+concept-kind = "ENTITY" | "ACTOR" | "WORK" | "EVENT" | "LIFECYCLE"
+             | "RULE" | "INFORMATION" | "RESOURCE" | "TEMPORAL"
+             | "SPATIAL" | "ORGANIZATIONAL" | "INTENT" | "REASONING"
+             | "MEASURE" | "LOGIC" | "MATH" | identifier ;
+type-ref = "string" | "boolean" | "integer" | "decimal" | "date"
+         | "datetime" | "duration" | semantic-ref ;
+severity = "info" | "warning" | "error" | "fatal" ;
+side-effect-policy = "none" | "declared" | "transactional" | "external" ;
+idempotency = "idempotent" | "conditional" | "non-idempotent" ;
+value = scalar | null-value | semantic-ref | list-value ;
+null-value = "null" ;
+list-value = "[", [ value, { ",", value } ], "]" ;
+scalar = string | number | boolean ;
+number = integer | decimal ;
+integer = [ "-" ], digit, { digit } ;
+nonnegative-integer = digit, { digit } ;
+decimal = [ "-" ], digit, { digit }, ".", digit, { digit } ;
+boolean = "true" | "false" ;
+confidence = decimal ;
+confidence-value = "confidence", ":", confidence, ";" ;
+temporal-value = string | semantic-ref ;
+semantic-ref = qualified-name ;
+implementation-ref = qualified-name ;
+qualified-name = identifier, { ".", identifier } ;
+version-range = string ;
+semantic-version = nonnegative-integer, ".", nonnegative-integer, ".",
+                   nonnegative-integer ;
+identifier = letter, { letter | digit | "_" | "-" } ;
+string = '"', { character }, '"' ;
+letter = ? Unicode letter ? ;
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+character = ? any Unicode scalar value except quote or line break ? ;

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/profile-preset-v1.schema.json",
+  "version": "1.0.0",
+  "id": "organizational-knowledge",
+  "description": "Governed organizational knowledge, policies, evidence, reasoning, identity reconciliation, temporal history, and graph publication.",
+  "requestedModules": ["ORGANIZATION", "ACTOR", "INFORMATION", "RULE", "REASONING", "WORK", "INTENT", "EVENT", "TEMPORAL", "MEASURE", "ACTION", "LINEAGE", "SECURITY"],
+  "requiredRuntimeCapabilities": ["KnowledgeGraph", "Provenance", "TemporalQuery", "PolicyEvaluation", "Inference", "IdentityResolution", "AccessControl", "Audit"],
+  "defaultEmitters": ["knowledge-graph", "vertical-slice"],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": []
+}

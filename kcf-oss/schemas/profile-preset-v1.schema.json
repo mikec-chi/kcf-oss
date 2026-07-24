@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/profile-preset-v1.schema.json",
+  "title": "KCF Profile Preset v1",
+  "type": "object",
+  "required": ["id", "description", "requestedModules"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "description": {"type": "string", "minLength": 1},
+    "extends": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+      "uniqueItems": true
+    },
+    "requestedModules": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9-]*$"},
+      "uniqueItems": true
+    },
+    "requiredRuntimeCapabilities": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "defaultEmitters": {
+      "type": "array",
+      "items": {"enum": ["dbml", "vertical-slice", "knowledge-graph"]},
+      "uniqueItems": true
+    },
+    "requiredPatterns": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+      "uniqueItems": true
+    },
+    "recommendedPatterns": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+      "uniqueItems": true
+    },
+    "prohibitedPatterns": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

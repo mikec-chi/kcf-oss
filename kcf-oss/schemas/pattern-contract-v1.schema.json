@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/pattern-contract-v1.schema.json",
+  "title": "KCF Pattern Contract v1",
+  "description": "Testable structural obligations for one reusable pattern. Domain-agnostic: obligations reference roles by trait and by kind, never by literal concept name, so a contract works for any domain that tags its concepts with the declared traits.",
+  "type": "object",
+  "required": ["patternContractVersion", "patternId", "title", "roles", "obligations"],
+  "properties": {
+    "patternContractVersion": {"const": "1.0.0"},
+    "patternId": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "roles": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/role"}, "description": "The role vocabulary this pattern introduces. Roles are the explicit, versioned interface between a pattern library (type-level) and an organization's model (instance-level): an instance fulfils a role by tagging a concept with the role's trait."},
+    "obligations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/obligation"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "role": {
+      "type": "object",
+      "required": ["trait", "title"],
+      "properties": {
+        "trait": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "conceptKind": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "obligation": {
+      "type": "object",
+      "required": ["id", "title", "obligation", "level"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+        "title": {"type": "string"},
+        "obligation": {
+          "enum": [
+            "concept-with-trait",
+            "trait-concept-has-lifecycle",
+            "trait-concept-has-action",
+            "trait-linked-to-trait",
+            "at-least-one-concept-kind",
+            "action-effect-has-fields",
+            "entity-has-identity",
+            "concept-kind-has-lifecycle",
+            "at-least-one-collection"
+          ]
+        },
+        "level": {"enum": ["required", "recommended", "info"]},
+        "trait": {"type": "string"},
+        "linkedTrait": {"type": "string"},
+        "rootKind": {"type": "string"},
+        "direction": {"enum": ["out", "in", "both"]},
+        "conceptKind": {"type": "string"},
+        "effect": {"type": "string"},
+        "effects": {"type": "array", "items": {"type": "string"}},
+        "fields": {"type": "array", "items": {"type": "string"}},
+        "collection": {"type": "string"},
+        "dimension": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

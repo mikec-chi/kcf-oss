@@ -1,0 +1,479 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OrganizationalKnowledge",
+  "module": "KCF",
+  "namespace": "acme",
+  "profile": "organizational-knowledge",
+  "profiles": [
+    "organizational-knowledge"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "RULE",
+    "INFORMATION",
+    "TEMPORAL",
+    "ORGANIZATION",
+    "INTENT",
+    "REASONING",
+    "MEASURE",
+    "SECURITY",
+    "LINEAGE"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "TEMPORAL": "1.0.0",
+    "ORGANIZATION": "1.0.0",
+    "INTENT": "1.0.0",
+    "REASONING": "1.0.0",
+    "MEASURE": "1.0.0",
+    "SECURITY": "1.0.0",
+    "LINEAGE": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Discount",
+      "qualifiedName": "acme.Discount",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "discountId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "LegalOfficer",
+      "qualifiedName": "acme.LegalOfficer",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "SalesAnalyst",
+      "qualifiedName": "acme.SalesAnalyst",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "ApproveDiscountWork",
+      "qualifiedName": "acme.ApproveDiscountWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "Acme",
+      "qualifiedName": "acme.Acme",
+      "kind": "ORGANIZATIONAL",
+      "references": [
+        "acme.SalesAnalyst",
+        "acme.LegalOfficer",
+        "acme.KnowledgeAccessPolicy",
+        "acme.SalesHandbook",
+        "acme.DiscountPolicy"
+      ],
+      "metadata": {
+        "organizationKind": "ORGANIZATION"
+      }
+    },
+    {
+      "id": "SalesHandbook",
+      "qualifiedName": "acme.SalesHandbook",
+      "kind": "INFORMATION",
+      "references": [
+        "acme.Discount",
+        "acme.LegalOfficer",
+        "acme.SalesAnalyst",
+        "acme.KnowledgeAccessPolicy"
+      ],
+      "metadata": {
+        "informationKind": "DOCUMENT"
+      }
+    },
+    {
+      "id": "KnowledgeAccessPolicy",
+      "qualifiedName": "acme.KnowledgeAccessPolicy",
+      "kind": "RULE",
+      "references": [
+        "acme.SalesHandbook",
+        "acme.ApproveDiscountWork",
+        "acme.LegalOfficer"
+      ],
+      "metadata": {
+        "ruleKind": "PERMISSION"
+      }
+    },
+    {
+      "id": "DiscountPolicy",
+      "qualifiedName": "acme.DiscountPolicy",
+      "kind": "RULE",
+      "references": [
+        "acme.Discount",
+        "acme.ApproveDiscountWork",
+        "acme.SalesHandbook",
+        "acme.LegalOfficer"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "SalesPolicy",
+      "qualifiedName": "acme.SalesPolicy",
+      "kind": "RULE",
+      "references": [
+        "acme.LegalOfficer",
+        "acme.DiscountPolicy"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    },
+    {
+      "id": "DiscountRationale",
+      "qualifiedName": "acme.DiscountRationale",
+      "kind": "REASONING",
+      "references": [
+        "acme.SalesHandbook"
+      ],
+      "metadata": {
+        "reasoningKind": "FACT"
+      }
+    }
+  ],
+  "relationships": [],
+  "lifecycles": [],
+  "actions": [],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "organizations": [
+    {
+      "id": "Acme",
+      "members": [
+        "acme.SalesAnalyst"
+      ],
+      "roles": [
+        "acme.LegalOfficer"
+      ],
+      "authorityDomains": [
+        "acme.KnowledgeAccessPolicy"
+      ],
+      "owns": [
+        "acme.SalesHandbook"
+      ],
+      "accountableFor": [
+        "acme.DiscountPolicy"
+      ],
+      "reporting": [],
+      "escalations": [],
+      "evidence": [],
+      "organizationKind": "ORGANIZATION",
+      "qualifiedName": "acme.Acme"
+    }
+  ],
+  "information": [
+    {
+      "id": "SalesHandbook",
+      "subjects": [
+        "acme.Discount"
+      ],
+      "authors": [
+        "acme.LegalOfficer"
+      ],
+      "sources": [
+        "acme.Discount"
+      ],
+      "audiences": [
+        "acme.SalesAnalyst"
+      ],
+      "evidence": [],
+      "informationKind": "DOCUMENT",
+      "representation": "text",
+      "confidentiality": "Internal",
+      "sourceDocument": "sales-handbook.pdf",
+      "sourceLocation": "page 14",
+      "extractionMethod": "llm",
+      "extractionModel": "knowledge-extractor-v1",
+      "confidence": 0.96,
+      "recordedAt": "2026-07-22T12:00:00Z",
+      "reviewedBy": "acme.LegalOfficer",
+      "accessPolicy": "acme.KnowledgeAccessPolicy",
+      "qualifiedName": "acme.SalesHandbook"
+    }
+  ],
+  "rules": [
+    {
+      "id": "KnowledgeAccessPolicy",
+      "appliesTo": [
+        "acme.SalesHandbook"
+      ],
+      "effects": [
+        "acme.ApproveDiscountWork"
+      ],
+      "exceptions": [],
+      "evidence": [
+        "acme.SalesHandbook"
+      ],
+      "ruleKind": "PERMISSION",
+      "condition": "requester is authorized",
+      "authority": "acme.LegalOfficer",
+      "mode": "PERMISSION",
+      "conflict": "deny-overrides",
+      "qualifiedName": "acme.KnowledgeAccessPolicy"
+    },
+    {
+      "id": "DiscountPolicy",
+      "appliesTo": [
+        "acme.Discount"
+      ],
+      "effects": [
+        "acme.ApproveDiscountWork"
+      ],
+      "exceptions": [],
+      "evidence": [
+        "acme.SalesHandbook"
+      ],
+      "ruleKind": "CONSTRAINT",
+      "condition": "discount percentage is at most 20",
+      "authority": "acme.LegalOfficer",
+      "qualifiedName": "acme.DiscountPolicy"
+    }
+  ],
+  "policies": [
+    {
+      "id": "SalesPolicy",
+      "rules": [
+        "acme.DiscountPolicy"
+      ],
+      "evidence": [],
+      "authority": "acme.LegalOfficer",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "acme.SalesPolicy"
+    }
+  ],
+  "reasoning": [
+    {
+      "id": "DiscountRationale",
+      "premises": [],
+      "evidence": [
+        "acme.SalesHandbook"
+      ],
+      "assumptions": [],
+      "contradictions": [],
+      "alternatives": [],
+      "reasoningKind": "FACT",
+      "proposition": "discounts over the standard threshold require approval",
+      "method": "DEDUCTIVE",
+      "confidence": 0.93,
+      "qualifiedName": "acme.DiscountRationale"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "DiscountApprovalClaim",
+      "evidence": [
+        "acme.SalesHandbook"
+      ],
+      "contradicts": [],
+      "subject": "acme.Discount",
+      "predicate": "requiresApproval",
+      "object": "acme.LegalOfficer",
+      "objectIsReference": true,
+      "status": "asserted",
+      "recordedAt": "2026-07-22T12:00:00Z",
+      "reviewedBy": "acme.LegalOfficer",
+      "classification": "Internal",
+      "accessPolicy": "acme.KnowledgeAccessPolicy",
+      "qualifiedName": "acme.DiscountApprovalClaim"
+    }
+  ],
+  "identityResolutions": [
+    {
+      "id": "SalesAnalystIdentity",
+      "aliases": [
+        "sales analyst"
+      ],
+      "externalIds": [
+        "HR-42"
+      ],
+      "sameAs": [],
+      "mergeSources": [],
+      "splitTargets": [],
+      "evidence": [],
+      "canonical": "acme.SalesAnalyst",
+      "status": "active",
+      "qualifiedName": "acme.SalesAnalystIdentity"
+    }
+  ],
+  "knowledgeQueries": [
+    {
+      "id": "CurrentDiscountPolicies",
+      "qualifiedName": "acme.CurrentDiscountPolicies",
+      "selectKind": "RULE",
+      "where": "appliesTo == Discount",
+      "world": "open",
+      "negation": "explicit",
+      "inference": "declared",
+      "temporal": "current"
+    }
+  ],
+  "runtimeRequirements": [
+    "KnowledgeGraph",
+    "Provenance",
+    "TemporalQuery",
+    "PolicyEvaluation",
+    "Inference",
+    "IdentityResolution",
+    "AccessControl",
+    "Audit"
+  ],
+  "emitters": [
+    {
+      "id": "knowledge-graph",
+      "supports": [
+        "KnowledgeGraph",
+        "Provenance",
+        "TemporalQuery",
+        "PolicyEvaluation",
+        "Inference",
+        "IdentityResolution",
+        "AccessControl",
+        "Audit"
+      ],
+      "unsupportedPolicy": "error"
+    },
+    {
+      "id": "vertical-slice",
+      "supports": [
+        "KnowledgeGraph",
+        "Provenance",
+        "TemporalQuery",
+        "PolicyEvaluation",
+        "Inference",
+        "IdentityResolution",
+        "AccessControl",
+        "Audit"
+      ],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "acme.Discount": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 4,
+      "column": 3,
+      "endLine": 7,
+      "endColumn": 4
+    },
+    "acme.LegalOfficer": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 9,
+      "column": 3,
+      "endLine": 9,
+      "endColumn": 25
+    },
+    "acme.SalesAnalyst": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 10,
+      "endColumn": 25
+    },
+    "acme.ApproveDiscountWork": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 31
+    },
+    "acme.Acme": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 13,
+      "column": 3,
+      "endLine": 20,
+      "endColumn": 4
+    },
+    "acme.SalesHandbook": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 22,
+      "column": 3,
+      "endLine": 38,
+      "endColumn": 4
+    },
+    "acme.KnowledgeAccessPolicy": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 40,
+      "column": 3,
+      "endLine": 49,
+      "endColumn": 4
+    },
+    "acme.DiscountPolicy": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 51,
+      "column": 3,
+      "endLine": 58,
+      "endColumn": 4
+    },
+    "acme.SalesPolicy": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 60,
+      "column": 3,
+      "endLine": 64,
+      "endColumn": 4
+    },
+    "acme.DiscountRationale": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 66,
+      "column": 3,
+      "endLine": 72,
+      "endColumn": 4
+    },
+    "acme.DiscountApprovalClaim": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 74,
+      "column": 3,
+      "endLine": 84,
+      "endColumn": 4
+    },
+    "acme.SalesAnalystIdentity": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 86,
+      "column": 3,
+      "endLine": 91,
+      "endColumn": 4
+    },
+    "acme.CurrentDiscountPolicies": {
+      "source": "tests/domains/organizational-knowledge.kcf",
+      "line": 93,
+      "column": 3,
+      "endLine": 100,
+      "endColumn": 4
+    }
+  }
+}

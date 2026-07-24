@@ -1,0 +1,14 @@
+(* KCF Logic Dimension Grammar v1.0. *)
+logic-model = "logic", "model", identifier, "{", proposition-def,
+              { proposition-def | predicate-def }, "}" ;
+proposition-def = "proposition", identifier, "{", "expression", ":",
+                  condition, ";", [ "mode", ":", modal-operator, ";" ], "}" ;
+predicate-def = "predicate", identifier, "(", [ parameter-def,
+                { ",", parameter-def } ], ")", "{", "expression", ":",
+                condition, ";", "}" ;
+parameter-def = identifier, ":", type-ref ;
+modal-operator = "necessary" | "possible" | "permitted" | "obligatory"
+               | "known" | "believed" ;
+
+identifier = ? KCF identifier ? ; condition = ? KCF condition ? ;
+type-ref = ? KCF type-ref ? ;

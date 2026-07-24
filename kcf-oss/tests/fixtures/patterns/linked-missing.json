@@ -1,0 +1,12 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "LinkedMissing",
+  "module": "KCF",
+  "namespace": "core",
+  "implementedPatterns": ["core.related-entities"],
+  "concepts": [
+    {"id": "Order", "qualifiedName": "core.Order", "kind": "ENTITY", "traits": ["primary"], "attributes": [{"name": "orderId", "type": "UUID", "identity": true}]},
+    {"id": "LineItem", "qualifiedName": "core.LineItem", "kind": "ENTITY", "traits": ["related"], "attributes": [{"name": "lineId", "type": "UUID", "identity": true}]}
+  ]
+}

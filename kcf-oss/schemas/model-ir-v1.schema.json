@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/model-ir-v1.schema.json",
+  "title": "KCF Normalized Semantic IR v1",
+  "type": "object",
+  "required": ["$schema", "irVersion", "id", "module", "concepts"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "irVersion": {"const": "1.0.0"},
+    "id": {"$ref": "#/$defs/identifier"},
+    "module": {"const": "KCF"},
+    "namespace": {"type": "string", "minLength": 1},
+    "profile": {"type": "string"},
+    "profiles": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "requiredPatterns": {"type": "array", "items": {"$ref": "#/$defs/patternId"}, "uniqueItems": true},
+    "recommendedPatterns": {"type": "array", "items": {"$ref": "#/$defs/patternId"}, "uniqueItems": true},
+    "prohibitedPatterns": {"type": "array", "items": {"$ref": "#/$defs/patternId"}, "uniqueItems": true},
+    "implementedPatterns": {"type": "array", "items": {"$ref": "#/$defs/patternId"}, "uniqueItems": true},
+    "excludedPatterns": {"type": "array", "items": {"$ref": "#/$defs/patternId"}, "uniqueItems": true},
+    "modules": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "moduleVersions": {"type": "object", "additionalProperties": {"type": "string"}},
+    "concepts": {"type": "array", "items": {"$ref": "#/$defs/concept"}},
+    "relationships": {"type": "array", "items": {"$ref": "#/$defs/relationship"}},
+    "lifecycles": {"type": "array", "items": {"$ref": "#/$defs/lifecycle"}},
+    "actions": {"type": "array", "items": {"$ref": "#/$defs/action"}},
+    "collectionTransforms": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "organizations": {"type": "array", "items": {"$ref": "#/$defs/organization"}},
+    "information": {"type": "array", "items": {"$ref": "#/$defs/information"}},
+    "rules": {"type": "array", "items": {"$ref": "#/$defs/rule"}},
+    "policies": {"type": "array", "items": {"$ref": "#/$defs/policy"}},
+    "reasoning": {"type": "array", "items": {"$ref": "#/$defs/reasoning"}},
+    "assertions": {"type": "array", "items": {"$ref": "#/$defs/assertion"}},
+    "identityResolutions": {"type": "array", "items": {"$ref": "#/$defs/identityResolution"}},
+    "knowledgeQueries": {"type": "array", "items": {"$ref": "#/$defs/knowledgeQuery"}},
+    "processes": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "events": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "resources": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "allocations": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "plans": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "emitters": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "runtimeRequirements": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "runtimeBindings": {"type": "array", "items": {"$ref": "#/$defs/openObject"}},
+    "integration": {"$ref": "#/$defs/openObject"},
+    "security": {"$ref": "#/$defs/openObject"},
+    "lineage": {"$ref": "#/$defs/openObject"},
+    "architecture": {"$ref": "#/$defs/openObject"},
+    "experience": {"$ref": "#/$defs/openObject"},
+    "design": {"$ref": "#/$defs/openObject"},
+    "analytics": {"$ref": "#/$defs/openObject"},
+    "ai": {"$ref": "#/$defs/openObject"},
+    "extensions": {"type": "object", "additionalProperties": {"$ref": "#/$defs/openObject"}},
+    "sourceMap": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sourceSpan"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"},
+    "patternId": {"type": "string", "pattern": "^[a-z][a-z0-9.-]*$"},
+    "openObject": {"type": "object", "additionalProperties": true},
+    "sourceSpan": {
+      "type": "object",
+      "required": ["source", "line", "column", "endLine", "endColumn"],
+      "properties": {
+        "source": {"type": "string"}, "line": {"type": "integer", "minimum": 1},
+        "column": {"type": "integer", "minimum": 1}, "endLine": {"type": "integer", "minimum": 1},
+        "endColumn": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "attribute": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"$ref": "#/$defs/identifier"}, "type": {"type": "string"},
+        "required": {"type": "boolean"}, "identity": {"type": "boolean"}, "default": {}
+      },
+      "additionalProperties": false
+    },
+    "concept": {
+      "type": "object",
+      "required": ["id", "qualifiedName", "kind"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "qualifiedName": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "INFORMATION", "RESOURCE", "TEMPORAL", "SPATIAL", "ORGANIZATIONAL", "INTENT", "REASONING", "MEASURE", "LOGIC", "MATH"]},
+        "abstract": {"type": "boolean"}, "attributes": {"type": "array", "items": {"$ref": "#/$defs/attribute"}},
+        "references": {"type": "array", "items": {"oneOf": [{"type": "string"}, {"$ref": "#/$defs/openObject"}]}},
+        "traits": {"type": "array", "items": {"type": "string"}}, "metadata": {"$ref": "#/$defs/openObject"},
+        "instances": {"type": "array"}
+      },
+      "additionalProperties": false
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["id", "rootKind", "source", "target"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "definition": {"type": "string"},
+        "rootKind": {"type": "string"}, "source": {"type": "string"}, "target": {"type": "string"},
+        "strength": {"type": "number"}, "allowSelf": {"type": "boolean"},
+        "qualifiers": {"$ref": "#/$defs/openObject"}, "validFrom": {"type": "string"}, "validTo": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "transition": {
+      "type": "object", "required": ["from", "to"],
+      "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "action": {"type": "string"}},
+      "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "object", "required": ["id", "states", "initial", "terminal", "transitions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "subject": {"type": "string"},
+        "states": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "initial": {"oneOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}]},
+        "terminal": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "transitions": {"type": "array", "items": {"$ref": "#/$defs/transition"}}
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "object", "required": ["id"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "effect": {"enum": ["query", "command", "transform"]},
+        "operation": {"type": "string"}, "scope": {"type": "string"}, "target": {"type": "string"},
+        "selection": {"type": "string"}, "inputCardinality": {"type": "string"},
+        "outputCardinality": {"type": "string"}, "idempotency": {"type": "string"},
+        "atomicity": {"type": "string"}, "concurrency": {"type": "string"},
+        "authorization": {"type": "string"}, "authorizationExemption": {"type": "string"},
+        "retry": {"type": "integer", "minimum": 0}, "mutations": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "knowledgeMetadata": {
+      "type": "object",
+      "properties": {
+        "validFrom": {"type": "string"}, "validTo": {"type": "string"},
+        "recordedAt": {"type": "string"}, "sourceDocument": {"type": "string"},
+        "sourceLocation": {"type": "string"}, "extractionMethod": {"type": "string"},
+        "extractionModel": {"type": "string"}, "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reviewedBy": {"type": "string"}, "evidence": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "classification": {"type": "string"}, "accessPolicy": {"type": "string"}
+      }
+    },
+    "organization": {
+      "type": "object", "required": ["id", "organizationKind"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "organizationKind": {"enum": ["ORGANIZATION", "UNIT", "DEPARTMENT", "TEAM", "POSITION"]},
+        "parent": {"type": "string"}, "members": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "roles": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "authorityDomains": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "owns": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "accountableFor": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "reporting": {"type": "array", "items": {"type": "object", "required": ["source", "target"], "properties": {
+          "source": {"type": "string"}, "target": {"type": "string"}, "validFrom": {"type": "string"}, "validTo": {"type": "string"}
+        }, "additionalProperties": false}},
+        "escalations": {"type": "array", "items": {"type": "array", "items": {"type": "string"}, "minItems": 2}}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "information": {
+      "type": "object", "required": ["id", "informationKind"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "informationKind": {"enum": ["DOCUMENT", "MESSAGE", "RECORD", "MODEL", "EVIDENCE", "INSTRUCTION", "REPORT", "SEMANTIC_PACKET"]},
+        "subjects": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "authors": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "sources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "audiences": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "schema": {"type": "string"}, "representation": {"type": "string"},
+        "confidentiality": {"type": "string"}, "freshness": {"type": "string"},
+        "completeness": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "rule": {
+      "type": "object", "required": ["id", "ruleKind", "condition", "effects"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "ruleKind": {"enum": ["CONSTRAINT", "PERMISSION", "PROHIBITION", "OBLIGATION", "ELIGIBILITY", "CLASSIFICATION", "DERIVATION", "DECISION", "EXCEPTION"]},
+        "condition": {}, "effects": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "appliesTo": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "mode": {"enum": ["PERMISSION", "PROHIBITION", "OBLIGATION", "RECOMMENDATION", "DISCRETION"]},
+        "priority": {"type": "integer"}, "conflict": {"enum": ["priority", "specificity", "authority", "latest", "deny-overrides", "permit-overrides", "explicit"]},
+        "authority": {"type": "string"}, "exceptions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "policy": {
+      "type": "object", "required": ["id", "authority", "rules"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "authority": {"type": "string"},
+        "rules": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "defaultConflict": {"enum": ["priority", "specificity", "authority", "latest", "deny-overrides", "permit-overrides", "explicit"]}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "reasoning": {
+      "type": "object", "required": ["id", "reasoningKind", "proposition", "method"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"},
+        "reasoningKind": {"enum": ["CLAIM", "FACT", "HYPOTHESIS", "ASSUMPTION", "INFERENCE", "EXPLANATION", "RECOMMENDATION", "CONTRADICTION"]},
+        "proposition": {}, "premises": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "conclusion": {}, "method": {"enum": ["DEDUCTIVE", "INDUCTIVE", "ABDUCTIVE", "CAUSAL", "PROBABILISTIC", "ANALOGICAL", "CONSTRAINT_BASED"]},
+        "assumptions": {"type": "array"}, "contradictions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "alternatives": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "assertion": {
+      "type": "object", "required": ["id", "subject", "predicate", "object", "status"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "subject": {"type": "string"}, "predicate": {}, "object": {},
+        "objectIsReference": {"type": "boolean"},
+        "status": {"enum": ["asserted", "inferred", "disputed", "superseded", "retracted", "unknown"]},
+        "supersedes": {"type": "string"}, "contradicts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "derivedBy": {"type": "string"}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "identityResolution": {
+      "type": "object", "required": ["id", "canonical"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "canonical": {"type": "string"},
+        "aliases": {"type": "array", "items": {}, "uniqueItems": true},
+        "externalIds": {"type": "array", "items": {}, "uniqueItems": true},
+        "sameAs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "mergeSources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "splitTargets": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "status": {"enum": ["active", "merged", "split", "retired"]}
+      },
+      "allOf": [{"$ref": "#/$defs/knowledgeMetadata"}]
+    },
+    "knowledgeQuery": {
+      "type": "object",
+      "required": ["id", "selectKind", "where", "world", "negation", "inference", "temporal"],
+      "properties": {
+        "id": {"$ref": "#/$defs/identifier"}, "qualifiedName": {"type": "string"},
+        "selectKind": {"type": "string"}, "where": {},
+        "world": {"enum": ["open", "closed"]}, "negation": {"enum": ["explicit", "failure"]},
+        "inference": {"enum": ["none", "declared", "materialized"]},
+        "temporal": {"enum": ["current", "as-of", "all-history"]}, "asOf": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

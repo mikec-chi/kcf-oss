@@ -1,0 +1,29 @@
+kcf model FulfillmentEvents profile event-driven-system {
+  namespace fulfillment;
+
+  entity Shipment {
+    identity shipmentId: UUID;
+    required status: String;
+    mutability "read-only";
+  }
+  actor Carrier { }
+  work TenderShipment { }
+  event ShipmentTendered immutable;
+  resource TenderCapacity { capacity 100; }
+
+  relationship carrier-participates: PARTICIPATION Carrier -> TenderShipment strength 1.0;
+  relationship tender-transforms-shipment: TRANSFORMATION TenderShipment -> Shipment strength 1.0;
+
+  command Tender {
+    operation update;
+    scope record;
+    target Shipment;
+    selection identity;
+    input one;
+    output one;
+    mutate status;
+    idempotency conditional;
+    atomicity atomic;
+    authorization fulfillment.TenderPolicy;
+  }
+}

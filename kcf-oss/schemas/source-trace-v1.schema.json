@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/source-trace-v1.schema.json",
+  "title": "KCF Source Trace v1",
+  "description": "Maps each source-document segment to the model construct identities the extraction produced from it. Kept as a side artifact so the IR contract stays unchanged while every construct can still be traced to its originating prose.",
+  "type": "object",
+  "required": ["sourceTraceVersion", "documentId", "model", "links"],
+  "properties": {
+    "sourceTraceVersion": {"const": "1.0.0"},
+    "documentId": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["segmentId", "constructs"],
+        "properties": {
+          "segmentId": {"type": "string", "minLength": 1},
+          "constructs": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

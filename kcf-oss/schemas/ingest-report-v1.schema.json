@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/ingest-report-v1.schema.json",
+  "title": "KCF Ingestion Report v1",
+  "description": "One report for the natural-language front door: does the extracted model validate, is it complete/pattern-conformant (assess), and does it faithfully cover the source prose (source coverage).",
+  "type": "object",
+  "required": ["ingestReportVersion", "model", "document", "valid", "ready", "sourceComplete", "assess", "sourceCoverage"],
+  "properties": {
+    "ingestReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "document": {"type": "string"},
+    "valid": {"type": "boolean"},
+    "ready": {"type": "boolean"},
+    "sourceComplete": {"type": "boolean"},
+    "assess": {"type": "object", "additionalProperties": true},
+    "sourceCoverage": {"type": "object", "additionalProperties": true}
+  },
+  "additionalProperties": false
+}

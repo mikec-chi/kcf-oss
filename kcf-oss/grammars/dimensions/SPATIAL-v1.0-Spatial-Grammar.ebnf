@@ -1,0 +1,22 @@
+(* KCF Spatial Dimension Grammar v1.0. *)
+spatial-model = "spatial", "model", identifier, "{", spatial-def,
+                { spatial-def | route-def }, "}" ;
+spatial-def = "spatial", identifier, "{", "kind", ":", spatial-kind, ";",
+              [ "contained-in", ":", semantic-ref, ";" ],
+              [ geometry-def ], { "adjacent-to", ":", semantic-ref, ";" },
+              { "route", ":", semantic-ref, ";" },
+              { "jurisdiction", ":", semantic-ref, ";" },
+              { "capacity", ":", semantic-ref, ";" }, "}" ;
+geometry-def = "geometry", ":", geometry-kind, "(", coordinate,
+               { ",", coordinate }, ")", ";" ;
+coordinate = number, number, [ number ] ;
+route-def = "route", identifier, "{", "from", ":", semantic-ref, ";",
+            "to", ":", semantic-ref, ";", { "via", ":", semantic-ref, ";" },
+            [ "distance", ":", number, semantic-ref, ";" ],
+            { constraint-use }, "}" ;
+spatial-kind = "LOCATION" | "REGION" | "ZONE" | "PATH" | "COORDINATE"
+             | "JURISDICTION" ;
+geometry-kind = "point" | "line" | "polygon" | "volume" ;
+
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+number = ? KCF number ? ; constraint-use = ? KCF constraint-use ? ;

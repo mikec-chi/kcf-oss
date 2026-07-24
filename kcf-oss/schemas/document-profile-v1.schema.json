@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/document-profile-v1.schema.json",
+  "title": "KCF Document Profile v1",
+  "description": "Input-side guidance for extracting a KCF model from a document of a given modality: which segment kinds it uses, which semantic dimensions the extraction should target, and how each segment kind maps to a construct. The generative analog of a pattern scaffold, keyed on document type rather than business pattern.",
+  "type": "object",
+  "required": ["documentProfileVersion", "documentKind", "title", "segmentKinds", "targetDimensions"],
+  "properties": {
+    "documentProfileVersion": {"const": "1.0.0"},
+    "documentKind": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "segmentKinds": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+    "targetDimensions": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+    "mapping": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["segmentKind", "producesKind"],
+        "properties": {
+          "segmentKind": {"type": "string"},
+          "producesKind": {"type": "string"},
+          "notes": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "guidance": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

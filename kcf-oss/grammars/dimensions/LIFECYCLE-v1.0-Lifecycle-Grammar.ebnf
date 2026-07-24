@@ -1,0 +1,22 @@
+(* KCF Lifecycle Dimension Grammar v1.0. *)
+lifecycle-model = "lifecycle", "model", identifier, "{", lifecycle-def,
+                  { lifecycle-def }, "}" ;
+lifecycle-def = "lifecycle", identifier, "{",
+                { "governs-kind", ":", concept-kind, ";" },
+                state-def, { state-def },
+                "initial", ":", identifier, ";",
+                "terminal", ":", identifier, { ",", identifier }, ";",
+                { transition-def }, { "invariant", ":", condition, ";" },
+                { "temporal", ":", semantic-ref, ";" }, "}" ;
+state-def = "state", identifier, "{",
+            { "entry", ":", semantic-ref, ";" },
+            { "exit", ":", semantic-ref, ";" },
+            { "invariant", ":", condition, ";" }, "}" ;
+transition-def = "transition", identifier, "->", identifier, "{",
+                 { "trigger", ":", semantic-ref, ";" },
+                 { "requires-work", ":", semantic-ref, ";" },
+                 { "guard", ":", condition, ";" },
+                 { "effect", ":", semantic-ref, ";" }, "}" ;
+
+identifier = ? KCF identifier ? ; concept-kind = ? KCF concept-kind ? ;
+semantic-ref = ? KCF semantic-ref ? ; condition = ? KCF condition ? ;

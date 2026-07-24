@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["version", "rules"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "version": {"type": "string"},
+    "sources": {"type": "array", "items": {"type": "string"}},
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "section", "severity", "requirement", "enforcement", "phase"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"},
+          "source": {"enum": ["semantic-core", "kcf"]},
+          "section": {"type": "string"},
+          "severity": {"enum": ["error", "warning", "info"]},
+          "requirement": {"type": "string"},
+          "enforcement": {"enum": ["automated", "partially-automated", "manual-review", "profile-dependent", "informational"]},
+          "phase": {"type": "string"},
+          "handler": {"type": "string"},
+          "aliases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

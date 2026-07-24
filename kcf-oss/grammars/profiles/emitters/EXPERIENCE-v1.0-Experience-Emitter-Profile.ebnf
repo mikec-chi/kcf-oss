@@ -1,0 +1,20 @@
+(* KCF experience emitter profile. *)
+experience-model = "experience", "model", identifier, "{", experience-element,
+                   { experience-element }, "}" ;
+experience-element = app-def | view-def | flow-def | component-def | binding-def ;
+app-def = "app", identifier, "{", "entry", ":", semantic-ref, ";",
+          { "view", ":", semantic-ref, ";" }, "}" ;
+view-def = "view", identifier, "{", [ "entity", ":", semantic-ref, ";" ],
+           { "component", ":", semantic-ref, ";" },
+           { "action", ":", semantic-ref, ";" }, "}" ;
+flow-def = "flow", identifier, "{", "entry", ":", identifier, ";",
+           flow-node, { flow-node | flow-edge }, "}" ;
+flow-node = "node", identifier, ":", semantic-ref, ";" ;
+flow-edge = "transition", identifier, "->", identifier,
+            [ "when", condition ], ";" ;
+component-def = "component", identifier, "{", { "property", ":", semantic-ref,
+                ";" }, { "slot", ":", identifier, ";" }, "}" ;
+binding-def = "bind", semantic-ref, "to", semantic-ref,
+              [ "mode", ( "read" | "write" | "two-way" ) ], ";" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+condition = ? KCF condition ? ;

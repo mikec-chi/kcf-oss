@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CrmClients",
+  "module": "KCF",
+  "namespace": "crm",
+  "modules": ["KCF"],
+  "concepts": [
+    {"id": "Client", "qualifiedName": "crm.Client", "kind": "ENTITY", "attributes": [
+      {"name": "clientId", "type": "UUID", "identity": true},
+      {"name": "loyaltyTier", "type": "String"}
+    ]}
+  ],
+  "identityResolutions": [
+    {"id": "ClientIsCustomer", "qualifiedName": "crm.ClientIsCustomer", "canonical": "shop.Customer", "sameAs": ["crm.Client"], "status": "merged"}
+  ]
+}

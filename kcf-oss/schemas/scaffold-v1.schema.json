@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/scaffold-v1.schema.json",
+  "title": "KCF Pattern Scaffold v1",
+  "description": "One-shot briefing for pattern-seeded synthesis: the profile closure, the roles to fill, and the obligations to satisfy - aggregated so an LLM has a single input.",
+  "type": "object",
+  "required": ["scaffoldVersion", "patterns", "roles", "obligations"],
+  "properties": {
+    "scaffoldVersion": {"const": "1.0.0"},
+    "profile": {"type": ["string", "null"]},
+    "modules": {"type": "array", "items": {"type": "string"}},
+    "patterns": {
+      "type": "object",
+      "required": ["required", "recommended", "prohibited"],
+      "properties": {
+        "required": {"type": "array", "items": {"type": "string"}},
+        "recommended": {"type": "array", "items": {"type": "string"}},
+        "prohibited": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trait", "fromPatterns"],
+        "properties": {
+          "trait": {"type": "string"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "conceptKind": {"type": "string"},
+          "fromPatterns": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["patternId", "hasContract", "items"],
+        "properties": {
+          "patternId": {"type": "string"},
+          "hasContract": {"type": "boolean"},
+          "items": {"type": "array", "items": {"type": "object", "additionalProperties": true}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "notes": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

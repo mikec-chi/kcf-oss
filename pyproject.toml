@@ -1,0 +1,77 @@
+# pyproject.toml for the STANDALONE public KCF repository.
+#
+# This file belongs at the ROOT of the extracted repo, where `kcf-oss/` and
+# `semantic-core/` sit as sibling directories alongside `kcf_launcher.py`.
+# `scripts/make-oss-repo.sh` places it there automatically.
+#
+#   pip install -e .        # editable dev install → provides the `kcf` command
+#   pip install .           # regular install; builds a wheel
+#   kcf compile … / kcf assess … (OSS stops at the IR; codegen is the LLM pack)
+#
+# The wheel maps the `kcf-oss/` directory to the import name `kcf_oss` and bundles
+# the grammars, schemas, presets, config, and reference tool/compiler/emitter
+# sources the toolchain reads at runtime. `semantic-core/` is only needed for the
+# contributor gate (`kcf check`) and full-stack tooling, which run from a source
+# checkout — see the note on `kcf check` below.
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kcf-oss"
+version = "1.3.0"
+description = "KCF — the open knowledge-coding standard: grammars, a reference compiler, a semantic analyzer, and traceable emitters that turn domain knowledge into a complete, machine-checked model IR."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Composable Holdings Inc.", email = "mikec@composableholdings.com" }]
+keywords = [
+    "semantics", "grammar", "ebnf", "code-generation", "llm",
+    "knowledge-graph", "domain-modeling", "intermediate-representation",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Compilers",
+]
+dependencies = [
+    "jsonschema>=4.0",
+]
+
+[project.optional-dependencies]
+playground = ["fastapi>=0.110", "uvicorn[standard]>=0.29"]
+mcp = ["mcp>=1.2"]
+
+[project.urls]
+Homepage = "https://github.com/OWNER/kcf"
+Documentation = "https://github.com/OWNER/kcf/tree/main/kcf-oss/docs"
+Source = "https://github.com/OWNER/kcf"
+Issues = "https://github.com/OWNER/kcf/issues"
+
+[project.scripts]
+kcf = "kcf_launcher:main"
+kcf-mcp = "kcf_mcp_launcher:main"
+
+# The launchers are single top-level modules. The toolchain itself ships as the
+# `kcf_oss` package (mapped from the `kcf-oss/` directory); its non-Python data
+# and flat tool/compiler sources are bundled via include-package-data +
+# MANIFEST.in and loaded by path at runtime.
+[tool.setuptools]
+py-modules = ["kcf_launcher", "kcf_mcp_launcher"]
+packages = ["kcf_oss"]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+kcf_oss = "kcf-oss"
+
+[tool.setuptools.package-data]
+kcf_oss = [
+    "**/*.py", "**/*.json", "**/*.ebnf", "**/*.md", "**/*.kcf", "**/*.html",
+]
+
+[tool.setuptools.exclude-package-data]
+kcf_oss = ["tests/**", "tmp/**", "packaging/**", "**/__pycache__/**"]

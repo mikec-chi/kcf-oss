@@ -1,0 +1,27 @@
+{
+  "stackTargetVersion": "1.0.0",
+  "id": "typescript-express-prisma",
+  "title": "TypeScript + Express + Prisma + PostgreSQL",
+  "tier": "backend",
+  "language": "TypeScript",
+  "framework": "Express",
+  "orm": "Prisma",
+  "database": "PostgreSQL",
+  "apiStyle": "rest",
+  "apiDocs": "swagger-ui-express at /docs; OpenAPI document built from zod via @asteasolutions/zod-to-openapi",
+  "testing": "vitest",
+  "conventions": [
+    "Expose OpenAPI/Swagger by default: register every zod schema with @asteasolutions/zod-to-openapi, build one OpenAPI 3 document, serve it at /openapi.json and Swagger UI via swagger-ui-express at /docs. Every route must be registered so the frontend can bind to it.",
+    "Layer as prisma/schema.prisma (data model) / src/dto.ts (zod request/response) / src/service.ts (command handlers) / src/routes.ts (Express routers) / src/policy.ts (authorization middleware) / src/openapi.ts (document builder).",
+    "identity attributes are the Prisma @id; UUIDs use @default(uuid()).",
+    "Optimistic concurrency: an Int `version` field; UpdateCustomer uses prisma.updateMany({ where: { id, version }, data: { ..., version: { increment: 1 } } }) and treats count===0 as 409.",
+    "Atomic commands run inside prisma.$transaction.",
+    "Conditional idempotency: return 200 unchanged if the mutate-listed fields already match.",
+    "Authorization: an Express middleware requirePolicy('customer.CustomerUpdatePolicy') guards the route.",
+    "Lifecycles map to a Prisma enum + a pure transition guard; only declared transitions are allowed.",
+    "A command may only write the fields in the action's `mutate` set.",
+    "Realize each action by its operation+scope: record CRUD (create→POST, read/exists/count→GET, replace→PUT, patch/update→PATCH, delete→DELETE, upsert→idempotent PUT); bulk-*/scope=set → a batch route honoring atomicity (prisma.$transaction vs per-record); each collectionTransforms entry (filter/map/group/aggregate/join/…) → a query/aggregate route or SQL view. Register every one in the OpenAPI document.",
+    "Validate requests with zod; tests use vitest against a test database or a mocked prisma client, covering happy path, illegal transition, and stale-version 409."
+  ],
+  "example": "EXAMPLE.md"
+}

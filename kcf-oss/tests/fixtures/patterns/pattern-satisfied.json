@@ -1,0 +1,22 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "AuditableSatisfied",
+  "module": "KCF",
+  "namespace": "core",
+  "implementedPatterns": ["core.auditable-entity"],
+  "concepts": [
+    {"id": "Ledger", "qualifiedName": "core.Ledger", "kind": "ENTITY", "traits": ["auditable"], "metadata": {"mutability": "read-only"}, "attributes": [
+      {"name": "ledgerId", "type": "UUID", "identity": true}
+    ]}
+  ],
+  "lifecycles": [
+    {"id": "LedgerLifecycle", "subject": "core.Ledger", "states": ["Open", "Closed"], "initial": "Open", "terminal": ["Closed"], "transitions": [
+      {"from": "Open", "to": "Closed"}
+    ]}
+  ],
+  "actions": [
+    {"id": "PostEntry", "effect": "command", "operation": "update", "scope": "record", "target": "core.Ledger", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "authorization": "core.LedgerPolicy"},
+    {"id": "GetLedger", "effect": "query", "operation": "read", "scope": "record", "target": "core.Ledger", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one"}
+  ]
+}

@@ -1,0 +1,279 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "RevenueIntelligence",
+  "module": "KCF",
+  "namespace": "intelligence",
+  "profile": "analytics-platform",
+  "profiles": [
+    "analytics-platform",
+    "ai-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "TEMPORAL",
+    "REASONING",
+    "MEASURE",
+    "LOGIC",
+    "MATH",
+    "SECURITY",
+    "LINEAGE",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "ANALYTICS",
+    "AI"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "TEMPORAL": "1.0.0",
+    "REASONING": "1.0.0",
+    "MEASURE": "1.0.0",
+    "LOGIC": "1.0.0",
+    "MATH": "1.0.0",
+    "SECURITY": "1.0.0",
+    "LINEAGE": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "ANALYTICS": "1.0.0",
+    "AI": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Sale",
+      "qualifiedName": "intelligence.Sale",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "saleId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "amount",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "name": "occurredAt",
+          "type": "DateTime",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "SalesDataset",
+      "qualifiedName": "intelligence.SalesDataset",
+      "kind": "INFORMATION",
+      "references": [
+        "intelligence.Sale"
+      ],
+      "metadata": {
+        "informationKind": "RECORD"
+      }
+    },
+    {
+      "id": "Revenue",
+      "qualifiedName": "intelligence.Revenue",
+      "kind": "MEASURE",
+      "references": []
+    },
+    {
+      "id": "RevenueForecast",
+      "qualifiedName": "intelligence.RevenueForecast",
+      "kind": "REASONING",
+      "references": [
+        "intelligence.Revenue"
+      ],
+      "metadata": {
+        "reasoningKind": "HYPOTHESIS"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "dataset-describes-sale",
+      "rootKind": "ASSOCIATION",
+      "source": "intelligence.SalesDataset",
+      "target": "intelligence.Sale",
+      "strength": 1.0,
+      "definition": "dataset-describes-sale"
+    },
+    {
+      "id": "forecast-uses-revenue",
+      "rootKind": "DEPENDENCY",
+      "source": "intelligence.RevenueForecast",
+      "target": "intelligence.Revenue",
+      "strength": 1.0,
+      "definition": "forecast-uses-revenue"
+    }
+  ],
+  "lifecycles": [],
+  "actions": [],
+  "collectionTransforms": [
+    {
+      "id": "MonthlyRevenue",
+      "keys": [
+        "month"
+      ],
+      "inputs": [],
+      "operation": "aggregate",
+      "inputSchema": "SalesSchema",
+      "outputSchema": "MonthlyRevenueSchema",
+      "grain": "month",
+      "bounded": true
+    }
+  ],
+  "events": [],
+  "resources": [],
+  "organizations": [],
+  "information": [
+    {
+      "id": "SalesDataset",
+      "subjects": [
+        "intelligence.Sale"
+      ],
+      "authors": [],
+      "sources": [
+        "intelligence.Sale"
+      ],
+      "audiences": [],
+      "evidence": [],
+      "informationKind": "RECORD",
+      "representation": "json",
+      "recordedAt": "2026-07-22T12:00:00Z",
+      "qualifiedName": "intelligence.SalesDataset"
+    }
+  ],
+  "rules": [],
+  "policies": [],
+  "reasoning": [
+    {
+      "id": "RevenueForecast",
+      "premises": [
+        "intelligence.Revenue"
+      ],
+      "evidence": [],
+      "assumptions": [],
+      "contradictions": [],
+      "alternatives": [],
+      "reasoningKind": "HYPOTHESIS",
+      "proposition": "historical revenue predicts future revenue",
+      "method": "INDUCTIVE",
+      "confidence": 0.8,
+      "qualifiedName": "intelligence.RevenueForecast"
+    }
+  ],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "runtimeRequirements": [
+    "SchemaRegistry",
+    "Lineage",
+    "BatchProcessing",
+    "StreamProcessing",
+    "MetricEvaluation",
+    "Authorization",
+    "FeatureStore",
+    "ModelRegistry",
+    "Training",
+    "Serving",
+    "DriftMonitoring"
+  ],
+  "emitters": [
+    {
+      "id": "vertical-slice",
+      "supports": [
+        "SchemaRegistry",
+        "Lineage",
+        "BatchProcessing",
+        "StreamProcessing",
+        "MetricEvaluation",
+        "Authorization",
+        "FeatureStore",
+        "ModelRegistry",
+        "Training",
+        "Serving",
+        "DriftMonitoring"
+      ],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "intelligence.Sale": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 5,
+      "column": 3,
+      "endLine": 10,
+      "endColumn": 4
+    },
+    "intelligence.SalesDataset": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 17,
+      "endColumn": 4
+    },
+    "intelligence.Revenue": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 18,
+      "column": 3,
+      "endLine": 18,
+      "endColumn": 22
+    },
+    "intelligence.RevenueForecast": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 19,
+      "column": 3,
+      "endLine": 25,
+      "endColumn": 4
+    },
+    "dataset-describes-sale": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 27,
+      "column": 3,
+      "endLine": 27,
+      "endColumn": 86
+    },
+    "forecast-uses-revenue": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 28,
+      "endColumn": 90
+    },
+    "MonthlyRevenue": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 30,
+      "column": 3,
+      "endLine": 37,
+      "endColumn": 4
+    }
+  }
+}

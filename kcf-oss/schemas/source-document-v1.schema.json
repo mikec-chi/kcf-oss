@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/source-document-v1.schema.json",
+  "title": "KCF Source Document v1",
+  "description": "A natural-language source segmented into addressable units, so extracted model constructs can cite the exact prose they came from. This is the input side of source-relative coverage.",
+  "type": "object",
+  "required": ["sourceDocumentVersion", "documentId", "segments"],
+  "properties": {
+    "sourceDocumentVersion": {"const": "1.0.0"},
+    "documentId": {"type": "string", "minLength": 1},
+    "title": {"type": "string"},
+    "documentKind": {"type": "string", "description": "The source modality, e.g. prose, flowchart, org-chart, form. Resolves to a document profile that guides extraction and constrains segment kinds."},
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["segmentId", "text"],
+        "properties": {
+          "segmentId": {"type": "string", "minLength": 1},
+          "text": {"type": "string"},
+          "kind": {"enum": ["statement", "heading", "note", "example", "question", "node", "edge", "decision", "field", "section", "position", "unit", "reporting-line", "cell", "validation"]},
+          "validatedBy": {"type": "string"},
+          "validatedAt": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

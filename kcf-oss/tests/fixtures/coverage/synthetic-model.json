@@ -1,0 +1,19 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "BillingSynthetic",
+  "module": "KCF",
+  "namespace": "fin",
+  "concepts": [
+    {"id": "Invoice", "qualifiedName": "fin.Invoice", "kind": "ENTITY", "attributes": [
+      {"name": "invoiceId", "type": "UUID", "identity": true}
+    ]}
+  ],
+  "rules": [
+    {"id": "SynthRule", "qualifiedName": "fin.SynthRule", "ruleKind": "CONSTRAINT", "condition": "amount is greater than zero", "effects": ["fin.Invoice"], "extractionMethod": "llm", "extractionModel": "domain-llm-v1", "confidence": 0.6}
+  ],
+  "assertions": [
+    {"id": "SynthClaim", "qualifiedName": "fin.SynthClaim", "subject": "fin.Invoice", "predicate": "requiresApproval", "object": true, "status": "inferred", "extractionMethod": "llm", "extractionModel": "domain-llm-v1", "confidence": 0.7},
+    {"id": "HumanClaim", "qualifiedName": "fin.HumanClaim", "subject": "fin.Invoice", "predicate": "isTaxable", "object": true, "status": "asserted", "reviewedBy": "sme:jane", "recordedAt": "2026-07-01T00:00:00Z"}
+  ]
+}

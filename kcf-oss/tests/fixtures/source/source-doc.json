@@ -1,0 +1,9 @@
+{
+  "sourceDocumentVersion": "1.0.0",
+  "documentId": "shop-process-notes",
+  "title": "Validated procurement notes",
+  "segments": [
+    {"segmentId": "s1", "text": "Customers place orders in the system.", "kind": "statement", "validatedBy": "sme:jane"},
+    {"segmentId": "s2", "text": "Each order contains one or more products.", "kind": "statement", "validatedBy": "sme:jane"}
+  ]
+}

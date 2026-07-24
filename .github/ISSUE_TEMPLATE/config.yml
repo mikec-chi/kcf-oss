@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question / discussion
+    url: https://github.com/OWNER/kcf/discussions
+    about: Ask how to model something, or discuss the standard's direction.
+  - name: Quickstart & docs
+    url: https://github.com/OWNER/kcf#60-second-quickstart
+    about: Try the 60-second hello world before filing an issue.

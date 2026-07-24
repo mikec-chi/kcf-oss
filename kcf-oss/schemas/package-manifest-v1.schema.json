@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/package-manifest-v1.schema.json",
+  "title": "KCF Package Manifest v1",
+  "description": "Declares a distributable KCF package and its kind, so the vocabulary layer, reusable business-pattern libraries, and per-organization knowledge can be versioned and shipped separately.",
+  "type": "object",
+  "required": ["packageManifestVersion", "packageKind", "name", "version"],
+  "properties": {
+    "packageManifestVersion": {"const": "1.0.0"},
+    "packageKind": {
+      "enum": ["vocabulary", "pattern-library", "organizational-knowledge"],
+      "description": "vocabulary = the grammar/engine (org- and domain-agnostic); pattern-library = reusable type-level patterns (cross-organization); organizational-knowledge = one organization's instance data (single-tenant, private)."
+    },
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "description": {"type": "string"},
+    "provides": {
+      "type": "object",
+      "properties": {
+        "patterns": {"type": "array", "items": {"type": "string"}},
+        "roles": {"type": "array", "items": {"type": "string"}},
+        "presets": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "dependsOn": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "packageKind"],
+        "properties": {
+          "name": {"type": "string"},
+          "version": {"type": "string"},
+          "packageKind": {"enum": ["vocabulary", "pattern-library", "organizational-knowledge"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "contents": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

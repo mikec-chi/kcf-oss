@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/coverage-model-v1.schema.json",
+  "title": "KCF Knowledge Coverage Model v1",
+  "description": "Declares, per profile, the knowledge obligations a domain model should satisfy. The grammar defines what is well-formed; this model defines what is complete.",
+  "type": "object",
+  "required": ["coverageModelVersion", "obligations"],
+  "properties": {
+    "coverageModelVersion": {"const": "1.0.0"},
+    "obligations": {"type": "array", "items": {"$ref": "#/$defs/obligation"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "obligation": {
+      "type": "object",
+      "required": ["id", "title", "obligation", "level", "profiles"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^coverage(\\.[a-z0-9-]+)+$"},
+        "title": {"type": "string"},
+        "obligation": {
+          "enum": [
+            "entity-has-identity",
+            "concept-kind-has-lifecycle",
+            "concept-kind-has-crud",
+            "concept-kind-has-set-operation",
+            "at-least-one-transformation",
+            "action-effect-has-fields",
+            "at-least-one-concept-kind",
+            "at-least-one-collection"
+          ]
+        },
+        "level": {"enum": ["required", "recommended", "info"]},
+        "profiles": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "conceptKind": {"type": "string"},
+        "effects": {"type": "array", "items": {"type": "string"}},
+        "fields": {"type": "array", "items": {"type": "string"}},
+        "exemptTraits": {"type": "array", "items": {"type": "string"}, "description": "Concept traits that exempt a concept from write obligations (CRUD/set/transform); an exempt concept needs only read/query."},
+        "collection": {"type": "string"},
+        "dimension": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

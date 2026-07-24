@@ -1,0 +1,25 @@
+(* KCF architecture emitter profile. *)
+architecture-model = "architecture", "model", identifier, "{",
+                     architecture-element, { architecture-element }, "}" ;
+architecture-element = system-def | service-def | interface-def | topology-def
+                     | deployment-def | boundary-def ;
+system-def = "system", identifier, "{", { "capability", ":", semantic-ref, ";" },
+             { "service", ":", semantic-ref, ";" }, "}" ;
+service-def = "service", identifier, "{", "realizes", ":", semantic-ref, ";",
+              { "interface", ":", semantic-ref, ";" },
+              [ "runtime", ":", semantic-ref, ";" ], "}" ;
+interface-def = "interface", identifier, "{", "contract", ":", semantic-ref,
+                ";", [ "protocol", ":", identifier, ";" ], "}" ;
+topology-def = "topology", identifier, "{", topology-node,
+               { topology-node | topology-edge }, "}" ;
+topology-node = "node", identifier, "{", { "hosts", ":", semantic-ref, ";" },
+                [ "environment", ":", semantic-ref, ";" ], "}" ;
+topology-edge = "connect", identifier, "->", identifier,
+                [ "via", semantic-ref ], ";" ;
+deployment-def = "deployment", identifier, "{", "artifact", ":", semantic-ref,
+                 ";", "target", ":", semantic-ref, ";",
+                 [ "version", ":", string, ";" ], "}" ;
+boundary-def = "boundary", identifier, "{", { "contains", ":", semantic-ref, ";" },
+               { "control", ":", semantic-ref, ";" }, "}" ;
+identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;
+string = ? KCF string ? ;

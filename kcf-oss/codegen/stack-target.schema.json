@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/kcf/kcf-oss/codegen/stack-target-v1.schema.json",
+  "title": "stack-target-v1",
+  "description": "A tech-stack descriptor for KCF LLM code generation. Declares the target technologies and conventions so the code-generation prompt is stack-specific and reproducible. Ship one per shipped example under stacks/<id>/stack.json; users can author their own to target any stack.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stackTargetVersion", "id", "title", "tier", "language"],
+  "properties": {
+    "stackTargetVersion": { "const": "1.0.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable kebab-case id, e.g. fastapi-sqlmodel-postgres"
+    },
+    "title": { "type": "string" },
+    "tier": {
+      "type": "string",
+      "enum": ["backend", "frontend", "fullstack"],
+      "description": "Which tier this stack generates. backend = persistence + action contract + OpenAPI/Swagger; frontend = UI generated against a backend's OpenAPI."
+    },
+    "language": { "type": "string", "description": "Primary language, e.g. Python, TypeScript" },
+    "framework": { "type": "string", "description": "Web/app/UI framework, e.g. FastAPI, Express, Django + DRF, React" },
+    "orm": { "type": "string", "description": "Data-access layer (backend), e.g. SQLModel, Prisma, Django ORM" },
+    "database": { "type": "string", "description": "Datastore (backend), e.g. PostgreSQL" },
+    "apiStyle": { "type": "string", "enum": ["rest", "graphql", "rpc", "none"], "default": "rest" },
+    "apiDocs": { "type": "string", "description": "Backend: how the OpenAPI/Swagger interface is exposed (tool + path), e.g. 'FastAPI built-in /docs', 'drf-spectacular /api/docs', 'swagger-ui-express /docs'. Frontend: the OpenAPI client generator, e.g. 'openapi-typescript + openapi-fetch'." },
+    "testing": { "type": "string", "description": "Test framework, e.g. pytest, vitest" },
+    "conventions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Short, imperative conventions the generator must follow (naming, layering, migration tool, how optimistic concurrency / authorization are expressed in this stack)."
+    },
+    "example": {
+      "type": "string",
+      "description": "Relative path to the single-shot EXAMPLE.md the LLM imitates."
+    }
+  }
+}

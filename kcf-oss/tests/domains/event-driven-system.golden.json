@@ -1,0 +1,256 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "FulfillmentEvents",
+  "module": "KCF",
+  "namespace": "fulfillment",
+  "profile": "event-driven-system",
+  "profiles": [
+    "event-driven-system"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "TEMPORAL",
+    "MEASURE",
+    "INTEGRATION",
+    "SECURITY",
+    "LINEAGE",
+    "ARCHITECTURE"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "TEMPORAL": "1.0.0",
+    "MEASURE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "LINEAGE": "1.0.0",
+    "ARCHITECTURE": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Shipment",
+      "qualifiedName": "fulfillment.Shipment",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "shipmentId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "Carrier",
+      "qualifiedName": "fulfillment.Carrier",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "TenderShipment",
+      "qualifiedName": "fulfillment.TenderShipment",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "ShipmentTendered",
+      "qualifiedName": "fulfillment.ShipmentTendered",
+      "kind": "EVENT",
+      "references": []
+    },
+    {
+      "id": "TenderCapacity",
+      "qualifiedName": "fulfillment.TenderCapacity",
+      "kind": "RESOURCE",
+      "references": [],
+      "metadata": {
+        "capacity": 100
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "carrier-participates",
+      "rootKind": "PARTICIPATION",
+      "source": "fulfillment.Carrier",
+      "target": "fulfillment.TenderShipment",
+      "strength": 1.0,
+      "definition": "carrier-participates"
+    },
+    {
+      "id": "tender-transforms-shipment",
+      "rootKind": "TRANSFORMATION",
+      "source": "fulfillment.TenderShipment",
+      "target": "fulfillment.Shipment",
+      "strength": 1.0,
+      "definition": "tender-transforms-shipment"
+    }
+  ],
+  "lifecycles": [],
+  "actions": [
+    {
+      "id": "Tender",
+      "effect": "command",
+      "mutations": [
+        "status"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "fulfillment.Shipment",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "fulfillment.TenderPolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [
+    {
+      "id": "ShipmentTendered",
+      "mutable": false
+    }
+  ],
+  "resources": [
+    {
+      "id": "TenderCapacity",
+      "capacity": 100
+    }
+  ],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "runtimeRequirements": [
+    "Messaging",
+    "Correlation",
+    "Idempotency",
+    "EventStore",
+    "Authorization",
+    "Observability"
+  ],
+  "emitters": [
+    {
+      "id": "dbml",
+      "supports": [
+        "Messaging",
+        "Correlation",
+        "Idempotency",
+        "EventStore",
+        "Authorization",
+        "Observability"
+      ],
+      "unsupportedPolicy": "error"
+    },
+    {
+      "id": "vertical-slice",
+      "supports": [
+        "Messaging",
+        "Correlation",
+        "Idempotency",
+        "EventStore",
+        "Authorization",
+        "Observability"
+      ],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "fulfillment.Shipment": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 4,
+      "column": 3,
+      "endLine": 8,
+      "endColumn": 4
+    },
+    "fulfillment.Carrier": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 9,
+      "column": 3,
+      "endLine": 9,
+      "endColumn": 20
+    },
+    "fulfillment.TenderShipment": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 10,
+      "endColumn": 26
+    },
+    "fulfillment.ShipmentTendered": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 36
+    },
+    "fulfillment.TenderCapacity": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 12,
+      "column": 3,
+      "endLine": 12,
+      "endColumn": 44
+    },
+    "carrier-participates": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 14,
+      "column": 3,
+      "endLine": 14,
+      "endColumn": 91
+    },
+    "tender-transforms-shipment": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 15,
+      "endColumn": 99
+    },
+    "Tender": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 17,
+      "column": 3,
+      "endLine": 28,
+      "endColumn": 4
+    }
+  }
+}
