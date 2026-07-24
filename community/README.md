@@ -25,7 +25,6 @@ And these live in the core tree (contribution paths documented in
 | Area | Contribute | Where |
 |---|---|---|
 | 🛠️ **Codegen stacks** | New backend/frontend targets (a worked `EXAMPLE.md`) | `kcf-oss/codegen/stacks/` |
-| 📦 **Presets** | New domain profile presets | `kcf-oss/profiles/presets/` |
 | 🔌 **Integrations** | MCP host configs, editor plugins, connectors | `kcf-oss/integrations/` |
 
 ## How it works

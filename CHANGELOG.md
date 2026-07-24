@@ -29,7 +29,7 @@ First public release of the open standard. Cut this section to a dated version
   surface, the reference compiler, the semantic analyzer, and the reusable
   application-generation prompt workflow. `grammar-stack` 1.3.0.
 - **Semantic IR** — the `model-ir-v1` contract (`ir` 1.0.0) with source spans,
-  plus the preset and delta schemas.
+  plus the delta schema.
 - **Semantic-rule catalogue** — combined KCF + stack-neutral `semantic-core`
   rules with stable diagnostic IDs and coverage tracking (`rules` catalogue).
 - **Coverage: build-operation guidance.** `[rules]` `kcf assess` reports
@@ -42,9 +42,6 @@ First public release of the open standard. Cut this section to a dated version
   model (analyzer-clean); `ready` is the completeness goal and its gaps travel to
   the codegen prompt as guidance. (Coverage-model contract + `coverage-model-v1`
   schema updated.)
-- **Presets** — six foundational profiles (business-application,
-  operational-system, organizational-knowledge, event-driven-system,
-  ai-application, analytics-platform) with automatic dependency closure.
 - **Code-generation pack** — `codegen/`: a tier-aware, tech-stack-agnostic system
   prompt, per-tier prompt templates, and a per-construct coverage audit
   (`CONSTRUCT_COVERAGE.md`) mapping every `model-ir-v1` construct to a backend and

@@ -9,7 +9,7 @@ These are the **standard**, and they are free to use, fork, and build on —
 forever, under [Apache-2.0](LICENSE):
 
 - **The grammars** — all 29 EBNF modules and the `KCF` metagrammar.
-- **The semantic IR contract** — `model-ir-v1` and the preset/delta schemas.
+- **The semantic IR contract** — `model-ir-v1` and the delta schema.
 - **The reference compiler** — `.kcf` text → normalized IR.
 - **The semantic analyzer** — validity, coverage, pattern-proof, role checks
   (`kcf assess`).
@@ -33,8 +33,9 @@ A commercial platform from **Composable Holdings Inc.** composes this standard
 and adds operational capabilities
 on top — for example the deterministic **emitters** (vertical-slice, and
 the tech-stack target/agentic emitters), a persisted semantic knowledge graph,
-additional industry-specific pattern presets, runtime/drift tooling, and an
-execution engine. That product **imports** the open standard; it never copies it
+the domain **presets** (the foundational and industry-specific profile library),
+runtime/drift tooling, and an execution engine. That product **imports** the open
+standard; it never copies it
 and never replaces it.
 
 ## The invariants we hold ourselves to
@@ -45,7 +46,7 @@ and never replaces it.
 2. **The open gate stands alone.** `kcf check` passes using only this
    repository. It has no proprietary dependency.
 3. **What is open stays open.** Everything in the open list above — the
-   grammars, IR, compiler, analyzer, foundational presets, and the LLM codegen
+   grammars, IR, compiler, analyzer, and the LLM codegen
    pack — stays open; new commercial features are additive on top of the IR.
    (Before the first public release the boundary was set deliberately at the IR:
    deterministic emitters are a commercial concern, since the open standard's job

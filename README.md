@@ -139,7 +139,6 @@ uvicorn app:app --app-dir kcf-oss/playground   # → http://127.0.0.1:8000
 | **Compiler** | `.kcf` text → normalized semantic IR with source spans |
 | **Analyzer** | validity + coverage + pattern-proof + role-resolution checks |
 | **IR schema** | versioned `model-ir-v1` JSON contract you can target from any tool |
-| **Presets** | 6 composable foundational profiles (business-application, event-driven-system, analytics-platform, …) |
 | **Codegen pack** | `codegen/` — a stack-agnostic system prompt + single-shot examples across **backend** (FastAPI, Express/Prisma, Django — each with Swagger) and **frontend** (React/TS bound to the backend's OpenAPI) tiers, plus a full per-construct coverage audit |
 | **MCP server** | `mcp/` — plug the toolchain into Claude / ChatGPT / VS Code; model a domain and generate code conversationally (`kcf-mcp`) |
 | **LLM workflow** | an ordered 16-step prompt package (`kcf-oss/workflows/`) for going from requirements to a validated IR |
@@ -158,7 +157,7 @@ uvicorn app:app --app-dir kcf-oss/playground   # → http://127.0.0.1:8000
 ## Open core
 
 KCF is open under **Apache-2.0** — the standard, compiler, analyzer, IR schema,
-foundational presets, and the codegen pack are free to use and always will be.
+and the codegen pack are free to use and always will be.
 A separate commercial platform builds *on top of* this standard; it never
 subtracts from it. See **[OPEN_CORE.md](OPEN_CORE.md)** for the exact promise.
 
@@ -173,7 +172,7 @@ KCF gets better the more people model with it. Two tracks — start with
   **showcase** of apps you shipped, and **experimental grammars**. Each area has a
   template and a quick check (models must be `valid` — `python
   community/models/validate.py`).
-- **Improve the core** — new **codegen stacks** and **presets**, **analyzer rules**,
+- **Improve the core** — new **codegen stacks**, **analyzer rules**,
   **integrations**, or **grammar** changes (read **[EXTENDING](kcf-oss/docs/EXTENDING.md)**
   and open a **Grammar RFC** first). The core is gated by `kcf check` (runs in CI on
   every PR).

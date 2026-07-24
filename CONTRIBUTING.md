@@ -10,7 +10,7 @@ analyzer, tooling).
 - Be respectful; we follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 - By contributing you agree your work is licensed under [Apache-2.0](LICENSE).
 - KCF is open-core. This repository is the **open standard** — grammars, compiler,
-  analyzer, IR schema, foundational presets, and the LLM codegen pack. It **stops at
+  analyzer, IR schema, and the LLM codegen pack. It **stops at
   the semantic IR**; deterministic emitters and the runtime are a separate commercial
   platform that composes it. See [OPEN_CORE.md](OPEN_CORE.md) — we won't merge changes
   that make the open standard depend on proprietary code.
@@ -48,12 +48,6 @@ copy a folder under [`kcf-oss/codegen/stacks/`](kcf-oss/codegen/stacks/), write 
 `EXAMPLE.md` that realizes the reference `business-application` model in your stack —
 honoring its lifecycle and the `UpdateCustomer` action contract. See
 [`kcf-oss/codegen/README.md`](kcf-oss/codegen/README.md).
-
-### Adding a domain preset
-
-New foundational profiles live in
-[`kcf-oss/profiles/presets/`](kcf-oss/profiles/presets/) with automatic dependency
-closure. Presets that capture a broad, reusable domain shape are welcome.
 
 ### Changing or adding a grammar
 
