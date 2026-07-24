@@ -5,7 +5,7 @@
   "description": "Event-oriented application with process, integration, lineage, security, and runtime semantics.",
   "requestedModules": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "INFORMATION", "RESOURCE", "TEMPORAL", "ACTION", "INTEGRATION", "SECURITY", "LINEAGE", "ARCHITECTURE"],
   "requiredRuntimeCapabilities": ["Messaging", "Correlation", "Idempotency", "EventStore", "Authorization", "Observability"],
-  "defaultEmitters": ["dbml", "vertical-slice"],
+  "defaultEmitters": [],
   "requiredPatterns": [],
   "recommendedPatterns": [],
   "prohibitedPatterns": []

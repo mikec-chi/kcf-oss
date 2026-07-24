@@ -85,7 +85,7 @@ requirements ──(author / NL / document / pattern front door)──▶ model-
 
 ## Why "lossless handoff" is the whole point
 
-Whatever consumes the IR — the LLM codegen pack, or a deterministic emitter —
+Whatever consumes the IR — the LLM codegen pack, or a separate commercial platform —
 must account for every construct and either realize it or explicitly mark it
 *unsupported*; it may **never silently drop it** (decision D-005). `dropped: []`
 is the machine-checkable promise that what you generate reflects the entire
@@ -99,8 +99,8 @@ specification; generating code is a separate, swappable step. The open path is
 the **[codegen pack](../codegen/)** — a stack-agnostic system prompt plus a
 single-shot example per stack that your own LLM uses to realize the IR in any
 technology, returning a coverage self-audit that proves nothing was dropped.
-(Deterministic emitters live in the separate commercial platform; the IR is the
-contract either targets.)
+(A separate commercial platform builds on the same IR; the IR is the
+contract either target consumes.)
 
 ## Next
 

@@ -12,7 +12,6 @@ Closes #
 - [ ] Analyzer / coverage rules — rule IDs in catalogue; negative fixtures added
 - [ ] IR schema — versioned with a migration/compatibility note
 - [ ] Preset / profile
-- [ ] Emitter — produces a trace manifest; no silently dropped meaning
 - [ ] Docs / workflow / examples only
 
 ## Checklist

@@ -1,11 +1,10 @@
 # KCF Versioning and Compatibility
 
-KCF versions four contracts independently:
+KCF versions three contracts independently:
 
 - grammar-stack version;
 - normalized semantic IR version;
-- semantic-rule catalogue version;
-- emitter version.
+- semantic-rule catalogue version.
 
 `config/compatibility-matrix.json` declares supported combinations.
 `config/module-lock.json` records each grammar module version and SHA-256 digest.
@@ -23,6 +22,5 @@ Semantic changes follow these rules:
 Use `tools/semantic_delta.py` before release and `tools/migrate_ir.py` when an
 older or unversioned IR document must be brought to the current schema.
 Recompile current `.kcf` source whenever possible; migration is for persisted IR
-without a current source representation. Before publishing, run compatibility
-checks, verify trace manifests, and register an approved IR under a new immutable
-name/version entry.
+without a current source representation. Run compatibility checks before
+publishing.

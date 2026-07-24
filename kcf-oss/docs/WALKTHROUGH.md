@@ -151,8 +151,7 @@ realized / delegated / out-of-tier / unsupported, with `dropped: []`.
 `dropped: []` is the guarantee that **nothing in the model was silently lost** in
 the handoff (decision D-005). The LLM builds against a specification that is
 complete, consistent, and traceable — not against prose it must guess at. (KCF
-stops at the IR; deterministic emitters that consume the same IR are part of the
-separate commercial platform.)
+stops at the IR; a separate commercial platform builds on the same IR.)
 
 ---
 
@@ -198,4 +197,4 @@ requirements ──(01b NL / 01c document / 02b pattern / author)──▶ model
 Recommended and info gaps never block `ready`; they are advisories you resolve at
 your discretion. This walkthrough is asserted end-to-end in the release gate: the
 draft must be *not ready* (with the identity gap) and the fixed model must be
-*ready* with a lossless emitter handoff.
+*ready*, with nothing dropped on the way to code.

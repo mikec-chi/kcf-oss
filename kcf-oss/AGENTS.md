@@ -19,8 +19,8 @@ and `../.llm/MAINTENANCE.md` before editing.
 
 Do not hand-edit semantic catalogues, coverage, fixture indexes, module locks,
 compiler `.golden.json` files, or updated PDFs. Change their sources and
-regenerate them using `.llm/MAINTENANCE.md`. (kcf-oss stops at the IR — it has no
-emitters or emitter goldens; those are part of the separate commercial overlay.)
+regenerate them using `.llm/MAINTENANCE.md`. (kcf-oss stops at the IR; a separate
+commercial platform builds on top of it.)
 
 ## Required checks
 
@@ -40,10 +40,9 @@ explicit model assertions; do not represent them as automatic structural proof.
 
 This open-source stack is `KCF` (`kcf-oss/`). A separate proprietary overlay
 (maintained as its own product, not part of this repository) composes this stack.
-Keep KCF grammar identifiers free of any commercial-overlay branding, and never
-copy proprietary overlay code (its knowledge-graph emitter, business-pattern
-presets, runtime, pattern-authoring, or registry) into `kcf-oss/`. The dependency
-arrow points one way only: the overlay imports `kcf-oss`, never the reverse.
+Keep KCF grammar identifiers free of any commercial-platform branding, and never
+copy proprietary platform code into `kcf-oss/`. The dependency
+arrow points one way only: the platform imports `kcf-oss`, never the reverse.
 
 ## Preset scope
 

@@ -44,12 +44,12 @@ governance. These map to:
 - `INTEGRATION`, `SECURITY`, and `LINEAGE` for reusable cross-dimensional
   operational profiles;
 - `ARCHITECTURE`, `EXPERIENCE`, `DESIGN`, `ANALYTICS`, and `AI` for
-  semantic-preserving emitter profiles;
+  semantic-preserving dimension profiles;
 - the manifest and integrity lock; versioned JSON Schemas; textual compiler;
   profile resolver; validator, linter, analyzer, and conformance fixtures;
   semantic-delta, migration, and compatibility tools; and the LLM code-generation
   pack (`codegen/`) that turns a `ready` IR into an application for any stack.
-  (Deterministic emitters and the runtime/registry are the commercial overlay.)
+  (A separate commercial platform builds on the same IR.)
 
 The PDFs call the series Parts I-III of V. This implementation covers only the
 three supplied documents and leaves extension points for later execution-focused

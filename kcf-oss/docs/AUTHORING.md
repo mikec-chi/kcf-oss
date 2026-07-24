@@ -1,8 +1,8 @@
 # KCF Domain Authoring
 
 The `AUTHORING` grammar is an ergonomic, source-controlled input language. The
-compiler converts it into canonical normalized semantic IR; emitters and
-analyzers consume the IR rather than the authoring syntax directly.
+compiler converts it into canonical normalized semantic IR; the analyzer and code
+generation consume the IR rather than the authoring syntax directly.
 The `.kcf` file is the editable source. Generated IR includes an embedded
 `sourceMap` and must be regenerated after a source repair rather than edited by
 hand.

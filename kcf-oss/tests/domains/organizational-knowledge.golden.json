@@ -352,36 +352,7 @@
     "AccessControl",
     "Audit"
   ],
-  "emitters": [
-    {
-      "id": "knowledge-graph",
-      "supports": [
-        "KnowledgeGraph",
-        "Provenance",
-        "TemporalQuery",
-        "PolicyEvaluation",
-        "Inference",
-        "IdentityResolution",
-        "AccessControl",
-        "Audit"
-      ],
-      "unsupportedPolicy": "error"
-    },
-    {
-      "id": "vertical-slice",
-      "supports": [
-        "KnowledgeGraph",
-        "Provenance",
-        "TemporalQuery",
-        "PolicyEvaluation",
-        "Inference",
-        "IdentityResolution",
-        "AccessControl",
-        "Audit"
-      ],
-      "unsupportedPolicy": "error"
-    }
-  ],
+  "emitters": [],
   "runtimeBindings": [],
   "sourceMap": {
     "acme.Discount": {

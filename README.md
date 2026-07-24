@@ -82,8 +82,7 @@ IR identity was realized and nothing dropped (`dropped: []`). See
 tour, [`kcf-oss/docs/WALKTHROUGH.md`](kcf-oss/docs/WALKTHROUGH.md).
 
 KCF **stops at the IR** — a complete, machine-checked model is the deliverable.
-Turning it into running code is the LLM codegen pack's job (deterministic
-emitters are part of the separate commercial platform).
+Turning it into running code is the LLM codegen pack's job.
 
 > **From source instead:** `git clone https://github.com/mikec-chi/kcf-oss.git && cd kcf-oss && pip install -e .`
 > A source checkout also gives you the contributor gate (`kcf check`) and the

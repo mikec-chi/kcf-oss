@@ -23,7 +23,7 @@ Lexer -> parser AST -> profile closure -> normalized semantic IR
 The textual model is the editable semantic source; the generated semantic IR is
 the machine handoff contract and **kcf-oss stops there** — repair the `.kcf`
 source and recompile instead of hand-editing generated IR. Code generation from a
-`ready` IR is the LLM `codegen/` pack (deterministic emitters are proprietary).
+`ready` IR is the LLM `codegen/` pack (a separate commercial platform builds on the same IR).
 `semantic-core` owns neutral rules; KCF owns concepts, dimensions, profiles, and
 compilation. DBML is a separate stack, not a KCF dependency.
 

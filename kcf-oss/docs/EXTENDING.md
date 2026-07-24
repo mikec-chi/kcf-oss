@@ -74,11 +74,10 @@ the compiler's authoring surface, analyzer handlers, emitters, and versioning.
 
    Only run `lock_modules.py` for an intentional, reviewed change — never to
    silence an unexplained hash mismatch.
-4. If a commercial overlay composes this stack downstream, its maintainers
-   re-run the overlay's own gate after an OSS grammar change (preset closures or
-   goldens there may shift). As an open-source contributor you don't need it —
-   the open stack never depends on any overlay, and `kcf check` is the gate for
-   this repository.
+4. If a separate commercial platform composes this stack downstream, its
+   maintainers re-run their own gate after an OSS grammar change. As an
+   open-source contributor you don't need it — the open stack never depends on
+   any downstream platform, and `kcf check` is the gate for this repository.
 
 If the edit is purely additive/optional you are usually done after regenerating
 locks and any affected goldens.
@@ -154,21 +153,21 @@ without a current source).
 
 ## The D-005 safety net
 
-Every emitter must return artifacts **plus** a trace manifest, and must mark any
-meaning it cannot realize as `unsupported` — it may **never silently drop it**.
-This is why adding a dimension does not immediately break emitters: unsupported
-meaning surfaces as `complete: false` with an explicit `unsupported` list, not as
-lost data. Preserve this discipline in every emitter change.
+Whatever consumes the IR must account for every construct and mark any meaning it
+cannot realize as `unsupported` — it may **never silently drop it**. This is why
+adding a dimension does not immediately break consumers: unsupported meaning
+surfaces as `complete: false` with an explicit `unsupported` list, not as lost
+data. Preserve this discipline in every change.
 
-## Interaction with a commercial overlay
+## Interaction with a commercial platform
 
-KCF is developed open-core (see `OPEN_CORE.md`). A separate commercial product
-composes this stack. The dependency arrow points one way: the overlay imports
-`kcf-oss`, never the reverse, so new open modules can only *add* capability to an
-overlay, never break it by direction. Keeping that arrow one-directional is a
-hard rule — a PR that makes the open stack depend on any overlay will not be
-merged. Re-verifying an overlay after an OSS change is the overlay maintainers'
-responsibility, done separately and outside this repository.
+KCF is developed open-core (see `OPEN_CORE.md`). A separate commercial platform
+builds on this stack. The dependency arrow points one way: the platform imports
+`kcf-oss`, never the reverse, so new open modules can only *add* capability
+downstream, never break it by direction. Keeping that arrow one-directional is a
+hard rule — a PR that makes the open stack depend on any downstream platform will
+not be merged. Re-verifying downstream after an OSS change is that platform's
+maintainers' responsibility, done separately and outside this repository.
 
 ## Governance
 

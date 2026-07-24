@@ -1,7 +1,7 @@
 # KCF Profile Presets
 
-Presets select a deterministic module closure, runtime capabilities, emitter
-defaults, and business-pattern obligations. Presets may inherit from one or more
+Presets select a deterministic module closure, runtime capabilities, and
+business-pattern obligations. Presets may inherit from one or more
 foundational presets through `extends`; the resolver deduplicates inherited
 lists, rejects cycles, and rejects any pattern that becomes both required and
 prohibited.

@@ -205,25 +205,7 @@
     "Serving",
     "DriftMonitoring"
   ],
-  "emitters": [
-    {
-      "id": "vertical-slice",
-      "supports": [
-        "SchemaRegistry",
-        "Lineage",
-        "BatchProcessing",
-        "StreamProcessing",
-        "MetricEvaluation",
-        "Authorization",
-        "FeatureStore",
-        "ModelRegistry",
-        "Training",
-        "Serving",
-        "DriftMonitoring"
-      ],
-      "unsupportedPolicy": "error"
-    }
-  ],
+  "emitters": [],
   "runtimeBindings": [],
   "sourceMap": {
     "intelligence.Sale": {

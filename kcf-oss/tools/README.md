@@ -23,9 +23,6 @@ location.
 
 The complete release gate is `python tools/kcf.py check`.
 
-Some higher-level tooling — a knowledge-graph emitter, pattern authoring
-(`pattern_harvest.py` / the `harvest-pattern` command), a package registry,
-runtime-drift analysis, and the whitepaper generator — is proprietary and lives
-in a separate commercial overlay that composes this open-source stack. That
-tooling is not part of this repository, and this open-source stack does not
-depend on it.
+Some higher-level tooling is proprietary and lives in a separate commercial
+platform that builds on this open-source stack. That tooling is not part of this
+repository, and this open-source stack does not depend on it.

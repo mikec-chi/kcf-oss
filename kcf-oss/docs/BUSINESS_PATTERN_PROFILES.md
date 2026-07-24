@@ -2,8 +2,7 @@
 
 Business-pattern presets encode reusable process and governance shapes rather
 than industry labels. A profile supplies module closure, runtime capabilities,
-emitter defaults, required patterns, recommendations, and explicit
-anti-patterns.
+required patterns, recommendations, and explicit anti-patterns.
 
 ## Selection
 

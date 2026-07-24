@@ -5,7 +5,7 @@
   "description": "Governed analytics, measures, lineage, transformation, reporting, and deployment semantics.",
   "requestedModules": ["ENTITY", "INFORMATION", "MEASURE", "TEMPORAL", "RULE", "ACTION", "LINEAGE", "ANALYTICS", "SECURITY", "ARCHITECTURE"],
   "requiredRuntimeCapabilities": ["SchemaRegistry", "Lineage", "BatchProcessing", "StreamProcessing", "MetricEvaluation", "Authorization"],
-  "defaultEmitters": ["vertical-slice"],
+  "defaultEmitters": [],
   "requiredPatterns": [],
   "recommendedPatterns": [],
   "prohibitedPatterns": []

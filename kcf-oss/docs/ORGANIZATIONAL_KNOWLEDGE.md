@@ -91,11 +91,8 @@ python tools/kcf.py compile model.kcf --output model-ir.json --validate
 python tools/kcf.py assess model-ir.json
 ```
 
-The knowledge-graph emitter (JSON-LD / RDF / SHACL) that consumes this IR is part
-of the separate commercial platform; KCF (open source) stops at the IR.
-
-The graph emitter produces `model.jsonld`, RDF Turtle in `model.ttl`, SHACL
-shapes in `shapes.ttl`, and a trace manifest.
+KCF (open source) stops at the IR. A separate commercial platform builds on the
+same IR to realize downstream artifacts.
 
 ## Knowledge governance
 

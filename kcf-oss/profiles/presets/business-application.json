@@ -5,7 +5,7 @@
   "description": "Transactional application with governed behavior, integration, experience, design, and deployment semantics.",
   "requestedModules": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "INFORMATION", "ACTION", "SECURITY", "INTEGRATION", "EXPERIENCE", "DESIGN", "ARCHITECTURE"],
   "requiredRuntimeCapabilities": ["Identity", "Persistence", "Authorization", "Audit", "Transaction", "UserExperience"],
-  "defaultEmitters": ["dbml", "vertical-slice"],
+  "defaultEmitters": [],
   "requiredPatterns": [],
   "recommendedPatterns": [],
   "prohibitedPatterns": []

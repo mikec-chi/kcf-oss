@@ -313,32 +313,7 @@
     "Transaction",
     "UserExperience"
   ],
-  "emitters": [
-    {
-      "id": "dbml",
-      "supports": [
-        "Identity",
-        "Persistence",
-        "Authorization",
-        "Audit",
-        "Transaction",
-        "UserExperience"
-      ],
-      "unsupportedPolicy": "error"
-    },
-    {
-      "id": "vertical-slice",
-      "supports": [
-        "Identity",
-        "Persistence",
-        "Authorization",
-        "Audit",
-        "Transaction",
-        "UserExperience"
-      ],
-      "unsupportedPolicy": "error"
-    }
-  ],
+  "emitters": [],
   "runtimeBindings": [],
   "sourceMap": {
     "customer.Customer": {

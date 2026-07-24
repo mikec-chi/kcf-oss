@@ -516,8 +516,8 @@ status, phase, handler when automated, and legacy aliases when applicable.
 - **Level 3 - Dimensional:** all applicable dimension invariants.
 - **Level 4 - Executable:** IR, capability contracts, bindings, plans, emitters,
   evidence, authorization, failure and compensation behavior.
-- **Level 5 - Governed:** profiles, versions, provenance, registry, extension,
-  semantic delta, testing, and model-runtime drift controls.
+- **Level 5 - Governed:** profiles, versions, provenance, extension, semantic
+  delta, and testing controls.
 
 Production KCF models SHOULD satisfy Level 5. A validator MUST report the
 highest completed level and every skipped or unavailable check.

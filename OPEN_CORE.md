@@ -23,20 +23,17 @@ forever, under [Apache-2.0](LICENSE):
 
 **OSS stops at the IR.** The open standard produces the machine-checked semantic
 IR; turning that IR into running code is done by the LLM **codegen pack** (open,
-above) or by deterministic **emitters**, which are part of the commercial overlay
-(below). The IR schema is the contract: anyone can write their own compiler,
-analyzer, or emitter against it without permission.
+above), and a separate commercial platform (below) also builds on the same IR.
+The IR schema is the contract: anyone can write their own compiler, analyzer, or
+generator against it without permission.
 
 ## What is commercial (a separate product)
 
-A commercial platform from **Composable Holdings Inc.** composes this standard
-and adds operational capabilities
-on top — for example the deterministic **emitters** (vertical-slice, and
-the tech-stack target/agentic emitters), a persisted semantic knowledge graph,
-the domain **presets** (the foundational and industry-specific profile library),
-runtime/drift tooling, and an execution engine. That product **imports** the open
-standard; it never copies it
-and never replaces it.
+A commercial platform from **Composable Holdings Inc.** builds on top of this
+standard — a separate product that turns KCF models into running systems, together
+with the operational capabilities that surround that (including a hosted profile
+library). It **imports** the open standard; it never copies it and never replaces
+it.
 
 ## The invariants we hold ourselves to
 
@@ -48,9 +45,9 @@ and never replaces it.
 3. **What is open stays open.** Everything in the open list above — the
    grammars, IR, compiler, analyzer, and the LLM codegen
    pack — stays open; new commercial features are additive on top of the IR.
-   (Before the first public release the boundary was set deliberately at the IR:
-   deterministic emitters are a commercial concern, since the open standard's job
-   is to produce a complete, machine-checked IR, not to ship code generators.)
+   (The boundary is set deliberately at the IR: the open standard's job is to
+   produce a complete, machine-checked IR and generate code from it with an LLM;
+   turning models into running systems is the commercial concern.)
 4. **The IR is a public contract.** Breaking changes to `model-ir-v1` are
    versioned and migrated in the open.
 

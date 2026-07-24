@@ -1,8 +1,9 @@
 # KCF LLM Application Workflow
 
 This folder contains an ordered prompt sequence for using a coding LLM to turn
-domain requirements into a validated KCF semantic model and then into an
-application.
+domain requirements into a validated KCF semantic model (the IR). Once the IR is
+validated, generate the application from it with the code-generation pack in
+[`../../codegen/`](../../codegen/).
 
 ## Important boundary
 
@@ -26,7 +27,8 @@ hand-editing generated IR.
    in its values.
 2. Give the LLM `00-shared-system-prompt.md` as its system or persistent project
    instruction.
-3. Run prompts `01` through `16` in order.
+3. Run prompts `01` through `10` in order — they produce the validated IR. Then
+   generate code from that IR with the pack in [`../../codegen/`](../../codegen/).
 4. Review and approve the output gate after every phase.
 5. Re-run a phase whenever an earlier artifact changes materially.
 6. Never proceed past prompt `10` while semantic validation contains errors or
@@ -51,12 +53,9 @@ commands. Replace bracketed variables such as `[DOMAIN]` before use, or provide
 | 08 | Operational profiles | `domain/07-operational-profiles.json` |
 | 09 | Author and compile the model | `domain/model.kcf`, generated `domain/model-ir.json` |
 | 10 | Validation and repair | `domain/validation-report.json` |
-| 11 | Runtime and emitter contracts | `domain/08-runtime-contract.json` |
-| 12 | Application architecture | `app/generation-plan.md` |
-| 13 | Experience and emitter models | Profile-specific model files and traceability review |
-| 14 | Vertical-slice code generation | Reference-emitter baseline, application code, and tests |
-| 15 | Semantic test generation | Rule-traceable test suite |
-| 16 | Release governance | `release/semantic-release-report.md` |
+
+Once step 10 produces a validated IR, hand it to the code-generation pack in
+[`../../codegen/`](../../codegen/) to build the application.
 
 ## Approval gates
 
@@ -65,13 +64,8 @@ commands. Replace bracketed variables such as `[DOMAIN]` before use, or provide
 - **Model gate:** Concepts, relationships, behavior, and profiles have stable
   semantic identities and no unresolved material ambiguity.
 - **Validation gate:** `kcf.py validate` reports no errors and manual
-  catalogue review has been recorded.
-- **Generation gate:** Runtime requirements and emitter support are explicit;
-  reference trace manifests are reviewed and unsupported semantics are not
-  silently discarded.
-- **Release gate:** Semantic delta, runtime drift, generated tests, and migration
-  requirements have been reviewed; stack/IR/catalogue/emitter versions are
-  compatible; registry integrity passes.
+  catalogue review has been recorded. The validated IR is the handoff to code
+  generation ([`../../codegen/`](../../codegen/)).
 
 ## Expected project layout
 
@@ -91,32 +85,16 @@ project/
     05-behavior-review.md
     06-supporting-semantics.json
     07-operational-profiles.json
-    08-runtime-contract.json
-    08-emitter-support.md
+    model.kcf
     model-ir.json
     previous-model-ir.json
     validation-report.json
     model-repair-log.md
     manual-rule-review.md
-  app/
-    generation-plan.md
-    models/
-    semantic-tests/
-  generated/
-    dbml/
-      trace-manifest.json
-    application/
-      trace-manifest.json
-    knowledge-graph/
-      model.jsonld
-      model.ttl
-      shapes.ttl
-      trace-manifest.json
-  runtime/
-    runtime-manifest.json
-  release/
-    semantic-release-report.md
 ```
+
+The validated `domain/model-ir.json` is the handoff to code generation — see
+[`../../codegen/`](../../codegen/) for turning it into an application.
 
 ## Validation commands
 
@@ -140,10 +118,9 @@ Once the IR is `ready`, generate code with an LLM using the pack in
 [`../../codegen/`](../../codegen/) — a stack-agnostic system prompt plus a
 single-shot example per stack (backend + frontend). KCF stops at the IR.
 
-Deterministic emitters (dbml, vertical-slice, knowledge-graph), runtime-drift
-analysis, and the business-pattern presets are provided by a separate commercial
-overlay that composes this open-source stack. They are not part of this
-repository; this open-source stack neither ships nor depends on them.
+Capabilities beyond the IR are provided by a separate commercial platform that
+builds on this open-source stack. They are not part of this repository; this
+open-source stack neither ships nor depends on them.
 
 The generated code must carry a coverage self-audit; an unsupported required
 semantic is a generation blocker. After release approval, register the immutable

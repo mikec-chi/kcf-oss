@@ -9,11 +9,8 @@ model and see, in one round trip:
    (the stack-agnostic system prompt + this model's IR + the stack's single-shot
    example). This is the lead path: KCF stops at the IR; your LLM writes the code.
 
-The deterministic `vertical-slice` emitter is also available (`schema.sql`,
-`openapi.json`, … + a lossless `trace-manifest`) as an optional baseline.
-
 It reuses the exact reference functions the `kcf` CLI uses — no extra semantics,
-no network calls, no proprietary overlay.
+no network calls, no proprietary code.
 
 ## Run locally
 

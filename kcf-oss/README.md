@@ -159,8 +159,8 @@ shape and a deliberately invalid shape under `tests/fixtures/`.
 
 Profile presets under `profiles/presets/` calculate syntactic and semantic
 dependency closure automatically. The IR is the stopping point: code generation
-(LLM-based, in `codegen/`, or deterministic emitters in the commercial overlay)
-consumes the IR and must diagnose unsupported meaning instead of silently
+(the LLM codegen pack in `codegen/`) consumes the IR and must diagnose unsupported
+meaning instead of silently
 dropping it (decision D-005).
 
 For governed organizational knowledge, use the `organizational-knowledge`
@@ -170,7 +170,7 @@ preset and read `docs/ORGANIZATIONAL_KNOWLEDGE.md`.
 
 `workflows/application-generation/` contains a reusable, ordered prompt package for
 turning domain requirements into a validated semantic IR and then generating an
-application by traceable vertical slices. Start with its `README.md`, configure
+application with the LLM codegen pack. Start with its `README.md`, configure
 `variables.example.json`, install `00-shared-system-prompt.md` as persistent
 context, and run prompts `01` through `16` in order.
 
@@ -188,8 +188,8 @@ context, and run prompts `01` through `16` in order.
 - Relationship inverses are derived from one canonical storage orientation.
 - Runtime execution binds semantic capability contracts to implementations;
   implementation code is not embedded in grammar definitions.
-- Code generation (LLM codegen pack, or emitters in the commercial overlay) must
-  report unsupported semantics rather than silently dropping them (D-005).
+- Code generation (the LLM codegen pack) must report unsupported semantics rather
+  than silently dropping them (D-005).
 
 ## License
 

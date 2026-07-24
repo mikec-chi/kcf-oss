@@ -5,7 +5,7 @@
   "description": "Governed organizational knowledge, policies, evidence, reasoning, identity reconciliation, temporal history, and graph publication.",
   "requestedModules": ["ORGANIZATION", "ACTOR", "INFORMATION", "RULE", "REASONING", "WORK", "INTENT", "EVENT", "TEMPORAL", "MEASURE", "ACTION", "LINEAGE", "SECURITY"],
   "requiredRuntimeCapabilities": ["KnowledgeGraph", "Provenance", "TemporalQuery", "PolicyEvaluation", "Inference", "IdentityResolution", "AccessControl", "Audit"],
-  "defaultEmitters": ["knowledge-graph", "vertical-slice"],
+  "defaultEmitters": [],
   "requiredPatterns": [],
   "recommendedPatterns": [],
   "prohibitedPatterns": []

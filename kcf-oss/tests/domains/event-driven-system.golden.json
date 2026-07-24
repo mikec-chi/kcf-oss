@@ -168,32 +168,7 @@
     "Authorization",
     "Observability"
   ],
-  "emitters": [
-    {
-      "id": "dbml",
-      "supports": [
-        "Messaging",
-        "Correlation",
-        "Idempotency",
-        "EventStore",
-        "Authorization",
-        "Observability"
-      ],
-      "unsupportedPolicy": "error"
-    },
-    {
-      "id": "vertical-slice",
-      "supports": [
-        "Messaging",
-        "Correlation",
-        "Idempotency",
-        "EventStore",
-        "Authorization",
-        "Observability"
-      ],
-      "unsupportedPolicy": "error"
-    }
-  ],
+  "emitters": [],
   "runtimeBindings": [],
   "sourceMap": {
     "fulfillment.Shipment": {

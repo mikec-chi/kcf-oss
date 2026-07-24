@@ -11,9 +11,9 @@ analyzer, tooling).
 - By contributing you agree your work is licensed under [Apache-2.0](LICENSE).
 - KCF is open-core. This repository is the **open standard** — grammars, compiler,
   analyzer, IR schema, and the LLM codegen pack. It **stops at
-  the semantic IR**; deterministic emitters and the runtime are a separate commercial
-  platform that composes it. See [OPEN_CORE.md](OPEN_CORE.md) — we won't merge changes
-  that make the open standard depend on proprietary code.
+  the semantic IR**; a separate commercial platform composes it beyond that. See
+  [OPEN_CORE.md](OPEN_CORE.md) — we won't merge changes that make the open standard
+  depend on proprietary code.
 - One focused contribution per PR; describe the *why*, not just the *what*.
 
 ---
@@ -83,8 +83,6 @@ CI runs exactly this on every pull request. Green locally ⇒ green in CI.
   normalization (`tools/normalize_stack.py --write`), lint (`tools/lint_stack.py`),
   lock regeneration, updated docs, updated compatibility metadata. Module filenames,
   start productions, and dependencies are normative in `config/grammar-stack.json`.
-- **Emitters** (in the commercial platform): must produce a `trace-manifest.json`
-  and report unsupported meaning rather than silently dropping it (decision D-005).
 - **Do not hand-edit generated files** (semantic catalogues, coverage, fixture
   indexes, module locks, `*.golden.json`) — change the source and regenerate.
 

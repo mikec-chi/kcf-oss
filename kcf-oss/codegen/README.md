@@ -9,8 +9,7 @@ of a fixed, per-framework code generator that rots.
 The IR is the durable contract, and **OSS stops there**. A tech-stack-agnostic
 **system prompt** plus a **single-shot example** per stack lets any capable LLM
 target any stack and keep up with framework changes, while the IR guarantees the
-model it builds from is complete and lossless. (Deterministic emitters are part
-of the separate commercial platform; this pack is the open path.)
+model it builds from is complete and lossless.
 
 ## Two tiers that connect via OpenAPI
 

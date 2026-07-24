@@ -4,15 +4,14 @@ All notable changes to KCF are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows
 [Semantic Versioning](https://semver.org/).
 
-KCF versions **four contracts independently** (see `kcf-oss/docs/VERSIONING.md`).
+KCF versions **three contracts independently** (see `kcf-oss/docs/VERSIONING.md`).
 Tag every contract-affecting entry with which one moved:
 
 - **`grammar-stack`** — the module set and their productions
 - **`ir`** — the normalized semantic IR shape (`model-ir-v1`)
 - **`rules`** — the semantic-rule catalogue
 
-(KCF stops at the IR; code generation is the LLM codegen pack. Deterministic
-emitters are part of the separate commercial platform, versioned there.)
+(KCF stops at the IR; code generation is the LLM codegen pack.)
 
 The package version (`pyproject.toml`) moves in lockstep with the highest-impact
 contract change in a release. Breaking changes to any contract require a major
@@ -142,7 +141,7 @@ First public release of the open standard. Cut this section to a dated version
   guide, and the Grammar RFC process.
 
 ### Notes
-- Pattern authoring (`pattern_harvest`) is a proprietary capability and is **not**
+- Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.
 
 <!--
