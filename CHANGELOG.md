@@ -23,10 +23,30 @@ First public release of the open standard. Cut this section to a dated version
 (e.g. `## [1.3.0] - YYYY-MM-DD`) when publishing to GitHub/PyPI.
 
 ### Added
-- **Open standard** — `kcf-oss`: 29 ISO/IEC 14977 EBNF grammar modules (523
+- **Open standard** — `kcf-oss`: 29 ISO/IEC 14977 EBNF grammar modules (580
   productions) rooted in the `KCF` metagrammar, the ergonomic `AUTHORING` textual
   surface, the reference compiler, the semantic analyzer, and the reusable
-  application-generation prompt workflow. `grammar-stack` 1.3.0.
+  application-generation prompt workflow. `grammar-stack` 1.11.0.
+- **Comprehensive authoring surface — `[grammar-stack]` 1.11.0.** The ergonomic
+  `.kcf` surface now expresses **all 16 dimension grammars plus the ACTION /
+  RELATIONSHIP algebra** first-class (it previously covered a structural subset):
+  rich **events** (`kind`, `trigger`, `affect-lifecycle`, `severity`,
+  `expectedness`, `correlation-key`, occurrence/detection time, `match`) — emitting
+  an event can drive the named lifecycle transition; **measures**
+  (`unit`/`aggregation`/`scale`/`period`/`threshold`/`target`); **temporal**
+  (+`calendar`); **spatial** (`geometry`/`route`); **intent** goals; **LOGIC**
+  (`proposition`/`predicate`); **MATH** (`formula`/`function`/`optimize`/
+  `distribution`/`simulation` with real math-expression ASTs); richer **actor**
+  (`role`/`authority`), **work** (BPMN `process`), **lifecycle** (state
+  entry/exit/invariant, transition trigger/guard/effect), and **resource**
+  (capacity/allocation); and the cross-cutting **profile blocks** (`integration`,
+  `security`, `lineage`, `architecture`, `experience`, `design`, `analytics`, `ai`)
+  authored as top-level sections that land in `ir[<section>]`. The compiler,
+  normalizer, and IR carry these through end to end (verified live), with new
+  reference domains (`entity-rich`, `quantitative`, `profiles`, `capability-skill`)
+  + goldens. The pre-IR guidance (`mcp/authoring-brief.md`, the MCP elicitation
+  flow), the codegen `system-prompt.md`, and `codegen/CONSTRUCT_COVERAGE.md` were
+  updated so models both **express** and **realize** the richer semantics.
 - **Semantic IR** — the `model-ir-v1` contract (`ir` 1.0.0) with source spans,
   plus the delta schema.
 - **Semantic-rule catalogue** — combined KCF + stack-neutral `semantic-core`

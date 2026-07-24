@@ -89,10 +89,10 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 |---|---|---|
 | `reasoning`, `assertions`, `identityResolutions`, `knowledgeQueries` | ✅ inference/derivation services + query endpoints (org-knowledge) | ✅ insight panels, query builders, resolved-identity views |
 | `analytics` extension | ➰ reporting endpoints / materialized views | ✅ dashboards, charts, KPI tiles (needs a charting lib) |
-| `concept` **MEASURE** | ✅ computed metric values + instrumentation | ✅ KPI tiles / sparklines |
+| `concept` **MEASURE** (`unit`, `aggregation`, `scale`, `period`, `threshold`, `target`, `tolerance`) | ✅ computed metric: `aggregation`→GROUP BY/rollup query or materialized view over `period`; `unit`/`scale` on the value; `threshold`/`target`→status + alerting | ✅ KPI tiles / sparklines with the `unit` and target/threshold bands |
 | `concept` **INTENT** | ➰ goals/outcomes as targets for processes/metadata | ✅ goal & progress displays |
 | `concept` **REASONING** / `ai` extension | ➰ inference endpoints / model-serving hooks | ✅ recommendation & explanation panels |
-| `concept` **LOGIC** / **MATH** | ✅ expression validators / computed values | ↔ show derived values; mirror simple checks |
+| **LOGIC** (`proposition`/`predicate`) / **MATH** (`formula`/`function`/`optimize`/`distribution`/`simulation`) | ✅ `proposition`→invariant/validator, `predicate`→boolean helper, `formula`/`function`→pure computed value, `optimize`→solver call (objective + constraints), `distribution`→sampler, `simulation`→Monte-Carlo runner (`trials`/`seed`) | ↔ show derived values; mirror simple predicates for instant feedback (server authoritative) |
 | `concept` **TEMPORAL** (validFrom/validTo, bitemporal) | ✅ validity columns + as-of queries + scheduling | ✅ date pickers, as-of view, validity display |
 | `concept` **SPATIAL** | ➰ geo types — needs **PostGIS** + geo binding (GeoAlchemy2 / GeoDjango / prisma geometry) | ✅ maps (needs a map lib) |
 
