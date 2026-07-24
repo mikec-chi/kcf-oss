@@ -27,18 +27,50 @@ Two tiers:
 Legend: ✅ owns · ➰ partial/optional (needs the noted add-on) · ↔ delegates to the
 other tier (calls the API / enforced server-side) · ⬚ out-of-tier.
 
+> **These dimensions are now first-class in the authoring surface** (grammar-stack
+> 1.11.0): events carry `eventKind`/`trigger`/`affectsLifecycle`/`severity`/
+> `correlationKeys`/occurrence-detection time/`matchCondition`; measures carry
+> `unit`/`aggregation`/`scale`/`threshold`/`target`; temporal/spatial/intent/logic/
+> math carry their fields; and the cross-cutting sections (`integration`, `security`,
+> `lineage`, `architecture`, `experience`, `design`, `analytics`, `ai`) are authored
+> as top-level blocks that land in `ir[<section>]`. **Realize whatever the IR
+> declares** — when these fields are present they are declared meaning, not inferred,
+> so treat them as `realized`, never `enriched`.
+
 ## Core structural constructs
 
 | IR construct | Backend | Frontend |
 |---|---|---|
 | `concept` **ENTITY** + `attribute` (identity/required/optional/type/default) | ✅ table/model + CRUD; `identity`→PK, `required`→NOT NULL, `default`→column default | ✅ list + detail + form; `type`→input widget, `required`→validation, `identity`→read-only key |
 | `concept` **ACTOR** | ✅ auth principal / role subject (maps to org roles + policies) | ✅ current-user context; role-gated components |
-| `concept` **EVENT** | ✅ append-only event table / domain event / outbox (immutable) | ✅ activity feed / timeline / notifications (read-only) |
+| `concept` **EVENT** (`eventKind`, `trigger`, `affectsLifecycle`, `severity`, `expectedness`, `correlationKeys`, occurrence/detection time, `matchCondition`) | ✅ append-only event table / domain event / outbox (immutable); `eventKind`→event type; **`affectsLifecycle`→emitting the event drives the named lifecycle transition** (through the lifecycle guard, not an ad-hoc status write); `trigger`→source binding; `correlationKeys`→correlation columns + index; `severity`/`expectedness`→columns + alerting; `matchCondition`→the detection predicate | ✅ activity feed / timeline / notifications; severity badges; correlation grouping |
 | `concept` **INFORMATION** (`informationKind`, confidentiality, freshness, completeness) | ✅ document/record/message store; `confidentiality`→access control; freshness/completeness columns | ✅ document viewer/editor; confidentiality badge; freshness indicator |
 | `concept` **RESOURCE** + `allocations` | ✅ resource entities + allocation records | ✅ resource browser / allocation UI |
 | `concept` **ORGANIZATIONAL** + `organizations` (unit/team/position, reporting, authorityDomains) | ✅ org tables + reporting edges → **RBAC scoping** | ✅ org switcher, member/role management, scope selector |
 | `relationship` (`rootKind`: composition/association/participation/governance/transformation/identity/dependency/causation/ordering/classification) | ✅ FK / join table; composition→cascade, governance→authz link, participation→membership | ✅ navigation, nested/related lists, selectors (association→picker) |
 | `lifecycle` + `transition` | ✅ status column + transition guard (reject undeclared transitions) | ✅ state badge + controls that offer **only the transitions legal from the current state** |
+
+### Rich example — an event that drives a lifecycle
+
+When the model declares the rich fields, realize them literally. For example this IR:
+
+```json
+{ "id": "OrderBreached", "qualifiedName": "shop.OrderBreached", "mutable": false,
+  "eventKind": "THRESHOLD", "affectsLifecycle": ["shop.OrderLife"],
+  "correlationKeys": ["orderId"], "severity": "high",
+  "matchCondition": "order.total > order.creditLimit" }
+```
+
+Backend realization (illustrative): an append-only `order_breached` outbox/event row
+(`orderId` + a `severity` column, indexed on the correlation key); a detector that
+raises the event when `matchCondition` holds; and — because `affectsLifecycle` names
+`OrderLife` — **emitting the event drives that lifecycle's transition through its
+guard** (reject if the transition isn't legal from the current state), rather than
+writing the status field directly. `severity` feeds alerting. Frontend: the event
+shows in the activity feed with a severity badge, grouped by `orderId`.
+
+This is the pattern for every now-authorable field: the IR value is declared meaning
+→ realize it (`realized`), don't treat it as an optional enrichment.
 
 ## Behavioral constructs
 

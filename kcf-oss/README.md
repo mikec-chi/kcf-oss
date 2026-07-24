@@ -41,9 +41,10 @@ and root module. Shared identifiers, references, conditions, expressions,
 cardinality, temporal validity, provenance, versions, profiles, capability
 contracts, assertions, and runtime instances are defined there once.
 
-The current manifest is grammar-stack `1.3.0`: 29 modules and 523 productions,
+The current manifest is grammar-stack `1.11.0`: 29 modules and 580 productions,
 with semantic IR `1.0.0`, 6 foundational profile presets, and a 270-rule KCF plus
-semantic-core catalogue. The
+semantic-core catalogue. The authoring surface is comprehensive across all 16
+dimension grammars plus the ACTION/RELATIONSHIP algebra (see `docs/AUTHORING.md`). The
 manifest, schemas, generated catalogue, and compatibility matrix remain
 authoritative when these contracts change.
 

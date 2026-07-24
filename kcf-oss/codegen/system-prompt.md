@@ -33,9 +33,17 @@ specified — you never guess its shape):
   honor exactly: `operation`, `scope`, `target`, `selection`, `input`/`output`
   cardinality, the fields it may `mutate`, and non-functional guarantees:
   `idempotency`, `atomicity`, `concurrency`, and `authorization`.
-- **`events`** — immutable facts. A correction is a new event, never an edit.
-- Plus `processes`, `resources`, `plans`, and extension objects
-  (`integration`, `security`, `lineage`, …) when present.
+- **`events`** — immutable facts (a correction is a new event, never an edit). Rich
+  events also carry `eventKind`, `trigger`, `severity`, `expectedness`,
+  `correlationKeys`, occurrence/detection time, `matchCondition`, and
+  **`affectsLifecycle`** — when set, emitting the event drives the named lifecycle
+  transition through its guard. These are declared meaning: realize them.
+- Plus `processes`, `resources`, `plans`, measures (`unit`/`aggregation`/
+  `scale`/`threshold`/`target`), temporal/spatial/intent fields, and the extension
+  objects (`integration`, `security`, `lineage`, `architecture`, `experience`,
+  `design`, `analytics`, `ai`) — all authorable and first-class when the model
+  declares them. Realize whatever is present (see `CONSTRUCT_COVERAGE.md`); never
+  treat declared fields as optional enrichment.
 
 ### The full construct checklist
 
