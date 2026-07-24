@@ -1,0 +1,718 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ProfilePlatform",
+  "module": "KCF",
+  "namespace": "pf",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Order",
+      "qualifiedName": "pf.Order",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "total",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Ops",
+      "qualifiedName": "pf.Ops",
+      "kind": "ACTOR",
+      "references": [],
+      "conceptKind": "PERSON"
+    },
+    {
+      "id": "FulfillOrder",
+      "qualifiedName": "pf.FulfillOrder",
+      "kind": "WORK",
+      "references": [],
+      "conceptKind": "TASK"
+    },
+    {
+      "id": "Revenue",
+      "qualifiedName": "pf.Revenue",
+      "kind": "MEASURE",
+      "references": [],
+      "conceptKind": "KPI",
+      "subjects": [
+        "pf.Order"
+      ]
+    },
+    {
+      "id": "OrderRule",
+      "qualifiedName": "pf.OrderRule",
+      "kind": "RULE",
+      "references": [
+        "pf.Order",
+        "pf.FulfillOrder",
+        "pf.Ops"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "OrderPolicy",
+      "qualifiedName": "pf.OrderPolicy",
+      "kind": "RULE",
+      "references": [
+        "pf.Ops",
+        "pf.OrderRule"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "order-fulfilled-by",
+      "rootKind": "DEPENDENCY",
+      "source": "pf.Order",
+      "target": "pf.FulfillOrder",
+      "strength": 1.0,
+      "qualifiers": {
+        "cardinality": "one-to-many",
+        "validations": [
+          "OrderRule"
+        ],
+        "inferences": [
+          "transitive"
+        ]
+      },
+      "definition": "order-fulfilled-by"
+    }
+  ],
+  "lifecycles": [],
+  "actions": [
+    {
+      "id": "CreateOrder",
+      "effect": "command",
+      "mutations": [],
+      "operation": "create",
+      "scope": "record",
+      "target": "pf.Order",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "pf.OrderPolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [
+    {
+      "id": "OrderRule",
+      "appliesTo": [
+        "pf.Order"
+      ],
+      "effects": [
+        "pf.FulfillOrder"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "total is non-negative",
+      "authority": "pf.Ops",
+      "qualifiedName": "pf.OrderRule"
+    }
+  ],
+  "policies": [
+    {
+      "id": "OrderPolicy",
+      "rules": [
+        "pf.OrderRule"
+      ],
+      "evidence": [],
+      "authority": "pf.Ops",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "pf.OrderPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "pf.Order": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 10,
+      "endColumn": 68
+    },
+    "pf.Ops": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 29
+    },
+    "pf.FulfillOrder": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 12,
+      "column": 3,
+      "endLine": 12,
+      "endColumn": 35
+    },
+    "pf.Revenue": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 13,
+      "column": 3,
+      "endLine": 13,
+      "endColumn": 47
+    },
+    "CreateOrder": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 19,
+      "endColumn": 4
+    },
+    "pf.OrderRule": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 20,
+      "column": 3,
+      "endLine": 20,
+      "endColumn": 127
+    },
+    "pf.OrderPolicy": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 21,
+      "column": 3,
+      "endLine": 21,
+      "endColumn": 89
+    },
+    "order-fulfilled-by": {
+      "source": "tests/domains/profiles.kcf",
+      "line": 23,
+      "column": 3,
+      "endLine": 23,
+      "endColumn": 142
+    }
+  },
+  "integration": {
+    "adapters": [
+      {
+        "id": "Http",
+        "protocol": "https",
+        "serialization": "json"
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "OrderApi",
+        "adapter": "Http",
+        "operation": "CreateOrder",
+        "address": "/orders"
+      }
+    ],
+    "routes": [
+      {
+        "id": "ApiRoute",
+        "source": "OrderApi",
+        "target": "OrderApi"
+      }
+    ],
+    "retryPolicies": [
+      {
+        "id": "Retry3",
+        "attempts": 3,
+        "requiresIdempotency": true
+      }
+    ],
+    "eventBridges": [
+      {
+        "id": "Bridge",
+        "event": "OrderPlaced",
+        "endpoint": "OrderApi"
+      }
+    ],
+    "mappings": [
+      {
+        "id": "OrderMap",
+        "fieldMaps": [
+          {
+            "from": "total",
+            "to": "amount",
+            "using": "RoundFn"
+          }
+        ],
+        "from": "Order",
+        "to": "OrderData"
+      }
+    ],
+    "errorPolicies": [
+      {
+        "id": "OnFail",
+        "handlers": [
+          {
+            "on": "timeout",
+            "target": "Retry3"
+          }
+        ]
+      }
+    ]
+  },
+  "security": {
+    "assets": [
+      {
+        "id": "OrderData",
+        "subject": "Order",
+        "classification": "confidential",
+        "owner": "Ops"
+      }
+    ],
+    "threats": [
+      {
+        "id": "Phishing",
+        "vector": "credential-phishing",
+        "actor": "Ops"
+      }
+    ],
+    "risks": [
+      {
+        "id": "R1",
+        "threat": "Phishing",
+        "asset": "OrderData",
+        "likelihood": 0.2,
+        "impact": 0.4,
+        "level": 0.08
+      }
+    ],
+    "controls": [
+      {
+        "id": "AccessControl",
+        "rule": "OrderRule",
+        "appliesTo": [
+          "Order"
+        ]
+      }
+    ],
+    "treatments": [
+      {
+        "id": "T1",
+        "risk": "R1",
+        "mode": "mitigate",
+        "control": "AccessControl"
+      }
+    ],
+    "trustBoundaries": [
+      {
+        "id": "Perimeter",
+        "contains": [
+          "OrderData"
+        ],
+        "crossingControls": [
+          "AccessControl"
+        ]
+      }
+    ],
+    "securityMappings": [
+      {
+        "source": "AccessControl",
+        "target": "OrderData",
+        "coverage": 0.9
+      }
+    ]
+  },
+  "lineage": {
+    "edges": [
+      {
+        "id": "Edge1",
+        "source": "Order",
+        "target": "OrderData"
+      }
+    ],
+    "bindings": [
+      {
+        "id": "B1",
+        "source": "Order",
+        "target": "OrderApi",
+        "kind": "data"
+      }
+    ],
+    "costs": [
+      {
+        "id": "C1",
+        "subject": "Order",
+        "amount": 100,
+        "unit": "USD"
+      }
+    ],
+    "fieldLineage": [
+      {
+        "from": "total",
+        "to": "amount",
+        "using": "RoundFn"
+      }
+    ]
+  },
+  "architecture": {
+    "services": [
+      {
+        "id": "OrderSvc",
+        "realizes": "CreateOrder",
+        "interfaces": [
+          "OrderIface"
+        ],
+        "runtime": "container"
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "OrderIface",
+        "contract": "OrderApi",
+        "protocol": "rest"
+      }
+    ],
+    "boundaries": [
+      {
+        "id": "CoreBoundary",
+        "contains": [
+          "OrderSvc"
+        ],
+        "controls": [
+          "AccessControl"
+        ]
+      }
+    ],
+    "topologies": [
+      {
+        "id": "Net",
+        "nodes": [
+          {
+            "id": "Web",
+            "hosts": [
+              "OrderSvc"
+            ],
+            "environment": "Prod"
+          },
+          {
+            "id": "Db",
+            "hosts": []
+          }
+        ],
+        "edges": [
+          {
+            "from": "Web",
+            "to": "Db",
+            "via": "ApiRoute"
+          }
+        ]
+      }
+    ],
+    "deployments": [
+      {
+        "id": "Deploy1",
+        "artifact": "OrderSvc",
+        "target": "Web",
+        "version": "1.0"
+      }
+    ]
+  },
+  "experience": {
+    "apps": [
+      {
+        "id": "Shop",
+        "entry": "OrderView",
+        "views": [
+          "OrderView"
+        ]
+      }
+    ],
+    "views": [
+      {
+        "id": "OrderView",
+        "entity": "Order",
+        "actions": [
+          "CreateOrder"
+        ]
+      }
+    ],
+    "components": [
+      {
+        "id": "OrderButton",
+        "slots": [
+          "label"
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "id": "Checkout",
+        "nodes": [
+          {
+            "id": "Start",
+            "ref": "OrderView"
+          },
+          {
+            "id": "Done",
+            "ref": "OrderView"
+          }
+        ],
+        "edges": [
+          {
+            "from": "Start",
+            "to": "Done",
+            "when": "order submitted"
+          }
+        ],
+        "entry": "Start"
+      }
+    ],
+    "bindings": [
+      {
+        "source": "OrderView",
+        "target": "Order",
+        "mode": "read"
+      }
+    ]
+  },
+  "design": {
+    "systems": [
+      {
+        "id": "Base",
+        "tokens": [
+          {
+            "id": "Primary",
+            "tokenKind": "color",
+            "value": "#0af"
+          }
+        ],
+        "breakpoints": [
+          {
+            "id": "Sm",
+            "value": 480,
+            "unit": "px"
+          },
+          {
+            "id": "Lg",
+            "value": 1024,
+            "unit": "px"
+          }
+        ],
+        "patterns": [
+          {
+            "id": "Card",
+            "constraints": [
+              "OrderRule"
+            ]
+          }
+        ]
+      }
+    ],
+    "pages": [
+      {
+        "id": "OrderPage",
+        "view": "OrderView",
+        "sections": [
+          "Header"
+        ]
+      }
+    ]
+  },
+  "analytics": {
+    "datasets": [
+      {
+        "id": "Sales",
+        "source": "Order",
+        "transforms": [
+          "Revenue"
+        ]
+      }
+    ],
+    "semanticLayers": [
+      {
+        "id": "Metrics",
+        "measures": [
+          "Revenue"
+        ]
+      }
+    ],
+    "reports": [
+      {
+        "id": "SalesReport",
+        "visuals": [
+          {
+            "id": "Bar",
+            "fields": [
+              "Revenue"
+            ],
+            "kind": "bar"
+          }
+        ],
+        "layer": "Metrics",
+        "output": "Revenue"
+      }
+    ],
+    "dashboards": [
+      {
+        "id": "Exec",
+        "visuals": [
+          {
+            "id": "Line",
+            "fields": [
+              "Revenue"
+            ],
+            "kind": "line"
+          }
+        ],
+        "filters": [
+          "Order"
+        ],
+        "actions": [
+          "CreateOrder"
+        ],
+        "layer": "Metrics"
+      }
+    ]
+  },
+  "ai": {
+    "featureSchemas": [
+      {
+        "id": "OrderFeatures",
+        "features": [
+          {
+            "id": "TotalFeature",
+            "ref": "Order"
+          }
+        ],
+        "target": "TotalFeature"
+      }
+    ],
+    "datasets": [
+      {
+        "id": "Training",
+        "information": "Order",
+        "schema": "OrderData"
+      }
+    ],
+    "models": [
+      {
+        "id": "Forecast",
+        "input": "Training",
+        "output": "Revenue",
+        "method": "xgboost",
+        "metrics": [
+          "Revenue"
+        ]
+      }
+    ],
+    "pipelines": [
+      {
+        "id": "Train",
+        "steps": [
+          {
+            "index": 0,
+            "ref": "Training"
+          },
+          {
+            "index": 1,
+            "ref": "Forecast"
+          }
+        ]
+      }
+    ],
+    "serving": [
+      {
+        "id": "Live",
+        "model": "Forecast",
+        "runtime": "kserve",
+        "capacity": 4
+      }
+    ],
+    "governance": [
+      {
+        "id": "Gov",
+        "policies": [
+          "OrderPolicy"
+        ],
+        "evidence": [
+          "OrderData"
+        ]
+      }
+    ]
+  }
+}

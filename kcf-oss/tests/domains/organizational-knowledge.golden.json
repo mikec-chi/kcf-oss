@@ -171,6 +171,16 @@
   "collectionTransforms": [],
   "events": [],
   "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
   "organizations": [
     {
       "id": "Acme",
@@ -342,6 +352,8 @@
       "temporal": "current"
     }
   ],
+  "skills": [],
+  "capabilities": [],
   "runtimeRequirements": [
     "KnowledgeGraph",
     "Provenance",

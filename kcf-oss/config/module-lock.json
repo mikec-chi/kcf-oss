@@ -1,6 +1,6 @@
 {
   "lockVersion": "1.0.0",
-  "grammarStackVersion": "1.3.0",
+  "grammarStackVersion": "1.11.0",
   "modules": {
     "KCF": {
       "version": "1.0.0",
@@ -145,7 +145,7 @@
     "AUTHORING": {
       "version": "1.0.0",
       "file": "grammars/authoring/KCF-AUTHORING-v1.2.ebnf",
-      "sha256": "39ebdc1f7d3c652c0c709170956259e7631c55f4f390b8a07a9dced6bf338974"
+      "sha256": "3dec3802f3462e3c57e70e7f54d7a04b546ac63cf96cc42808f9a9dce87c732a"
     }
   }
 }

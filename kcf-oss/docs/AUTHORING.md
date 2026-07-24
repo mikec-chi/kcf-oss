@@ -77,6 +77,34 @@ reasoning, epistemic assertions, identity reconciliation, and knowledge-query
 policies. Profile presets determine the complete module closure. Every compiled
 declaration receives a source-map entry used by diagnostics.
 
+As of grammar-stack 1.11.0 the authoring surface is comprehensive across all
+sixteen dimension grammars plus the core ACTION/RELATIONSHIP algebra:
+
+- **ENTITY** — identity (with `generated`), attributes (cardinality + qualifiers),
+  `compose`, named `reference` (cardinality + inverse), embedded `collection`,
+  inline `lifecycle`/`constraint` binding, and entity `mutation` blocks.
+- **EVENT** — `kind`, subject/source/observer/trigger/affect-lifecycle/evidence,
+  occurrence/detection time, correlation-key, severity, expectedness, match.
+- **ACTOR** — kind, role/authority/responsible-for/accountable-for/member-of,
+  availability, communication, plus top-level `authority` grants.
+- **WORK** — performer/input/output/outcome, pre/post/completion/failure,
+  requires-resource/tool, governed-by/triggered-by/emit/compensate-with/temporal,
+  and top-level `process` (BPMN start/end/step/gateway/call/flow/boundary/lane).
+- **MEASURE** — kind/subject/unit/scale/calculation/aggregation/period/threshold/
+  target/tolerance, plus top-level `unit`.
+- **LIFECYCLE** — state bodies (entry/exit/invariant), rich transitions
+  (trigger/requires-work/guard/effect), governs-kind, invariants, temporal.
+- **RESOURCE** — kind/capacity(+unit)/availability/location/owner/allocation- and
+  reservation-policy/consumption/replenishment/cost, plus top-level `allocation`.
+- **INTENT/TEMPORAL/SPATIAL/LOGIC/MATH** — the quantitative cluster: goals with
+  tradeoffs; temporal fields + `calendar`; spatial fields + geometry + `route`;
+  `proposition`/`predicate`; and `formula`/`function`/`optimize`/`distribution`/
+  `simulation` with real math-expression ASTs.
+- **Operational + emitter PROFILES** — authored as top-level blocks
+  `integration { … }`, `security { … }`, `lineage { … }`, `architecture { … }`,
+  `experience { … }`, `design { … }`, `analytics { … }`, `ai { … }`, each
+  projecting into `ir[<section>]`.
+
 AUTHORING v1.1 added the organizational-knowledge surface documented in
 `ORGANIZATIONAL_KNOWLEDGE.md`. AUTHORING v1.2 adds enforceable business-pattern
 claims. If a

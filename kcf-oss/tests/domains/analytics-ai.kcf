@@ -15,7 +15,19 @@ kcf model RevenueIntelligence profile analytics-platform {
     representation json;
     recorded-at "2026-07-22T12:00:00Z";
   }
-  measure Revenue { }
+  unit USD {
+    dimension currency;
+    symbol "$";
+  }
+  measure Revenue {
+    kind KPI;
+    subject Sale;
+    unit USD;
+    scale ratio;
+    aggregation sum;
+    target 1000000;
+    tolerance 50000;
+  }
   reasoning RevenueForecast {
     kind HYPOTHESIS;
     proposition "historical revenue predicts future revenue";

@@ -1,0 +1,478 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "QuantitativePlanning",
+  "module": "KCF",
+  "namespace": "qp",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Product",
+      "qualifiedName": "qp.Product",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "productId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Owner",
+      "qualifiedName": "qp.Owner",
+      "kind": "ACTOR",
+      "references": [],
+      "conceptKind": "PERSON"
+    },
+    {
+      "id": "RevenueKPI",
+      "qualifiedName": "qp.RevenueKPI",
+      "kind": "MEASURE",
+      "references": [],
+      "conceptKind": "KPI",
+      "subjects": [
+        "qp.Product"
+      ]
+    },
+    {
+      "id": "GrowRevenue",
+      "qualifiedName": "qp.GrowRevenue",
+      "kind": "INTENT",
+      "references": [],
+      "conceptKind": "GOAL",
+      "desiredState": "quarterly revenue trends upward",
+      "successes": [
+        "revenue up at least 10 percent"
+      ],
+      "priority": 1,
+      "tradeoffs": [
+        {
+          "item": "Speed",
+          "against": "Quality",
+          "weight": 0.6
+        }
+      ],
+      "timeHorizon": "qp.FiscalYear",
+      "stakeholders": [
+        "qp.Owner"
+      ],
+      "measures": [
+        "qp.RevenueKPI"
+      ],
+      "failures": [
+        "revenue declines two quarters running"
+      ]
+    },
+    {
+      "id": "FiscalYear",
+      "qualifiedName": "qp.FiscalYear",
+      "kind": "TEMPORAL",
+      "references": [],
+      "conceptKind": "INTERVAL",
+      "calculation": "end minus start",
+      "startValue": "2026-01-01",
+      "endValue": "2026-12-31",
+      "durationValue": {
+        "value": 12,
+        "unit": "month"
+      },
+      "recurrence": "FREQ=YEARLY",
+      "timezone": "UTC",
+      "calendarRef": "qp.BusinessCalendar"
+    },
+    {
+      "id": "DockCapacity",
+      "qualifiedName": "qp.DockCapacity",
+      "kind": "RESOURCE",
+      "references": [],
+      "conceptKind": "CAPACITY"
+    },
+    {
+      "id": "Region",
+      "qualifiedName": "qp.Region",
+      "kind": "SPATIAL",
+      "references": [],
+      "conceptKind": "REGION"
+    },
+    {
+      "id": "Warehouse",
+      "qualifiedName": "qp.Warehouse",
+      "kind": "SPATIAL",
+      "references": [],
+      "conceptKind": "LOCATION",
+      "geometry": {
+        "geometryKind": "point",
+        "coordinates": [
+          [
+            1.5,
+            2.5
+          ]
+        ]
+      },
+      "containedIn": "qp.Region",
+      "adjacentTo": [
+        "qp.Region"
+      ],
+      "jurisdictions": [
+        "qp.Region"
+      ],
+      "spatialRoutes": [
+        "qp.SupplyRoute"
+      ],
+      "spatialCapacities": [
+        "qp.DockCapacity"
+      ]
+    }
+  ],
+  "relationships": [],
+  "lifecycles": [],
+  "actions": [],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [
+    {
+      "id": "DockCapacity",
+      "qualifiedName": "qp.DockCapacity",
+      "resourceKind": "CAPACITY",
+      "capacity": 5
+    }
+  ],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [
+    {
+      "id": "BusinessCalendar",
+      "qualifiedName": "qp.BusinessCalendar",
+      "workingDays": [
+        "monday",
+        "tuesday"
+      ],
+      "holidays": [
+        "2026-01-01"
+      ],
+      "timezone": "UTC"
+    }
+  ],
+  "routes": [
+    {
+      "id": "SupplyRoute",
+      "qualifiedName": "qp.SupplyRoute",
+      "via": [
+        "qp.Region"
+      ],
+      "constraints": [],
+      "from": "qp.Warehouse",
+      "to": "qp.Region",
+      "distance": {
+        "value": 42.0,
+        "unit": "kilometre"
+      }
+    }
+  ],
+  "propositions": [
+    {
+      "id": "AllProductsPriced",
+      "qualifiedName": "qp.AllProductsPriced",
+      "expression": "every product has a price",
+      "mode": "necessary"
+    }
+  ],
+  "predicates": [
+    {
+      "id": "IsUnderpriced",
+      "qualifiedName": "qp.IsUnderpriced",
+      "parameters": [
+        {
+          "name": "product",
+          "type": "UUID"
+        }
+      ],
+      "expression": "price below cost"
+    }
+  ],
+  "math": [
+    {
+      "id": "MarginFormula",
+      "qualifiedName": "qp.MarginFormula",
+      "mathKind": "formula",
+      "result": "qp.RevenueKPI",
+      "expression": {
+        "op": "-",
+        "left": {
+          "ref": "price"
+        },
+        "right": {
+          "op": "*",
+          "left": {
+            "ref": "cost"
+          },
+          "right": {
+            "ref": "quantity"
+          }
+        }
+      }
+    },
+    {
+      "id": "UnitMargin",
+      "qualifiedName": "qp.UnitMargin",
+      "mathKind": "function",
+      "parameters": [
+        {
+          "name": "cost",
+          "type": "Decimal"
+        },
+        {
+          "name": "price",
+          "type": "Decimal"
+        }
+      ],
+      "returns": "Decimal",
+      "expression": {
+        "op": "-",
+        "left": {
+          "ref": "price"
+        },
+        "right": {
+          "ref": "cost"
+        }
+      }
+    },
+    {
+      "id": "MaximizeMargin",
+      "qualifiedName": "qp.MaximizeMargin",
+      "mathKind": "optimize",
+      "objective": {
+        "direction": "maximize",
+        "expression": {
+          "op": "-",
+          "left": {
+            "ref": "revenue"
+          },
+          "right": {
+            "ref": "cost"
+          }
+        }
+      },
+      "variables": [
+        "price"
+      ],
+      "constraints": [
+        "price is at least cost"
+      ]
+    },
+    {
+      "id": "DemandModel",
+      "qualifiedName": "qp.DemandModel",
+      "mathKind": "distribution",
+      "family": "normal",
+      "qualifiers": {
+        "mean": 100,
+        "stddev": 15
+      }
+    },
+    {
+      "id": "DemandSim",
+      "qualifiedName": "qp.DemandSim",
+      "mathKind": "simulation",
+      "model": "qp.MaximizeMargin",
+      "trials": 1000,
+      "seed": 42
+    }
+  ],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "qp.Product": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 9,
+      "column": 3,
+      "endLine": 12,
+      "endColumn": 4
+    },
+    "qp.Owner": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 13,
+      "column": 3,
+      "endLine": 13,
+      "endColumn": 31
+    },
+    "qp.RevenueKPI": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 14,
+      "column": 3,
+      "endLine": 14,
+      "endColumn": 52
+    },
+    "qp.GrowRevenue": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 16,
+      "column": 3,
+      "endLine": 26,
+      "endColumn": 4
+    },
+    "qp.FiscalYear": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 37,
+      "endColumn": 4
+    },
+    "qp.DockCapacity": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 39,
+      "column": 3,
+      "endLine": 39,
+      "endColumn": 55
+    },
+    "qp.Region": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 40,
+      "column": 3,
+      "endLine": 40,
+      "endColumn": 34
+    },
+    "qp.Warehouse": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 41,
+      "column": 3,
+      "endLine": 49,
+      "endColumn": 4
+    },
+    "qp.BusinessCalendar": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 51,
+      "column": 3,
+      "endLine": 56,
+      "endColumn": 4
+    },
+    "qp.SupplyRoute": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 58,
+      "column": 3,
+      "endLine": 63,
+      "endColumn": 4
+    },
+    "qp.AllProductsPriced": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 65,
+      "column": 3,
+      "endLine": 68,
+      "endColumn": 4
+    },
+    "qp.IsUnderpriced": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 70,
+      "column": 3,
+      "endLine": 72,
+      "endColumn": 4
+    },
+    "qp.MarginFormula": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 74,
+      "column": 3,
+      "endLine": 77,
+      "endColumn": 4
+    },
+    "qp.UnitMargin": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 79,
+      "column": 3,
+      "endLine": 81,
+      "endColumn": 4
+    },
+    "qp.MaximizeMargin": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 83,
+      "column": 3,
+      "endLine": 87,
+      "endColumn": 4
+    },
+    "qp.DemandModel": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 89,
+      "column": 3,
+      "endLine": 93,
+      "endColumn": 4
+    },
+    "qp.DemandSim": {
+      "source": "tests/domains/quantitative.kcf",
+      "line": 95,
+      "column": 3,
+      "endLine": 99,
+      "endColumn": 4
+    }
+  }
+}

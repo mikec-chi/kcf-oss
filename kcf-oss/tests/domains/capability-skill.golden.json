@@ -1,0 +1,372 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CapabilitySkill",
+  "module": "KCF",
+  "namespace": "cs",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Ticket",
+      "qualifiedName": "cs.Ticket",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "ticketId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "subject",
+          "type": "String",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Engineer",
+      "qualifiedName": "cs.Engineer",
+      "kind": "ACTOR",
+      "references": [],
+      "conceptKind": "PERSON",
+      "availability": "on-call rotation",
+      "communicationRef": "cs.NotifyChannel",
+      "capabilities": [
+        "cs.RunDiagnostics"
+      ],
+      "skills": [
+        "cs.Diagnose"
+      ],
+      "roles": [
+        "cs.SupportRole"
+      ],
+      "authorities": [
+        "cs.EscalateTicket"
+      ],
+      "responsibleFor": [
+        "cs.ResolveWork"
+      ],
+      "accountableFor": [
+        "cs.Ticket"
+      ],
+      "memberOf": [
+        "cs.SupportTeam"
+      ]
+    },
+    {
+      "id": "SupportRole",
+      "qualifiedName": "cs.SupportRole",
+      "kind": "ACTOR",
+      "references": [],
+      "conceptKind": "ROLE"
+    },
+    {
+      "id": "NotifyChannel",
+      "qualifiedName": "cs.NotifyChannel",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "SupportTeam",
+      "qualifiedName": "cs.SupportTeam",
+      "kind": "ORGANIZATIONAL",
+      "references": [
+        "cs.Engineer"
+      ],
+      "metadata": {
+        "organizationKind": "TEAM"
+      }
+    },
+    {
+      "id": "ResolveWork",
+      "qualifiedName": "cs.ResolveWork",
+      "kind": "WORK",
+      "references": [],
+      "requiresCapability": [
+        "cs.RunDiagnostics"
+      ],
+      "requiresSkill": [
+        "cs.Diagnose"
+      ]
+    },
+    {
+      "id": "OpsRule",
+      "qualifiedName": "cs.OpsRule",
+      "kind": "RULE",
+      "references": [
+        "cs.Ticket",
+        "cs.ResolveWork",
+        "cs.Engineer"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "OpsPolicy",
+      "qualifiedName": "cs.OpsPolicy",
+      "kind": "RULE",
+      "references": [
+        "cs.Engineer",
+        "cs.OpsRule"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [],
+  "lifecycles": [],
+  "actions": [
+    {
+      "id": "ResolveTicket",
+      "effect": "command",
+      "mutations": [
+        "subject"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "cs.Ticket",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "cs.OpsPolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [
+    {
+      "id": "EscalateTicket",
+      "qualifiedName": "cs.EscalateTicket",
+      "mode": "may-escalate",
+      "subject": "cs.Engineer",
+      "target": "cs.Ticket",
+      "when": [
+        "ticket age exceeds SLA"
+      ]
+    }
+  ],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [
+    {
+      "id": "SupportTeam",
+      "members": [
+        "cs.Engineer"
+      ],
+      "roles": [],
+      "authorityDomains": [],
+      "owns": [],
+      "accountableFor": [],
+      "reporting": [],
+      "escalations": [],
+      "evidence": [],
+      "organizationKind": "TEAM",
+      "qualifiedName": "cs.SupportTeam"
+    }
+  ],
+  "information": [],
+  "rules": [
+    {
+      "id": "OpsRule",
+      "appliesTo": [
+        "cs.Ticket"
+      ],
+      "effects": [
+        "cs.ResolveWork"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "subject is present",
+      "authority": "cs.Engineer",
+      "qualifiedName": "cs.OpsRule"
+    }
+  ],
+  "policies": [
+    {
+      "id": "OpsPolicy",
+      "rules": [
+        "cs.OpsRule"
+      ],
+      "evidence": [],
+      "authority": "cs.Engineer",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "cs.OpsPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [
+    {
+      "id": "Diagnose",
+      "qualifiedName": "cs.Diagnose",
+      "level": "expert"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "RunDiagnostics",
+      "qualifiedName": "cs.RunDiagnostics",
+      "requiresSkill": [
+        "cs.Diagnose"
+      ],
+      "implementedBy": "cs.ResolveTicket"
+    }
+  ],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "cs.Ticket": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 8,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 4
+    },
+    "cs.Engineer": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 13,
+      "column": 3,
+      "endLine": 24,
+      "endColumn": 4
+    },
+    "cs.SupportRole": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 26,
+      "column": 3,
+      "endLine": 26,
+      "endColumn": 35
+    },
+    "cs.NotifyChannel": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 27,
+      "column": 3,
+      "endLine": 27,
+      "endColumn": 25
+    },
+    "cs.SupportTeam": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 28,
+      "endColumn": 59
+    },
+    "cs.EscalateTicket": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 30,
+      "column": 3,
+      "endLine": 35,
+      "endColumn": 4
+    },
+    "cs.ResolveWork": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 37,
+      "column": 3,
+      "endLine": 40,
+      "endColumn": 4
+    },
+    "cs.Diagnose": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 42,
+      "column": 3,
+      "endLine": 44,
+      "endColumn": 4
+    },
+    "cs.RunDiagnostics": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 46,
+      "column": 3,
+      "endLine": 49,
+      "endColumn": 4
+    },
+    "ResolveTicket": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 51,
+      "column": 3,
+      "endLine": 62,
+      "endColumn": 4
+    },
+    "cs.OpsRule": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 64,
+      "column": 3,
+      "endLine": 70,
+      "endColumn": 4
+    },
+    "cs.OpsPolicy": {
+      "source": "tests/domains/capability-skill.kcf",
+      "line": 72,
+      "column": 3,
+      "endLine": 76,
+      "endColumn": 4
+    }
+  }
+}

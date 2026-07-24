@@ -266,10 +266,21 @@
   "events": [
     {
       "id": "CustomerUpdated",
+      "qualifiedName": "customer.CustomerUpdated",
       "mutable": false
     }
   ],
   "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
   "organizations": [],
   "information": [],
   "rules": [
@@ -305,6 +316,8 @@
   "assertions": [],
   "identityResolutions": [],
   "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
   "runtimeRequirements": [
     "Identity",
     "Persistence",

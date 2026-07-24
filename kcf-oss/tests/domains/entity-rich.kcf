@@ -1,0 +1,116 @@
+// Exercises the full ENTITY dimension surface: generated identity, attribute
+// cardinality + qualifiers, a named reference (cardinality + inverse), a composition
+// (cardinality + orphan policy), an embedded collection (block form with identity +
+// order-by), an inline lifecycle binding, an inline constraint-use, and an
+// entity-embedded mutation (operation/scope/selection/change/pre+post-conditions/
+// emit/atomicity/concurrency/version-field/idempotency). Structured as an
+// obligation-complete business-application so the model gate passes.
+kcf model OrderManagement profile business-application {
+  namespace shop;
+
+  entity Customer {
+    identity customerId: UUID generated;
+    required name: String;
+    optional email: String unique;
+  }
+
+  entity Note {
+    identity noteId: UUID;
+    required text: String;
+  }
+
+  entity LineItem {
+    identity lineId: UUID;
+    required sku: String;
+    required qty: Decimal;
+  }
+
+  entity Order {
+    identity orderId: UUID generated;
+    required status: String;
+    optional tags: String many;
+    reference customer: Customer one inverse orders;
+    compose lines: LineItem many orphan cascade;
+    collection notes of Note {
+      identity noteId;
+      order-by text;
+    }
+    lifecycle OrderLifecycle;
+    constraint OrderStatusRule;
+    mutation SubmitOrder {
+      operation update;
+      scope record;
+      selection identity;
+      change status from "Draft" to "Submitted";
+      precondition "order has at least one line";
+      postcondition "order status is Submitted";
+      emit OrderSubmitted;
+      atomicity atomic;
+      concurrency optimistic;
+      version-field version;
+      idempotency conditional;
+    }
+  }
+
+  actor OrderClerk { }
+  work SubmitOrderWork { }
+  event OrderSubmitted { immutable; subject Order; }
+
+  relationship clerk-performs-submit: PARTICIPATION OrderClerk -> SubmitOrderWork strength 1.0;
+  relationship submit-transforms-order: TRANSFORMATION SubmitOrderWork -> Order strength 1.0;
+
+  lifecycle OrderLifecycle for Order {
+    initial Draft;
+    state Submitted;
+    terminal Closed;
+    transition Draft -> Submitted;
+    transition Submitted -> Closed;
+  }
+
+  command CreateOrder {
+    operation create;
+    scope record;
+    target Order;
+    input one;
+    output one;
+    precondition "customer is provided";
+    postcondition "order exists in Draft";
+    failure-mode "duplicate order rejected";
+    consumes Order;
+    produces Order;
+    idempotency conditional;
+    transaction required, atomic;
+    authorization shop.OrderPolicy;
+  }
+
+  query GetOrder {
+    operation read;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+  }
+
+  collection OpenOrders {
+    operation filter;
+    inputSchema Order;
+    outputSchema Order;
+    predicate "order status is Submitted";
+    bounded true;
+  }
+
+  rule OrderStatusRule {
+    kind CONSTRAINT;
+    condition "order has a status";
+    effect SubmitOrderWork;
+    applies-to Order;
+    authority OrderClerk;
+  }
+
+  policy OrderPolicy {
+    authority OrderClerk;
+    rule OrderStatusRule;
+    default-conflict deny-overrides;
+  }
+}

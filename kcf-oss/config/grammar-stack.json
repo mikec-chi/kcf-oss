@@ -1,6 +1,6 @@
 {
   "name": "kcf-oss",
-  "version": "1.3.0",
+  "version": "1.11.0",
   "irVersion": "1.0.0",
   "notation": "ISO/IEC 14977",
   "rootModule": "KCF",

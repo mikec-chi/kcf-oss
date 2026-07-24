@@ -4,15 +4,101 @@ kcf model FulfillmentEvents profile event-driven-system {
   entity Shipment {
     identity shipmentId: UUID;
     required status: String;
+    optional tenderedAt: Date;
     mutability "read-only";
   }
   actor Carrier { }
-  work TenderShipment { }
-  event ShipmentTendered immutable;
-  resource TenderCapacity { capacity 100; }
+  work TenderShipment {
+    kind TASK;
+    performer Carrier;
+    input Shipment;
+    output Shipment;
+    outcome ShipmentTendered;
+    emit ShipmentTendered;
+    precondition "shipment is ready to tender";
+    postcondition "shipment is tendered";
+  }
+
+  // Exercises the full EVENT dimension surface: kind, subject(s), source(s),
+  // observer(s), occurrence/detection time, correlation-key(s), severity,
+  // expectedness, trigger(s), affect-lifecycle, evidence, and a match condition.
+  event ShipmentTendered {
+    immutable;
+    kind OCCURRENCE;
+    subject Shipment;
+    source Carrier;
+    observer Carrier;
+    trigger TenderShipment;
+    occurrence-time tenderedAt;
+    correlation-key shipmentId;
+    severity info;
+    expectedness expected;
+    affect-lifecycle ShipmentLifecycle;
+    evidence TenderManifest;
+    match "shipment transitions to Tendered";
+  }
+
+  resource TenderCapacity {
+    kind CAPACITY;
+    capacity 100;
+    availability "business hours";
+    owner Carrier;
+    consumption reserve;
+  }
+
+  information TenderManifest {
+    kind DOCUMENT;
+    subject Shipment;
+    trust 0.92;
+    field trackingNumber: String;
+    field weightKg: Decimal;
+    source Shipment;
+    source-document "tender-manifest.pdf";
+    recorded-at "2026-07-24T12:00:00Z";
+    reviewed-by Carrier;
+  }
+
+  lifecycle ShipmentLifecycle for Shipment {
+    governs-kind ENTITY;
+    initial Created;
+    state Tendered {
+      entry Tender;
+      invariant "a tendered shipment has a carrier";
+    }
+    terminal Delivered;
+    transition Created -> Tendered {
+      trigger ShipmentTendered;
+      requires-work TenderShipment;
+      guard "shipment is ready to tender";
+      effect Tender;
+    }
+    transition Tendered -> Delivered;
+    invariant "a shipment cannot be delivered before it is tendered";
+    temporal ShipmentClock;
+  }
+
+  temporal ShipmentClock { }
 
   relationship carrier-participates: PARTICIPATION Carrier -> TenderShipment strength 1.0;
   relationship tender-transforms-shipment: TRANSFORMATION TenderShipment -> Shipment strength 1.0;
+
+  // Full BPMN process choreography (WORK dimension process-def).
+  process TenderProcess {
+    start Begin triggered-by ShipmentTendered;
+    step DoTender: TenderShipment in CarrierLane;
+    gateway Accepted: exclusive;
+    end Delivered outcome ShipmentTendered;
+    end Rejected;
+    flow Begin -> DoTender;
+    flow DoTender -> Accepted;
+    flow Accepted -> Delivered when "carrier accepted" priority 1;
+    flow Accepted -> Rejected;
+    boundary TenderTimeout on DoTender uses ShipmentTendered;
+    lane CarrierLane {
+      performer Carrier;
+      contains DoTender;
+    }
+  }
 
   command Tender {
     operation update;

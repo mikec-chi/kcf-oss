@@ -29,6 +29,19 @@ COMMANDS = {
     "invoke", "emit", "allocate", "release",
 }
 SET_MUTATIONS = {"bulk-update", "bulk-patch", "bulk-delete", "bulk-upsert", "synchronize"}
+ACTION_OPERATIONS = {
+    "create", "read", "replace", "update", "patch", "delete", "upsert", "exists",
+    "query", "count", "bulk-create", "bulk-update", "bulk-patch", "bulk-delete",
+    "bulk-upsert", "synchronize", "invoke", "emit", "allocate", "release",
+}
+ACTION_SCOPES = {"record", "set", "batch", "stream", "window"}
+ACTION_CARDINALITIES = {"zero", "one", "optional-one", "many", "stream"}
+SELECTION_KINDS = {"identity", "predicate", "keys", "relation", "partition", "window", "all"}
+ATOMICITY_MODES = {"atomic", "per-record", "best-effort"}
+CONCURRENCY_MODES = {"none", "optimistic", "pessimistic", "serialized"}
+DIRECTIONALITIES = {"directed", "bidirectional", "symmetric"}
+POLARITIES = {"affirm", "deny", "support", "oppose", "permit", "prohibit"}
+INFERENCE_SEMANTICS = {"none", "inverse", "transitive", "inherit", "qualify", "causal"}
 COLLECTION_OPERATIONS = {
     "select", "project", "filter", "map", "flat-map", "distinct", "sort",
     "group", "aggregate", "join", "union", "intersect", "except", "window",
@@ -106,6 +119,8 @@ class Analyzer:
         collections = (
             "actions", "lifecycles", "organizations", "information", "rules",
             "policies", "reasoning", "assertions", "identityResolutions",
+            "skills", "capabilities", "units", "collectionTransforms", "authorities",
+            "calendars", "routes", "propositions", "predicates", "math", "resources",
         )
         for collection in collections:
             for item in self.model.get(collection, []):
@@ -137,7 +152,11 @@ class Analyzer:
             root = rel.get("rootKind")
             if root not in ROOT_RELATIONSHIPS:
                 self.report("error", "kcf.relationship.root-kind", rid, f"Invalid root relationship kind {root!r}.")
-            key = (rel.get("definition"), source, target, tuple(sorted(rel.get("qualifiers", {}).items())))
+            qualifier_key = tuple(sorted(
+                (k, tuple(v) if isinstance(v, list) else v)
+                for k, v in (rel.get("qualifiers", {}) or {}).items()
+            ))
+            key = (rel.get("definition"), source, target, qualifier_key)
             if key in seen:
                 self.report("warning", "stack.graph.edge-unique", rid, "Duplicate equivalent relationship.")
             seen.add(key)
@@ -146,6 +165,16 @@ class Analyzer:
             strength = rel.get("strength")
             if strength is not None and not 0 <= strength <= 1:
                 self.report("error", "kcf.relationship.strength", rid, "Strength must be in [0,1].")
+            # Enum membership for the relationship qualifiers that define one
+            # (qualifiers live under the open `qualifiers` object).
+            quals = rel.get("qualifiers", {}) or {}
+            if quals.get("directionality") is not None and quals["directionality"] not in DIRECTIONALITIES:
+                self.report("error", "kcf.relationship.directionality", rid, f"Unknown directionality {quals['directionality']!r}.")
+            if quals.get("polarity") is not None and quals["polarity"] not in POLARITIES:
+                self.report("error", "kcf.relationship.polarity", rid, f"Unknown polarity {quals['polarity']!r}.")
+            for inference in quals.get("inferences", []):
+                if inference not in INFERENCE_SEMANTICS:
+                    self.report("error", "kcf.relationship.infer", rid, f"Unknown inference semantics {inference!r}.")
             valid_from, valid_to = rel.get("validFrom"), rel.get("validTo")
             if valid_from and valid_to and valid_from > valid_to:
                 self.report("error", "kcf.relationship.temporal", rid, "validFrom is after validTo.")
@@ -222,6 +251,21 @@ class Analyzer:
             operation = action.get("operation")
             effect = action.get("effect")
             scope = action.get("scope")
+            # Enum membership for the contract fields (catches typos the semantic
+            # constraints below would otherwise silently accept).
+            if operation is not None and operation not in ACTION_OPERATIONS:
+                self.report("error", "action.operation.unknown", aid, f"Unknown operation {operation!r}.")
+            if scope is not None and scope not in ACTION_SCOPES:
+                self.report("error", "action.scope.unknown", aid, f"Unknown scope {scope!r}.")
+            if action.get("selection") is not None and action["selection"] not in SELECTION_KINDS:
+                self.report("error", "action.selection.unknown", aid, f"Unknown selection {action['selection']!r}.")
+            for card_field in ("inputCardinality", "outputCardinality"):
+                if action.get(card_field) is not None and action[card_field] not in ACTION_CARDINALITIES:
+                    self.report("error", "action.cardinality.unknown", aid, f"Unknown {card_field} {action[card_field]!r}.")
+            if action.get("atomicity") is not None and action["atomicity"] not in ATOMICITY_MODES:
+                self.report("error", "action.atomicity.unknown", aid, f"Unknown atomicity {action['atomicity']!r}.")
+            if action.get("concurrency") is not None and action["concurrency"] not in CONCURRENCY_MODES:
+                self.report("error", "action.concurrency.unknown", aid, f"Unknown concurrency {action['concurrency']!r}.")
             if operation in COMMANDS and effect != "command":
                 self.report("error", "action.invoke.effect-context", aid, "Mutation/invocation operation must be a command.")
             if operation in SET_MUTATIONS and scope not in {"set", "batch", "stream", "window"}:
@@ -674,9 +718,320 @@ class Analyzer:
                 correction="Remove the exclusion or document it in a custom profile.",
             )
 
+    def check_capabilities_skills(self):
+        """Every declared concept reference-list must resolve: an ACTOR's
+        capabilities/skills, a WORK's required capabilities/skills, an EVENT's
+        subject(s)/trigger(s), a capability's requires-skill/implemented-by, and a
+        skill's requires."""
+        for concept in self.model.get("concepts", []):
+            name = concept.get("qualifiedName") or concept.get("id", "<concept>")
+            for field, rule in (("capabilities", "kcf.actor.capability"), ("skills", "kcf.actor.skill"),
+                                ("requiresCapability", "kcf.work.requires-capability"),
+                                ("requiresSkill", "kcf.work.requires-skill"),
+                                ("subjects", "kcf.event.subject"), ("triggers", "kcf.event.trigger"),
+                                ("sources", "kcf.event.source"), ("observers", "kcf.event.observer"),
+                                ("affectsLifecycle", "kcf.event.affect-lifecycle"),
+                                ("evidence", "kcf.event.evidence"),
+                                ("roles", "kcf.actor.role"), ("authorities", "kcf.actor.authority"),
+                                ("responsibleFor", "kcf.actor.responsible-for"),
+                                ("accountableFor", "kcf.actor.accountable-for"),
+                                ("memberOf", "kcf.actor.member-of"),
+                                ("performers", "kcf.work.performer"), ("inputs", "kcf.work.input"),
+                                ("outputs", "kcf.work.output"), ("outcomes", "kcf.work.outcome"),
+                                ("requiresResource", "kcf.work.requires-resource"),
+                                ("requiresTool", "kcf.work.requires-tool"),
+                                ("governedBy", "kcf.work.governed-by"),
+                                ("triggeredBy", "kcf.work.triggered-by"),
+                                ("emits", "kcf.work.emit"),
+                                ("compensateWith", "kcf.work.compensate-with"),
+                                ("temporalRefs", "kcf.work.temporal"),
+                                ("stakeholders", "kcf.intent.stakeholder"),
+                                ("measures", "kcf.intent.measure"),
+                                ("adjacentTo", "kcf.spatial.adjacent-to"),
+                                ("jurisdictions", "kcf.spatial.jurisdiction"),
+                                ("spatialRoutes", "kcf.spatial.route")):
+                for ref in concept.get(field, []):
+                    if not self.reference_exists(ref):
+                        self.report("error", rule, name, f"Unresolved {field} reference {ref!r}.")
+        for capability in self.model.get("capabilities", []):
+            cid = capability.get("qualifiedName") or capability.get("id", "<capability>")
+            for ref in capability.get("requiresSkill", []):
+                if not self.reference_exists(ref):
+                    self.report("error", "kcf.capability.requires-skill", cid, f"Unresolved skill reference {ref!r}.")
+            if capability.get("implementedBy") and not self.reference_exists(capability["implementedBy"]):
+                self.report("error", "kcf.capability.implemented-by", cid, f"Unresolved implementation {capability['implementedBy']!r}.")
+        for skill in self.model.get("skills", []):
+            sid = skill.get("qualifiedName") or skill.get("id", "<skill>")
+            for ref in skill.get("requires", []):
+                if not self.reference_exists(ref):
+                    self.report("error", "kcf.skill.requires", sid, f"Unresolved skill prerequisite {ref!r}.")
+
+    EVENT_KINDS = {"OCCURRENCE", "SIGNAL", "OBSERVATION", "NORMAL", "EXCEPTION",
+                   "THRESHOLD", "SCHEDULED", "EXTERNAL", "DERIVED", "CORRECTION"}
+    EXPECTEDNESS = {"expected", "unexpected", "unknown"}
+
+    def check_events(self):
+        """EVENT dimension enums: an event's kind (if declared) must be a defined
+        event-kind, and expectedness (if declared) must be a defined level."""
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "EVENT":
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<event>")
+            kind = concept.get("conceptKind")
+            if kind is not None and kind not in self.EVENT_KINDS:
+                self.report("error", "kcf.event.kind", name,
+                            f"Unknown event kind {kind!r}; expected one of {sorted(self.EVENT_KINDS)}.")
+            expectedness = concept.get("expectedness")
+            if expectedness is not None and expectedness not in self.EXPECTEDNESS:
+                self.report("error", "kcf.event.expectedness", name,
+                            f"Unknown expectedness {expectedness!r}; expected one of {sorted(self.EXPECTEDNESS)}.")
+
+    CARDINALITIES = {"one", "many", "set", "zero-or-one", "one-or-many", "zero-or-many", "optional-one"}
+    ORPHAN_POLICIES = {"restrict", "cascade", "detach", "archive"}
+    MUTATION_OPERATIONS = {"create", "replace", "update", "patch", "delete", "upsert",
+                           "archive", "assign-reference", "add-member", "remove-member", "synchronize"}
+    MUTATION_SCOPES = {"record", "set", "batch", "stream"}
+    ATOMICITIES = {"atomic", "per-record", "best-effort"}
+    CONCURRENCY_POLICIES = {"none", "optimistic", "pessimistic", "serialized"}
+    SELECTIONS = {"identity", "predicate", "keys", "partition", "all"}
+
+    def check_entities(self):
+        """ENTITY dimension: resolve compositions/named-references/embedded-collection
+        targets, inline lifecycle binding, and inline constraint-uses; enforce
+        cardinality/orphan enums; and validate entity-embedded mutations (subject,
+        operation/scope/atomicity/concurrency/selection enums, emitted events)."""
+        for concept in self.model.get("concepts", []):
+            name = concept.get("qualifiedName") or concept.get("id", "<concept>")
+            for comp in concept.get("compositions", []):
+                if not self.reference_exists(comp.get("target")):
+                    self.report("error", "kcf.entity.composition", name, f"Unresolved composition target {comp.get('target')!r}.")
+                if comp.get("cardinality") and comp["cardinality"] not in self.CARDINALITIES:
+                    self.report("error", "kcf.entity.cardinality", name, f"Unknown cardinality {comp['cardinality']!r}.")
+                if comp.get("orphan") and comp["orphan"] not in self.ORPHAN_POLICIES:
+                    self.report("error", "kcf.entity.orphan", name, f"Unknown orphan policy {comp['orphan']!r}.")
+            for ref in concept.get("namedReferences", []):
+                if not self.reference_exists(ref.get("target")):
+                    self.report("error", "kcf.entity.reference", name, f"Unresolved reference target {ref.get('target')!r}.")
+                if ref.get("cardinality") and ref["cardinality"] not in self.CARDINALITIES:
+                    self.report("error", "kcf.entity.cardinality", name, f"Unknown cardinality {ref['cardinality']!r}.")
+            for coll in concept.get("collections", []):
+                if not self.reference_exists(coll.get("of")):
+                    self.report("error", "kcf.entity.collection", name, f"Unresolved collection element type {coll.get('of')!r}.")
+            if concept.get("lifecycleRef") and not self.reference_exists(concept["lifecycleRef"]):
+                self.report("error", "kcf.entity.lifecycle", name, f"Unresolved lifecycle {concept['lifecycleRef']!r}.")
+            for ref in concept.get("constraints", []):
+                if not self.reference_exists(ref):
+                    self.report("error", "kcf.entity.constraint", name, f"Unresolved constraint {ref!r}.")
+        for mutation in self.model.get("mutations", []):
+            mid = mutation.get("qualifiedName") or mutation.get("id", "<mutation>")
+            if not self.reference_exists(mutation.get("subject")):
+                self.report("error", "kcf.mutation.subject", mid, f"Unresolved mutation subject {mutation.get('subject')!r}.")
+            for field, allowed, rule in (("operation", self.MUTATION_OPERATIONS, "kcf.mutation.operation"),
+                                         ("scope", self.MUTATION_SCOPES, "kcf.mutation.scope"),
+                                         ("atomicity", self.ATOMICITIES, "kcf.mutation.atomicity"),
+                                         ("concurrency", self.CONCURRENCY_POLICIES, "kcf.mutation.concurrency"),
+                                         ("selection", self.SELECTIONS, "kcf.mutation.selection")):
+                value = mutation.get(field)
+                if value is not None and value not in allowed:
+                    self.report("error", rule, mid, f"Unknown {field} {value!r}; expected one of {sorted(allowed)}.")
+            for emitted in mutation.get("emits", []):
+                if not self.reference_exists(emitted):
+                    self.report("error", "kcf.mutation.emit", mid, f"Unresolved emitted event {emitted!r}.")
+
+    MEASURE_KINDS = {"QUANTITY", "METRIC", "KPI", "THRESHOLD", "SCORE"}
+    SCALE_KINDS = {"nominal", "ordinal", "interval", "ratio"}
+    AGGREGATION_KINDS = {"sum", "average", "minimum", "maximum", "count", "distinct-count", "none"}
+
+    def check_measures(self):
+        """MEASURE dimension: measure kind/scale/aggregation enums and unit/
+        calculation/period references (all optional in the ergonomic surface), plus
+        unit `base` references."""
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "MEASURE":
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<measure>")
+            kind = concept.get("conceptKind")
+            if kind is not None and kind not in self.MEASURE_KINDS:
+                self.report("error", "kcf.measure.kind", name, f"Unknown measure kind {kind!r}; expected one of {sorted(self.MEASURE_KINDS)}.")
+            if concept.get("scale") is not None and concept["scale"] not in self.SCALE_KINDS:
+                self.report("error", "kcf.measure.scale", name, f"Unknown scale {concept['scale']!r}; expected one of {sorted(self.SCALE_KINDS)}.")
+            if concept.get("aggregation") is not None and concept["aggregation"] not in self.AGGREGATION_KINDS:
+                self.report("error", "kcf.measure.aggregation", name, f"Unknown aggregation {concept['aggregation']!r}; expected one of {sorted(self.AGGREGATION_KINDS)}.")
+            for field, rule in (("unitRef", "kcf.measure.unit"), ("calculationRef", "kcf.measure.calculation"), ("periodRef", "kcf.measure.period")):
+                if concept.get(field) and not self.reference_exists(concept[field]):
+                    self.report("error", rule, name, f"Unresolved {field} reference {concept[field]!r}.")
+        for unit in self.model.get("units", []):
+            uid = unit.get("qualifiedName") or unit.get("id", "<unit>")
+            if unit.get("base") and not self.reference_exists(unit["base"]):
+                self.report("error", "kcf.unit.base", uid, f"Unresolved base unit {unit['base']!r}.")
+
+    ACTOR_KINDS = {"PERSON", "ROLE", "TEAM", "ORGANIZATION", "SYSTEM", "AI_AGENT", "MACHINE", "EXTERNAL_PARTY"}
+    AUTHORITY_MODES = {"may-perform", "may-approve", "may-delegate", "may-escalate", "must-not-perform"}
+
+    def check_actors(self):
+        """ACTOR dimension: actor-kind enum, communication reference, and top-level
+        authority grants (mode enum + subject/target references)."""
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "ACTOR":
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<actor>")
+            kind = concept.get("conceptKind")
+            if kind is not None and kind not in self.ACTOR_KINDS:
+                self.report("error", "kcf.actor.kind", name, f"Unknown actor kind {kind!r}; expected one of {sorted(self.ACTOR_KINDS)}.")
+            if concept.get("communicationRef") and not self.reference_exists(concept["communicationRef"]):
+                self.report("error", "kcf.actor.communication", name, f"Unresolved communication reference {concept['communicationRef']!r}.")
+        for authority in self.model.get("authorities", []):
+            aid = authority.get("qualifiedName") or authority.get("id", "<authority>")
+            mode = authority.get("mode")
+            if mode is not None and mode not in self.AUTHORITY_MODES:
+                self.report("error", "kcf.authority.mode", aid, f"Unknown authority mode {mode!r}; expected one of {sorted(self.AUTHORITY_MODES)}.")
+            for field in ("subject", "target"):
+                if authority.get(field) and not self.reference_exists(authority[field]):
+                    self.report("error", f"kcf.authority.{field}", aid, f"Unresolved authority {field} {authority[field]!r}.")
+
+    WORK_KINDS = {"ACTION", "DECISION", "TASK", "ACTIVITY", "PROCESS"}
+    GATEWAY_KINDS = {"exclusive", "inclusive", "parallel", "event-based"}
+
+    def check_work(self):
+        """WORK dimension: work-kind enum, and process choreography (gateway-kind
+        enum; step/call/event/boundary/lane semantic refs; flow endpoints referencing
+        process-local node ids)."""
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "WORK":
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<work>")
+            kind = concept.get("conceptKind")
+            if kind is not None and kind not in self.WORK_KINDS:
+                self.report("error", "kcf.work.kind", name, f"Unknown work kind {kind!r}; expected one of {sorted(self.WORK_KINDS)}.")
+        for process in self.model.get("processes", []):
+            pid = process.get("qualifiedName") or process.get("id", "<process>")
+            node_ids = {node["id"] for node in process.get("nodes", [])}
+            # Structural checks (unique ids, single start, >=1 end, flow endpoints,
+            # reachability) are owned by check_processes; here we add the WORK-dimension
+            # semantics: gateway enum + semantic-ref resolution + boundary/lane wiring.
+            for node in process.get("nodes", []):
+                if node.get("type") == "gateway" and node.get("gatewayKind") not in self.GATEWAY_KINDS:
+                    self.report("error", "kcf.process.gateway", pid, f"Unknown gateway kind {node.get('gatewayKind')!r}.")
+                for ref_key in ("activity", "uses", "triggeredBy", "outcome"):
+                    if node.get(ref_key) and not self.reference_exists(node[ref_key]):
+                        self.report("error", "kcf.process.node", pid, f"Unresolved {ref_key} {node[ref_key]!r} in node {node.get('id')!r}.")
+            for boundary in process.get("boundaries", []):
+                if boundary.get("on") not in node_ids:
+                    self.report("error", "kcf.process.boundary", pid, f"Boundary attached to unknown node {boundary.get('on')!r}.")
+                if boundary.get("uses") and not self.reference_exists(boundary["uses"]):
+                    self.report("error", "kcf.process.boundary", pid, f"Unresolved boundary event {boundary['uses']!r}.")
+            for lane in process.get("lanes", []):
+                if lane.get("performer") and not self.reference_exists(lane["performer"]):
+                    self.report("error", "kcf.process.lane", pid, f"Unresolved lane performer {lane['performer']!r}.")
+                for contained in lane.get("contains", []):
+                    if contained not in node_ids:
+                        self.report("error", "kcf.process.lane", pid, f"Lane contains unknown node {contained!r}.")
+
+    CONCEPT_KIND_NAMES = {"ENTITY", "ACTOR", "WORK", "EVENT", "RESOURCE", "INTENT",
+                          "MEASURE", "TEMPORAL", "SPATIAL", "LOGIC", "MATH"}
+
+    def check_lifecycle_refs(self):
+        """LIFECYCLE dimension enrichments: governs-kind enum, state entry/exit actions,
+        transition trigger/requires-work/effect, and temporal references."""
+        for lifecycle in self.model.get("lifecycles", []):
+            lid = lifecycle.get("qualifiedName") or lifecycle.get("id", "<lifecycle>")
+            for governed in lifecycle.get("governsKind", []):
+                if governed not in self.CONCEPT_KIND_NAMES:
+                    self.report("error", "kcf.lifecycle.governs-kind", lid, f"Unknown governed concept kind {governed!r}.")
+            for state, body in (lifecycle.get("stateBodies") or {}).items():
+                for ref_key in ("entry", "exit"):
+                    for ref in body.get(ref_key, []):
+                        if not self.reference_exists(ref):
+                            self.report("error", f"kcf.lifecycle.state.{ref_key}", lid, f"Unresolved {ref_key} {ref!r} in state {state!r}.")
+            for transition in lifecycle.get("transitions", []):
+                for ref_key in ("trigger", "requiresWork", "effect"):
+                    for ref in transition.get(ref_key, []):
+                        if not self.reference_exists(ref):
+                            self.report("error", f"kcf.lifecycle.transition", lid, f"Unresolved {ref_key} {ref!r}.")
+            for ref in lifecycle.get("temporalRefs", []):
+                if not self.reference_exists(ref):
+                    self.report("error", "kcf.lifecycle.temporal", lid, f"Unresolved temporal reference {ref!r}.")
+
+    INTENT_KINDS = {"GOAL", "OBJECTIVE", "OUTCOME", "REQUEST", "PREFERENCE", "PRIORITY", "SUCCESS_CONDITION", "FAILURE_CONDITION"}
+    TEMPORAL_KINDS = {"INSTANT", "INTERVAL", "DURATION", "DEADLINE", "SCHEDULE", "RECURRENCE", "EFFECTIVE_PERIOD"}
+    DURATION_UNITS = {"millisecond", "second", "minute", "hour", "day", "week", "month", "year"}
+    SPATIAL_KINDS = {"LOCATION", "REGION", "ZONE", "PATH", "COORDINATE", "JURISDICTION"}
+    GEOMETRY_KINDS = {"point", "line", "polygon", "volume"}
+    MODAL_OPERATORS = {"necessary", "possible", "permitted", "obligatory", "known", "believed"}
+
+    def check_quantitative(self):
+        """INTENT/TEMPORAL/SPATIAL/LOGIC/MATH enums + single-reference resolution."""
+        kind_rules = {"INTENT": ("kcf.intent.kind", self.INTENT_KINDS),
+                      "TEMPORAL": ("kcf.temporal.kind", self.TEMPORAL_KINDS),
+                      "SPATIAL": ("kcf.spatial.kind", self.SPATIAL_KINDS)}
+        for concept in self.model.get("concepts", []):
+            kind = concept.get("kind")
+            if kind not in kind_rules:
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<concept>")
+            rule, allowed = kind_rules[kind]
+            classifier = concept.get("conceptKind")
+            if classifier is not None and classifier not in allowed:
+                self.report("error", rule, name, f"Unknown {kind.lower()} kind {classifier!r}; expected one of {sorted(allowed)}.")
+            for field, frule in (("containedIn", "kcf.spatial.contained-in"),
+                                 ("calendarRef", "kcf.temporal.calendar"),
+                                 ("timeHorizon", "kcf.intent.time-horizon")):
+                if concept.get(field) and not self.reference_exists(concept[field]):
+                    self.report("error", frule, name, f"Unresolved {field} {concept[field]!r}.")
+            geometry = concept.get("geometry")
+            if geometry and geometry.get("geometryKind") not in self.GEOMETRY_KINDS:
+                self.report("error", "kcf.spatial.geometry", name, f"Unknown geometry kind {geometry.get('geometryKind')!r}.")
+            duration = concept.get("durationValue")
+            if duration and duration.get("unit") not in self.DURATION_UNITS:
+                self.report("error", "kcf.temporal.duration", name, f"Unknown duration unit {duration.get('unit')!r}.")
+        for proposition in self.model.get("propositions", []):
+            pid = proposition.get("qualifiedName") or proposition.get("id", "<proposition>")
+            if proposition.get("mode") is not None and proposition["mode"] not in self.MODAL_OPERATORS:
+                self.report("error", "kcf.logic.mode", pid, f"Unknown modal operator {proposition['mode']!r}.")
+        for formula in self.model.get("math", []):
+            mid = formula.get("qualifiedName") or formula.get("id", "<math>")
+            for field in ("result", "model"):
+                if formula.get(field) and not self.reference_exists(formula[field]):
+                    self.report("error", "kcf.math.reference", mid, f"Unresolved {field} {formula[field]!r}.")
+        for route in self.model.get("routes", []):
+            rid = route.get("qualifiedName") or route.get("id", "<route>")
+            for field in ("from", "to"):
+                if route.get(field) and not self.reference_exists(route[field]):
+                    self.report("error", "kcf.spatial.route", rid, f"Unresolved route {field} {route[field]!r}.")
+
+    RESOURCE_KINDS = {"CONSUMABLE", "RENEWABLE", "CAPACITY", "TOOL", "FACILITY", "COMPUTE", "FINANCIAL"}
+    CONSUMPTION_MODES = {"consume", "reserve", "borrow", "share"}
+
+    def check_resources(self):
+        """RESOURCE dimension: resource-kind + consumption enums, resource reference
+        fields, and allocation references."""
+        for resource in self.model.get("resources", []):
+            rid = resource.get("qualifiedName") or resource.get("id", "<resource>")
+            if resource.get("resourceKind") is not None and resource["resourceKind"] not in self.RESOURCE_KINDS:
+                self.report("error", "kcf.resource.kind", rid, f"Unknown resource kind {resource['resourceKind']!r}; expected one of {sorted(self.RESOURCE_KINDS)}.")
+            if resource.get("consumption") is not None and resource["consumption"] not in self.CONSUMPTION_MODES:
+                self.report("error", "kcf.resource.consumption", rid, f"Unknown consumption mode {resource['consumption']!r}.")
+            for field in ("capacityUnit", "location", "owner", "allocationPolicy", "reservationPolicy", "replenishment", "cost"):
+                if resource.get(field) and not self.reference_exists(resource[field]):
+                    self.report("error", "kcf.resource.reference", rid, f"Unresolved {field} {resource[field]!r}.")
+        for allocation in self.model.get("allocations", []):
+            aid = allocation.get("qualifiedName") or allocation.get("id", "<allocation>")
+            for field in ("resource", "consumer", "reservation"):
+                if allocation.get(field) and not self.reference_exists(allocation[field]):
+                    self.report("error", "kcf.allocation.reference", aid, f"Unresolved {field} {allocation[field]!r}.")
+
     def run(self):
         self.build_symbols()
         self.check_refs()
+        self.check_capabilities_skills()
+        self.check_events()
+        self.check_entities()
+        self.check_measures()
+        self.check_actors()
+        self.check_work()
+        self.check_lifecycle_refs()
+        self.check_quantitative()
+        self.check_resources()
         self.check_relationships()
         self.check_lifecycles()
         self.check_actions()

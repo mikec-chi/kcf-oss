@@ -1,0 +1,102 @@
+// Exercises the operational + emitter PROFILE grammars surfaced in the authoring
+// language: INTEGRATION, SECURITY, LINEAGE (operational) and ARCHITECTURE, EXPERIENCE,
+// DESIGN, ANALYTICS, AI (emitters) — including nested sub-blocks (topology nodes/edges,
+// flow nodes/edges, design-system tokens/breakpoints/patterns, report/dashboard visuals,
+// ai feature-schemas/pipelines) and arrow forms (map, on-handler, security-map,
+// field-lineage, bind). Each profile projects into ir[<section>]; refs resolve by local id.
+kcf model ProfilePlatform profile business-application {
+  namespace pf;
+
+  entity Order { identity orderId: UUID; required total: Decimal; }
+  actor Ops { kind PERSON; }
+  work FulfillOrder { kind TASK; }
+  measure Revenue { kind KPI; subject Order; }
+
+  command CreateOrder {
+    operation create; scope record; target Order;
+    input one; output one; idempotency conditional; atomicity atomic;
+    authorization pf.OrderPolicy;
+  }
+  rule OrderRule { kind CONSTRAINT; condition "total is non-negative"; effect FulfillOrder; applies-to Order; authority Ops; }
+  policy OrderPolicy { authority Ops; rule OrderRule; default-conflict deny-overrides; }
+
+  relationship order-fulfilled-by: DEPENDENCY Order -> FulfillOrder strength 1.0 cardinality one to many validate OrderRule infer transitive;
+
+  integration {
+    adapter Http { protocol "https"; serialization "json"; }
+    endpoint OrderApi { adapter Http; operation CreateOrder; address "/orders"; }
+    route ApiRoute { source OrderApi; target OrderApi; }
+    retry-policy Retry3 { attempts 3; requires-idempotency true; }
+    event-bridge Bridge { event OrderPlaced; endpoint OrderApi; }
+    mapping OrderMap { from Order; to OrderData; map total -> amount using RoundFn; }
+    error-policy OnFail { on timeout -> Retry3; }
+  }
+
+  security {
+    asset OrderData { subject Order; classification "confidential"; owner Ops; }
+    threat Phishing { vector "credential-phishing"; actor Ops; }
+    risk R1 { threat Phishing; asset OrderData; likelihood 0.2; impact 0.4; level 0.08; }
+    control AccessControl { rule OrderRule; applies-to Order; }
+    treatment T1 { risk R1; mode mitigate; control AccessControl; }
+    trust-boundary Perimeter { contains OrderData; crossing-control AccessControl; }
+    security-map AccessControl -> OrderData coverage 0.9;
+  }
+
+  lineage {
+    lineage Edge1 { source Order; target OrderData; }
+    binding B1 { source Order; target OrderApi; kind data; }
+    cost C1 { subject Order; amount 100; unit "USD"; }
+    field-lineage total -> amount using RoundFn;
+  }
+
+  architecture {
+    service OrderSvc { realizes CreateOrder; interface OrderIface; runtime "container"; }
+    interface OrderIface { contract OrderApi; protocol "rest"; }
+    boundary CoreBoundary { contains OrderSvc; control AccessControl; }
+    topology Net {
+      node Web { hosts OrderSvc; environment Prod; }
+      node Db { }
+      connect Web -> Db via ApiRoute;
+    }
+    deployment Deploy1 { artifact OrderSvc; target Web; version "1.0"; }
+  }
+
+  experience {
+    app Shop { entry OrderView; view OrderView; }
+    view OrderView { entity Order; action CreateOrder; }
+    component OrderButton { slot label; }
+    flow Checkout {
+      entry Start;
+      node Start: OrderView;
+      node Done: OrderView;
+      transition Start -> Done when "order submitted";
+    }
+    bind OrderView to Order mode read;
+  }
+
+  design {
+    design-system Base {
+      token Primary: color = "#0af";
+      breakpoint Sm: 480 px;
+      breakpoint Lg: 1024 px;
+      pattern Card { constraint OrderRule; }
+    }
+    page OrderPage { view OrderView; section Header; }
+  }
+
+  analytics {
+    dataset Sales { source Order; transform Revenue; }
+    semantic-layer Metrics { measure Revenue; }
+    report SalesReport { layer Metrics; visual Bar { kind "bar"; field Revenue; } output Revenue; }
+    dashboard Exec { layer Metrics; visual Line { kind "line"; field Revenue; } filter Order; action CreateOrder; }
+  }
+
+  ai {
+    features OrderFeatures { feature TotalFeature: Order; target TotalFeature; }
+    dataset Training { information Order; schema OrderData; }
+    model Forecast { input Training; output Revenue; method "xgboost"; metric Revenue; }
+    pipeline Train { step 0: Training; step 1: Forecast; }
+    serving Live { model Forecast; runtime "kserve"; capacity 4; }
+    governance Gov { policy OrderPolicy; evidence OrderData; }
+  }
+}

@@ -1,0 +1,529 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OrderManagement",
+  "module": "KCF",
+  "namespace": "shop",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Customer",
+      "qualifiedName": "shop.Customer",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true,
+          "required": true,
+          "generated": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "required": false,
+          "qualifiers": [
+            "unique"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Note",
+      "qualifiedName": "shop.Note",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "noteId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "text",
+          "type": "String",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "LineItem",
+      "qualifiedName": "shop.LineItem",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "lineId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "sku",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "qty",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Order",
+      "qualifiedName": "shop.Order",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true,
+          "required": true,
+          "generated": true
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "tags",
+          "type": "String",
+          "required": false,
+          "cardinality": "many"
+        }
+      ],
+      "compositions": [
+        {
+          "name": "lines",
+          "target": "shop.LineItem",
+          "cardinality": "many",
+          "orphan": "cascade"
+        }
+      ],
+      "namedReferences": [
+        {
+          "name": "customer",
+          "target": "shop.Customer",
+          "cardinality": "one",
+          "inverse": "orders"
+        }
+      ],
+      "collections": [
+        {
+          "name": "notes",
+          "of": "shop.Note",
+          "identity": "noteId",
+          "orderBy": "text"
+        }
+      ],
+      "lifecycleRef": "shop.OrderLifecycle",
+      "constraints": [
+        "shop.OrderStatusRule"
+      ]
+    },
+    {
+      "id": "OrderClerk",
+      "qualifiedName": "shop.OrderClerk",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "SubmitOrderWork",
+      "qualifiedName": "shop.SubmitOrderWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "OrderSubmitted",
+      "qualifiedName": "shop.OrderSubmitted",
+      "kind": "EVENT",
+      "references": [],
+      "subjects": [
+        "shop.Order"
+      ]
+    },
+    {
+      "id": "OrderStatusRule",
+      "qualifiedName": "shop.OrderStatusRule",
+      "kind": "RULE",
+      "references": [
+        "shop.Order",
+        "shop.SubmitOrderWork",
+        "shop.OrderClerk"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "OrderPolicy",
+      "qualifiedName": "shop.OrderPolicy",
+      "kind": "RULE",
+      "references": [
+        "shop.OrderClerk",
+        "shop.OrderStatusRule"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "clerk-performs-submit",
+      "rootKind": "PARTICIPATION",
+      "source": "shop.OrderClerk",
+      "target": "shop.SubmitOrderWork",
+      "strength": 1.0,
+      "definition": "clerk-performs-submit"
+    },
+    {
+      "id": "submit-transforms-order",
+      "rootKind": "TRANSFORMATION",
+      "source": "shop.SubmitOrderWork",
+      "target": "shop.Order",
+      "strength": 1.0,
+      "definition": "submit-transforms-order"
+    }
+  ],
+  "lifecycles": [
+    {
+      "id": "OrderLifecycle",
+      "subject": "shop.Order",
+      "states": [
+        "Draft",
+        "Submitted",
+        "Closed"
+      ],
+      "initial": "Draft",
+      "terminal": [
+        "Closed"
+      ],
+      "transitions": [
+        {
+          "from": "Draft",
+          "to": "Submitted"
+        },
+        {
+          "from": "Submitted",
+          "to": "Closed"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "CreateOrder",
+      "effect": "command",
+      "mutations": [],
+      "operation": "create",
+      "scope": "record",
+      "target": "shop.Order",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "preconditions": [
+        "customer is provided"
+      ],
+      "postconditions": [
+        "order exists in Draft"
+      ],
+      "failureModes": [
+        "duplicate order rejected"
+      ],
+      "inputs": [
+        "Order"
+      ],
+      "outputs": [
+        "Order"
+      ],
+      "idempotency": "conditional",
+      "transactionMode": "required",
+      "atomicity": "atomic",
+      "authorization": "shop.OrderPolicy"
+    },
+    {
+      "id": "GetOrder",
+      "effect": "query",
+      "mutations": [],
+      "operation": "read",
+      "scope": "record",
+      "target": "shop.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    }
+  ],
+  "collectionTransforms": [
+    {
+      "id": "OpenOrders",
+      "keys": [],
+      "inputs": [],
+      "operation": "filter",
+      "inputSchema": "Order",
+      "outputSchema": "Order",
+      "predicate": "order status is Submitted",
+      "bounded": true
+    }
+  ],
+  "events": [
+    {
+      "id": "OrderSubmitted",
+      "qualifiedName": "shop.OrderSubmitted",
+      "mutable": false,
+      "subjects": [
+        "shop.Order"
+      ]
+    }
+  ],
+  "resources": [],
+  "mutations": [
+    {
+      "id": "SubmitOrder",
+      "subject": "shop.Order",
+      "operation": "update",
+      "scope": "record",
+      "selection": "identity",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "versionField": "version",
+      "idempotency": "conditional",
+      "mutates": [
+        "status"
+      ],
+      "changes": [
+        {
+          "kind": "change",
+          "target": "status",
+          "from": "Draft",
+          "to": "Submitted"
+        }
+      ],
+      "preconditions": [
+        "order has at least one line"
+      ],
+      "postconditions": [
+        "order status is Submitted"
+      ],
+      "emits": [
+        "shop.OrderSubmitted"
+      ]
+    }
+  ],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [
+    {
+      "id": "OrderStatusRule",
+      "appliesTo": [
+        "shop.Order"
+      ],
+      "effects": [
+        "shop.SubmitOrderWork"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "order has a status",
+      "authority": "shop.OrderClerk",
+      "qualifiedName": "shop.OrderStatusRule"
+    }
+  ],
+  "policies": [
+    {
+      "id": "OrderPolicy",
+      "rules": [
+        "shop.OrderStatusRule"
+      ],
+      "evidence": [],
+      "authority": "shop.OrderClerk",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "shop.OrderPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "shop.Customer": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 15,
+      "endColumn": 4
+    },
+    "shop.Note": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 17,
+      "column": 3,
+      "endLine": 20,
+      "endColumn": 4
+    },
+    "shop.LineItem": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 22,
+      "column": 3,
+      "endLine": 26,
+      "endColumn": 4
+    },
+    "shop.Order": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 53,
+      "endColumn": 4
+    },
+    "shop.OrderClerk": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 55,
+      "column": 3,
+      "endLine": 55,
+      "endColumn": 23
+    },
+    "shop.SubmitOrderWork": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 56,
+      "column": 3,
+      "endLine": 56,
+      "endColumn": 27
+    },
+    "shop.OrderSubmitted": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 57,
+      "column": 3,
+      "endLine": 57,
+      "endColumn": 53
+    },
+    "clerk-performs-submit": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 59,
+      "column": 3,
+      "endLine": 59,
+      "endColumn": 96
+    },
+    "submit-transforms-order": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 60,
+      "column": 3,
+      "endLine": 60,
+      "endColumn": 94
+    },
+    "OrderLifecycle": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 62,
+      "column": 3,
+      "endLine": 68,
+      "endColumn": 4
+    },
+    "CreateOrder": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 70,
+      "column": 3,
+      "endLine": 84,
+      "endColumn": 4
+    },
+    "GetOrder": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 86,
+      "column": 3,
+      "endLine": 93,
+      "endColumn": 4
+    },
+    "OpenOrders": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 95,
+      "column": 3,
+      "endLine": 101,
+      "endColumn": 4
+    },
+    "shop.OrderStatusRule": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 103,
+      "column": 3,
+      "endLine": 109,
+      "endColumn": 4
+    },
+    "shop.OrderPolicy": {
+      "source": "tests/domains/entity-rich.kcf",
+      "line": 111,
+      "column": 3,
+      "endLine": 115,
+      "endColumn": 4
+    }
+  }
+}

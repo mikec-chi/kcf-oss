@@ -101,7 +101,16 @@
       "id": "Revenue",
       "qualifiedName": "intelligence.Revenue",
       "kind": "MEASURE",
-      "references": []
+      "references": [],
+      "conceptKind": "KPI",
+      "scale": "ratio",
+      "aggregation": "sum",
+      "target": 1000000,
+      "tolerance": 50000,
+      "unitRef": "intelligence.USD",
+      "subjects": [
+        "intelligence.Sale"
+      ]
     },
     {
       "id": "RevenueForecast",
@@ -151,6 +160,23 @@
   ],
   "events": [],
   "resources": [],
+  "mutations": [],
+  "units": [
+    {
+      "id": "USD",
+      "qualifiedName": "intelligence.USD",
+      "dimension": "currency",
+      "symbol": "$"
+    }
+  ],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
   "organizations": [],
   "information": [
     {
@@ -192,6 +218,8 @@
   "assertions": [],
   "identityResolutions": [],
   "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
   "runtimeRequirements": [
     "SchemaRegistry",
     "Lineage",
@@ -222,39 +250,46 @@
       "endLine": 17,
       "endColumn": 4
     },
-    "intelligence.Revenue": {
+    "intelligence.USD": {
       "source": "tests/domains/analytics-ai.kcf",
       "line": 18,
       "column": 3,
-      "endLine": 18,
-      "endColumn": 22
+      "endLine": 21,
+      "endColumn": 4
+    },
+    "intelligence.Revenue": {
+      "source": "tests/domains/analytics-ai.kcf",
+      "line": 22,
+      "column": 3,
+      "endLine": 30,
+      "endColumn": 4
     },
     "intelligence.RevenueForecast": {
       "source": "tests/domains/analytics-ai.kcf",
-      "line": 19,
+      "line": 31,
       "column": 3,
-      "endLine": 25,
+      "endLine": 37,
       "endColumn": 4
     },
     "dataset-describes-sale": {
       "source": "tests/domains/analytics-ai.kcf",
-      "line": 27,
+      "line": 39,
       "column": 3,
-      "endLine": 27,
+      "endLine": 39,
       "endColumn": 86
     },
     "forecast-uses-revenue": {
       "source": "tests/domains/analytics-ai.kcf",
-      "line": 28,
+      "line": 40,
       "column": 3,
-      "endLine": 28,
+      "endLine": 40,
       "endColumn": 90
     },
     "MonthlyRevenue": {
       "source": "tests/domains/analytics-ai.kcf",
-      "line": 30,
+      "line": 42,
       "column": 3,
-      "endLine": 37,
+      "endLine": 49,
       "endColumn": 4
     }
   }

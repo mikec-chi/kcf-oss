@@ -11,7 +11,18 @@ authoring-declaration = concept-decl | organization-decl | information-decl
                       | rule-decl | policy-decl | reasoning-decl
                       | assertion-decl | identity-resolution-decl
                       | knowledge-query-decl | relationship-decl
-                      | lifecycle-decl | action-decl | collection-decl ;
+                      | lifecycle-decl | action-decl | collection-decl | unit-decl
+                      | authority-decl | process-decl | calendar-decl | route-decl
+                      | proposition-decl | predicate-decl | math-decl | allocation-decl
+                      | profile-block ;
+(* Operational + emitter PROFILE blocks (ergonomic form of the profile grammars under
+   grammars/profiles/). Each element projects into ir[<section>][<collection>];
+   references resolve by local id. Element bodies are `<key> <value>;` lines. *)
+profile-block = profile-section, "{", { profile-element }, "}" ;
+profile-section = "integration" | "security" | "lineage" | "architecture"
+                | "experience" | "design" | "analytics" | "ai" ;
+profile-element = identifier, identifier, "{", { profile-member }, "}" ;
+profile-member = identifier, scalar, ";" | knowledge-metadata ;
 
 concept-decl = concept-keyword, identifier, concept-body
              | "event", identifier, "immutable", ";" ;
@@ -20,13 +31,183 @@ concept-keyword = "entity" | "actor" | "work" | "event" | "resource"
                 | "spatial" | "logic" | "math" ;
 concept-body = "{", { concept-member }, "}" ;
 concept-member = attribute-decl | reference-decl | trait-decl
-               | abstract-decl | property-decl ;
+               | abstract-decl | immutable-decl | kind-decl
+               | capability-decl | skill-decl
+               | requires-capability-decl | requires-skill-decl
+               | event-member | entity-member | measure-member | actor-member
+               | work-member | intent-member | temporal-member | spatial-member
+               | resource-member | property-decl ;
 attribute-decl = attribute-modifier, identifier, ":", qualified-name,
-                 [ "=", scalar ], ";" ;
+                 [ "=", scalar ], [ cardinality ], { qualifier }, ";" ;
 attribute-modifier = "identity" | "required" | "optional" | "field" ;
+cardinality = "one" | "many" | "set" | "zero-or-one" | "one-or-many"
+            | "zero-or-many" | "optional-one" ;
+qualifier = "generated" | identifier ;                       (* generated flag + free-form qualifiers *)
+(* ENTITY dimension members (ergonomic form of dimensions/ENTITY-v1.0). *)
+entity-member = composition-decl | named-reference-decl | embedded-collection-decl
+              | lifecycle-binding-decl | constraint-decl | mutation-decl ;
+composition-decl = "compose", identifier, ":", semantic-ref, cardinality,
+                   [ "orphan", orphan-policy ], ";" ;
+named-reference-decl = "reference", identifier, ":", semantic-ref, cardinality,
+                       [ "inverse", identifier ], ";" ;
+embedded-collection-decl = "collection", identifier, ":", semantic-ref, ";"
+                | "collection", identifier, "of", semantic-ref, "{",
+                  [ "identity", identifier, ";" ], [ "order-by", identifier, ";" ],
+                  { "constraint", semantic-ref, ";" }, "}" ;
+lifecycle-binding-decl = "lifecycle", semantic-ref, ";" ;    (* bind entity to its lifecycle *)
+constraint-decl = "constraint", semantic-ref, ";" ;          (* inline constraint-use *)
+orphan-policy = "restrict" | "cascade" | "detach" | "archive" ;
+mutation-decl = "mutation", identifier, "{",
+                "operation", mutation-operation, ";",
+                [ "scope", mutation-scope, ";" ], [ "selection", selection, ";" ],
+                { mutation-change }, { "precondition", scalar, ";" },
+                { "postcondition", scalar, ";" }, { "emit", semantic-ref, ";" },
+                [ "atomicity", atomicity, ";" ], [ "concurrency", concurrency, ";" ],
+                [ "version-field", identifier, ";" ], [ "idempotency", identifier, ";" ], "}" ;
+mutation-change = "change", identifier, [ "from", scalar, "to", scalar ], ";"
+                | "add-member", identifier, ";"
+                | "remove-member", identifier, ";"
+                | "archive", [ identifier ], ";" ;
+mutation-operation = "create" | "replace" | "update" | "patch" | "delete" | "upsert"
+                   | "archive" | "assign-reference" | "add-member" | "remove-member" | "synchronize" ;
+mutation-scope = "record" | "set" | "batch" | "stream" ;
+selection = "identity" | "predicate" | "keys" | "partition" | "all" ;
+atomicity = "atomic" | "per-record" | "best-effort" ;
+concurrency = "none" | "optimistic" | "pessimistic" | "serialized" ;
 reference-decl = "ref", semantic-ref, ";" ;
 trait-decl = "trait", semantic-ref, ";" ;
 abstract-decl = "abstract", ";" ;
+immutable-decl = "immutable", ";" ;                          (* EVENT: value semantics *)
+kind-decl = "kind", identifier, ";" ;                        (* dimension classifier: event-kind, actor-kind, ... *)
+capability-decl = "capability", semantic-ref, ";" ;          (* ACTOR *)
+skill-decl = "skill", semantic-ref, ";" ;                    (* ACTOR *)
+requires-capability-decl = "requires-capability", semantic-ref, ";" ;  (* WORK *)
+requires-skill-decl = "requires-skill", semantic-ref, ";" ;            (* WORK *)
+(* EVENT dimension members (ergonomic form of dimensions/EVENT-v1.0). *)
+event-member = "subject", semantic-ref, ";"
+             | "source", semantic-ref, ";"
+             | "observer", semantic-ref, ";"
+             | "trigger", semantic-ref, ";"
+             | "affect-lifecycle", semantic-ref, ";"
+             | "evidence", semantic-ref, ";"
+             | "occurrence-time", identifier, ";"
+             | "detection-time", identifier, ";"
+             | "correlation-key", identifier, ";"
+             | "severity", scalar, ";"
+             | "expectedness", identifier, ";"
+             | "match", scalar, ";" ;
+(* MEASURE dimension members (ergonomic form of dimensions/MEASURE-v1.0). `kind`
+   reuses kind-decl with a measure-kind classifier; `subject` reuses event-member. *)
+measure-member = "unit", semantic-ref, ";"
+               | "scale", scale-kind, ";"
+               | "calculation", semantic-ref, ";"
+               | "aggregation", aggregation-kind, ";"
+               | "period", semantic-ref, ";"
+               | "threshold", number, ";"
+               | "target", number, ";"
+               | "tolerance", number, ";" ;
+scale-kind = "nominal" | "ordinal" | "interval" | "ratio" ;
+aggregation-kind = "sum" | "average" | "minimum" | "maximum" | "count"
+                 | "distinct-count" | "none" ;
+unit-decl = "unit", identifier, "{", "dimension", identifier, ";",
+            [ "symbol", scalar, ";" ], [ "base", semantic-ref, ";" ],
+            [ "factor", number, ";" ], "}" ;
+(* ACTOR dimension members (ergonomic form of dimensions/ACTOR-v1.0). `kind` reuses
+   kind-decl with an actor-kind classifier; `capability`/`skill` reuse ACTOR decls. *)
+actor-member = "role", semantic-ref, ";"
+             | "authority", semantic-ref, ";"
+             | "responsible-for", semantic-ref, ";"
+             | "accountable-for", semantic-ref, ";"
+             | "member-of", semantic-ref, ";"
+             | "availability", scalar, ";"
+             | "communication", semantic-ref, ";" ;
+authority-decl = "authority", identifier, "{", "mode", authority-mode, ";",
+                 "subject", semantic-ref, ";", "target", semantic-ref, ";",
+                 { "when", scalar, ";" }, [ validity-inline ], "}" ;
+authority-mode = "may-perform" | "may-approve" | "may-delegate"
+               | "may-escalate" | "must-not-perform" ;
+(* WORK dimension members (ergonomic form of dimensions/WORK-v1.0). `kind` reuses
+   kind-decl with a work-kind classifier; requires-capability/skill reuse WORK decls. *)
+work-member = "performer", semantic-ref, ";"
+            | "input", semantic-ref, ";"
+            | "output", semantic-ref, ";"
+            | "outcome", semantic-ref, ";"
+            | "requires-resource", semantic-ref, ";"
+            | "requires-tool", semantic-ref, ";"
+            | "governed-by", semantic-ref, ";"
+            | "triggered-by", semantic-ref, ";"
+            | "emit", semantic-ref, ";"
+            | "compensate-with", semantic-ref, ";"
+            | "temporal", semantic-ref, ";"
+            | "precondition", scalar, ";"
+            | "postcondition", scalar, ";"
+            | "completion", scalar, ";"
+            | "failure", scalar, ";" ;
+(* WORK-dimension process choreography (BPMN). *)
+process-decl = "process", identifier, "{", { process-member }, "}" ;
+process-member = "start", identifier, [ "triggered-by", semantic-ref ], ";"
+               | "end", identifier, [ "outcome", semantic-ref ], ";"
+               | "event", identifier, "uses", semantic-ref, ";"
+               | "step", identifier, ":", semantic-ref, [ "in", identifier ], ";"
+               | "gateway", identifier, ":", gateway-kind, ";"
+               | "call", identifier, ":", semantic-ref, ";"
+               | "flow", identifier, "->", identifier,
+                 [ "when", scalar ], [ "priority", number ], ";"
+               | "boundary", identifier, "on", identifier, "uses", semantic-ref, ";"
+               | lane-decl ;
+lane-decl = "lane", identifier, "{", "performer", semantic-ref, ";",
+            { "contains", identifier, ";" }, "}" ;
+gateway-kind = "exclusive" | "inclusive" | "parallel" | "event-based" ;
+(* INTENT / TEMPORAL / SPATIAL dimension concept members (ergonomic forms of their
+   dimension grammars; `kind` reuses kind-decl with the relevant classifier). *)
+intent-member = "desired-state", scalar, ";" | "success", scalar, ";"
+              | "priority", number, ";" | "stakeholder", semantic-ref, ";"
+              | "measure", semantic-ref, ";" | "time-horizon", semantic-ref, ";"
+              | "tradeoff", semantic-ref, "against", semantic-ref, [ "weight", number ], ";" ;
+temporal-member = "start", scalar, ";" | "end", scalar, ";"
+                | "duration", number, duration-unit, ";" | "recurrence", scalar, ";"
+                | "calendar", semantic-ref, ";" | "timezone", scalar, ";"
+                | "calculation", scalar, ";" ;
+duration-unit = "millisecond" | "second" | "minute" | "hour" | "day"
+              | "week" | "month" | "year" ;
+spatial-member = "contained-in", semantic-ref, ";" | "adjacent-to", semantic-ref, ";"
+               | "route", semantic-ref, ";" | "jurisdiction", semantic-ref, ";"
+               | "geometry", geometry-kind, "[", coordinate, { [ "," ], coordinate }, "]", ";" ;
+geometry-kind = "point" | "line" | "polygon" | "volume" ;
+coordinate = number, number, [ number ] ;
+calendar-decl = "calendar", identifier, "{", "timezone", scalar, ";",
+                { "working-day", identifier, ";" }, { "holiday", scalar, ";" }, "}" ;
+route-decl = "route", identifier, "{", "from", semantic-ref, ";", "to", semantic-ref, ";",
+             { "via", semantic-ref, ";" }, [ "distance", number, identifier, ";" ],
+             { "constraint", semantic-ref, ";" }, "}" ;
+proposition-decl = "proposition", identifier, "{", "expression", scalar, ";",
+                   [ "mode", modal-operator, ";" ], "}" ;
+modal-operator = "necessary" | "possible" | "permitted" | "obligatory" | "known" | "believed" ;
+predicate-decl = "predicate", identifier, "{", { "param", identifier, ":", qualified-name, ";" },
+                 "expression", scalar, ";", "}" ;
+math-decl = ( "formula" | "function" | "optimize" | "distribution" | "simulation" ),
+            identifier, "{", { math-member }, "}" ;
+math-member = "result", semantic-ref, ";" | "returns", qualified-name, ";"
+            | "family", identifier, ";" | "model", semantic-ref, ";"
+            | "expression", scalar, ";" | "param", identifier, ":", qualified-name, ";"
+            | "objective", ( "minimize" | "maximize" ), scalar, ";"
+            | "variable", identifier, ";" | "constraint", scalar, ";"
+            | "trials", number, ";" | "seed", number, ";" | property-decl ;
+(* RESOURCE dimension members (ergonomic form of dimensions/RESOURCE-v1.0). `kind`
+   reuses kind-decl with a resource-kind classifier. *)
+resource-member = "capacity", number, [ identifier ], ";"
+                | "availability", scalar, ";"
+                | "location", semantic-ref, ";"
+                | "owner", semantic-ref, ";"
+                | "allocation-policy", semantic-ref, ";"
+                | "reservation-policy", semantic-ref, ";"
+                | "consumption", consumption-mode, ";"
+                | "replenishment", semantic-ref, ";"
+                | "cost", semantic-ref, ";" ;
+consumption-mode = "consume" | "reserve" | "borrow" | "share" ;
+allocation-decl = "allocation", identifier, "{", "resource", semantic-ref, ";",
+                  "consumer", semantic-ref, ";", "quantity", number, ";",
+                  [ "reservation", semantic-ref, ";" ], [ validity-inline ], "}" ;
 property-decl = identifier, scalar, ";" ;
 
 organization-decl = "organization", identifier, "{",
@@ -56,7 +237,9 @@ information-member = "subject", semantic-ref, ";"
                    | "representation", identifier, ";"
                    | "confidentiality", identifier, ";"
                    | "freshness", semantic-ref, ";"
-                   | "completeness", number, ";" ;
+                   | "completeness", number, ";"
+                   | "trust", number, ";"
+                   | "field", identifier, ":", qualified-name, [ cardinality ], ";" ;
 information-kind = "DOCUMENT" | "MESSAGE" | "RECORD" | "MODEL" | "EVIDENCE"
                  | "INSTRUCTION" | "REPORT" | "SEMANTIC_PACKET" ;
 
@@ -152,10 +335,20 @@ relationship-decl = "relationship", identifier, ":", identifier,
                     { identifier, scalar }, ";" ;
 lifecycle-decl = "lifecycle", identifier, [ "for", semantic-ref ], "{",
                  lifecycle-member, { lifecycle-member }, "}" ;
-lifecycle-member = state-decl | transition-decl ;
-state-decl = ( "state" | "initial" | "terminal" ), identifier, ";" ;
+lifecycle-member = state-decl | transition-decl
+                 | "governs-kind", identifier, ";"
+                 | "invariant", scalar, ";"
+                 | "temporal", semantic-ref, ";" ;
+state-decl = ( "initial" | "terminal" ), identifier, ";"
+           | "state", identifier, ";"
+           | "state", identifier, "{", { state-member }, "}" ;
+state-member = "entry", semantic-ref, ";" | "exit", semantic-ref, ";"
+             | "invariant", scalar, ";" ;
 transition-decl = "transition", identifier, "->", identifier,
-                  [ "using", semantic-ref ], ";" ;
+                  [ "using", semantic-ref ],
+                  ( ";" | "{", { transition-member }, "}" ) ;
+transition-member = "trigger", semantic-ref, ";" | "requires-work", semantic-ref, ";"
+                  | "guard", scalar, ";" | "effect", semantic-ref, ";" ;
 
 action-decl = action-effect, identifier, "{", action-member,
               { action-member }, "}" ;

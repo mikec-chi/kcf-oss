@@ -51,10 +51,11 @@ def normalize(model: Model) -> dict:
         "modules": modules,
         "moduleVersions": {module: locks.get(module, {}).get("version", "1.0.0") for module in modules},
         "concepts": [], "relationships": [], "lifecycles": [], "actions": [],
-        "collectionTransforms": [], "events": [], "resources": [],
+        "collectionTransforms": [], "events": [], "resources": [], "mutations": [], "units": [], "authorities": [], "processes": [],
+        "calendars": [], "routes": [], "propositions": [], "predicates": [], "math": [], "allocations": [],
         "organizations": [], "information": [], "rules": [], "policies": [],
         "reasoning": [], "assertions": [], "identityResolutions": [],
-        "knowledgeQueries": [],
+        "knowledgeQueries": [], "skills": [], "capabilities": [],
         "runtimeRequirements": requirements,
         "emitters": [{"id": name, "supports": requirements, "unsupportedPolicy": "error"} for name in dict.fromkeys(item for resolution in resolutions for item in resolution["emitters"])],
         "runtimeBindings": [],
@@ -83,15 +84,98 @@ def normalize(model: Model) -> dict:
                 "kind": declaration.values["kind"],
                 "references": [qualify(value, namespace) for value in declaration.values.get("references", [])],
             }
-            for key in ("attributes", "traits", "metadata", "abstract"):
+            # Verbatim scalar/list fields (dimension `kind` classifier + EVENT
+            # single-value fields carried as authored).
+            for key in ("attributes", "traits", "metadata", "abstract", "conceptKind",
+                        "occurrenceTime", "detectionTime", "correlationKeys",
+                        "severity", "expectedness", "matchCondition",
+                        "scale", "aggregation", "availability", "calculation",
+                        "desiredState", "successes", "priority", "tradeoffs",
+                        "geometry", "startValue", "endValue", "durationValue",
+                        "recurrence", "timezone"):
                 if declaration.values.get(key): concept[key] = declaration.values[key]
+            # MEASURE numeric fields may legitimately be 0, so guard on None.
+            for key in ("threshold", "target", "tolerance"):
+                if declaration.values.get(key) is not None: concept[key] = declaration.values[key]
+            # Single reference fields (qualified): MEASURE unit/period, ACTOR
+            # communication, TEMPORAL calendar, SPATIAL contained-in, INTENT time-horizon.
+            for key in ("unitRef", "periodRef", "communicationRef",
+                        "containedIn", "calendarRef", "timeHorizon"):
+                if declaration.values.get(key): concept[key] = qualify(declaration.values[key], namespace)
+            # ACTOR capabilities/skills + WORK required capabilities/skills + EVENT
+            # subject/source/observer/trigger/affect-lifecycle/evidence — qualified
+            # reference lists resolved by the analyzer.
+            for reflist in ("capabilities", "skills", "requiresCapability", "requiresSkill",
+                            "subjects", "triggers", "sources", "observers",
+                            "affectsLifecycle", "evidence", "roles", "authorities",
+                            "responsibleFor", "accountableFor", "memberOf",
+                            "performers", "inputs", "outputs", "outcomes",
+                            "requiresResource", "requiresTool", "governedBy",
+                            "triggeredBy", "emits", "compensateWith", "temporalRefs",
+                            "stakeholders", "measures", "adjacentTo", "jurisdictions",
+                            "spatialRoutes", "spatialCapacities"):
+                if declaration.values.get(reflist):
+                    concept[reflist] = [qualify(value, namespace) for value in declaration.values[reflist]]
+            # WORK condition members (verbatim condition strings).
+            for key in ("preconditions", "postconditions", "completions", "failures"):
+                if declaration.values.get(key): concept[key] = declaration.values[key]
+            # ENTITY structural fields: compositions / named references / embedded
+            # collections (qualify their embedded refs), inline lifecycle binding, and
+            # inline constraint-uses.
+            for comp in declaration.values.get("compositions", []) or []:
+                concept.setdefault("compositions", []).append({**comp, "target": qualify(comp["target"], namespace)})
+            for ref in declaration.values.get("namedReferences", []) or []:
+                concept.setdefault("namedReferences", []).append({**ref, "target": qualify(ref["target"], namespace)})
+            for coll in declaration.values.get("collections", []) or []:
+                concept.setdefault("collections", []).append({**coll, "of": qualify(coll["of"], namespace)})
+            if declaration.values.get("lifecycleRef"):
+                concept["lifecycleRef"] = qualify(declaration.values["lifecycleRef"], namespace)
+            if declaration.values.get("constraints"):
+                concept["constraints"] = [qualify(v, namespace) for v in declaration.values["constraints"]]
             ir["concepts"].append(concept)
             record_source(ir["sourceMap"], concept["qualifiedName"], declaration)
+            # Entity-embedded mutations project into the top-level mutations collection,
+            # with the enclosing entity as subject and emitted events qualified.
+            for mut in declaration.values.get("mutations", []) or []:
+                # Identity is the bare id (like top-level actions) so a mutation folds
+                # cleanly into the action stream at emit time (see effective_actions).
+                entry = {"id": mut["name"], "subject": concept["qualifiedName"]}
+                for field in ("operation", "scope", "selection", "atomicity",
+                              "concurrency", "versionField", "idempotency"):
+                    if mut.get(field) is not None:
+                        entry[field] = mut[field]
+                for field in ("mutates", "changes", "preconditions", "postconditions"):
+                    if mut.get(field):
+                        entry[field] = mut[field]
+                if mut.get("emits"):
+                    entry["emits"] = [qualify(e, namespace) for e in mut["emits"]]
+                ir["mutations"].append(entry)
             if concept["kind"] == "EVENT":
-                ir["events"].append({"id": declaration.name, "mutable": not declaration.values.get("immutable", False)})
+                # Project the full declared event so the runtime/emitters can drive
+                # orchestration off it (refs already namespace-qualified).
+                event = {"id": declaration.name, "qualifiedName": concept["qualifiedName"],
+                         "mutable": not declaration.values.get("immutable", False)}
+                if concept.get("conceptKind"): event["eventKind"] = concept["conceptKind"]
+                for field in ("subjects", "triggers", "sources", "observers",
+                              "affectsLifecycle", "evidence", "correlationKeys"):
+                    if concept.get(field): event[field] = concept[field]
+                for field in ("occurrenceTime", "detectionTime", "severity",
+                              "expectedness", "matchCondition"):
+                    if concept.get(field) is not None: event[field] = concept[field]
+                ir["events"].append(event)
             if concept["kind"] == "RESOURCE":
-                resource = {"id": declaration.name}
-                if "capacity" in declaration.values.get("metadata", {}): resource["capacity"] = declaration.values["metadata"]["capacity"]
+                resource = {"id": declaration.name, "qualifiedName": concept["qualifiedName"]}
+                if declaration.values.get("conceptKind"): resource["resourceKind"] = declaration.values["conceptKind"]
+                if declaration.values.get("capacity") is not None: resource["capacity"] = declaration.values["capacity"]
+                # legacy metadata.capacity fallback (older hand-authored IR)
+                elif "capacity" in declaration.values.get("metadata", {}): resource["capacity"] = declaration.values["metadata"]["capacity"]
+                if declaration.values.get("availability"): resource["availability"] = declaration.values["availability"]
+                if declaration.values.get("consumption"): resource["consumption"] = declaration.values["consumption"]
+                if declaration.values.get("capacityUnit"): resource["capacityUnit"] = qualify(declaration.values["capacityUnit"], namespace)
+                for src_key, dst_key in (("locationRef", "location"), ("ownerRef", "owner"),
+                                         ("allocationPolicy", "allocationPolicy"), ("reservationPolicy", "reservationPolicy"),
+                                         ("replenishmentRef", "replenishment"), ("costRef", "cost")):
+                    if declaration.values.get(src_key): resource[dst_key] = qualify(declaration.values[src_key], namespace)
                 ir["resources"].append(resource)
         elif declaration.kind == "organization":
             item = {"id": declaration.name, **declaration.values}
@@ -186,6 +270,102 @@ def normalize(model: Model) -> dict:
             item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
             ir["knowledgeQueries"].append(item)
             record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "skill":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
+            if declaration.values.get("level"): item["level"] = declaration.values["level"]
+            if declaration.values.get("requires"): item["requires"] = qualify_list(declaration.values["requires"])
+            if declaration.values.get("constraints"): item["constraints"] = qualify_list(declaration.values["constraints"])
+            ir["skills"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "process":
+            # Node ids are process-local; semantic refs (activity/uses/performer/
+            # triggeredBy/outcome) are namespace-qualified.
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
+            nodes = []
+            for node in declaration.values.get("nodes", []):
+                n = dict(node)
+                for ref_key in ("activity", "uses", "triggeredBy", "outcome"):
+                    if n.get(ref_key): n[ref_key] = qualify(n[ref_key], namespace)
+                nodes.append(n)
+            item["nodes"] = nodes
+            item["flows"] = declaration.values.get("flows", [])
+            boundaries = []
+            for boundary in declaration.values.get("boundaries", []):
+                b = dict(boundary)
+                if b.get("uses"): b["uses"] = qualify(b["uses"], namespace)
+                boundaries.append(b)
+            item["boundaries"] = boundaries
+            lanes = []
+            for lane in declaration.values.get("lanes", []):
+                lane_copy = dict(lane)
+                if lane_copy.get("performer"): lane_copy["performer"] = qualify(lane_copy["performer"], namespace)
+                lanes.append(lane_copy)
+            item["lanes"] = lanes
+            ir["processes"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "allocation":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            for key in ("resource", "consumer", "reservation"):
+                if item.get(key): item[key] = qualify(item[key], namespace)
+            ir["allocations"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "calendar":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            ir["calendars"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "route":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            for key in ("from", "to"):
+                if item.get(key): item[key] = qualify(item[key], namespace)
+            if item.get("via"): item["via"] = qualify_list(item["via"])
+            if item.get("constraints"): item["constraints"] = qualify_list(item["constraints"])
+            ir["routes"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "proposition":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            ir["propositions"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "predicate":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            ir["predicates"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "math":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
+            for key in ("result", "model"):
+                if item.get(key): item[key] = qualify(item[key], namespace)
+            ir["math"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "profile":
+            # Operational/emitter profile block -> ir[<section>][<collection>].
+            # Refs resolve by local id, so nothing is namespace-qualified here.
+            section = declaration.values["section"]
+            target = ir.setdefault(section, {})
+            for collection, items in declaration.values["collections"].items():
+                target.setdefault(collection, []).extend(items)
+        elif declaration.kind == "authority":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
+            if declaration.values.get("mode"): item["mode"] = declaration.values["mode"]
+            for key in ("subject", "target"):
+                if declaration.values.get(key): item[key] = qualify(declaration.values[key], namespace)
+            if declaration.values.get("when"): item["when"] = declaration.values["when"]
+            for key in ("validFrom", "validTo"):
+                if declaration.values.get(key): item[key] = declaration.values[key]
+            ir["authorities"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "capability":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
+            if declaration.values.get("requiresSkill"): item["requiresSkill"] = qualify_list(declaration.values["requiresSkill"])
+            if declaration.values.get("outcome"): item["outcome"] = qualify_list(declaration.values["outcome"])
+            if declaration.values.get("implementedBy"): item["implementedBy"] = qualify(declaration.values["implementedBy"], namespace)
+            ir["capabilities"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
+        elif declaration.kind == "unit":
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
+            for key in ("dimension", "symbol", "factor"):
+                if declaration.values.get(key) is not None: item[key] = declaration.values[key]
+            if declaration.values.get("base"): item["base"] = qualify(declaration.values["base"], namespace)
+            ir["units"].append(item)
+            record_source(ir["sourceMap"], item["qualifiedName"], declaration)
         elif declaration.kind == "relationship":
             relationship = {"id": declaration.name, **declaration.values}
             relationship["definition"] = relationship.get("definition", declaration.name)
@@ -198,6 +378,26 @@ def normalize(model: Model) -> dict:
             lifecycle["subject"] = qualify(lifecycle.get("subject"), namespace)
             initial = lifecycle.get("initial", [])
             lifecycle["initial"] = initial[0] if len(initial) == 1 else initial
+            # Qualify the LIFECYCLE-dimension semantic refs (state entry/exit actions,
+            # transition trigger/requires-work/effect, temporal) so they resolve like
+            # every other dimension; conditions (guard/invariant) stay verbatim.
+            if lifecycle.get("temporalRefs"):
+                lifecycle["temporalRefs"] = [qualify(ref, namespace) for ref in lifecycle["temporalRefs"]]
+            state_bodies = {}
+            for state, body in (lifecycle.get("stateBodies") or {}).items():
+                new_body = dict(body)
+                for key in ("entry", "exit"):
+                    if new_body.get(key): new_body[key] = [qualify(ref, namespace) for ref in new_body[key]]
+                state_bodies[state] = new_body
+            if state_bodies:
+                lifecycle["stateBodies"] = state_bodies
+            transitions = []
+            for transition in lifecycle.get("transitions", []):
+                new_transition = dict(transition)
+                for key in ("trigger", "requiresWork", "effect"):
+                    if new_transition.get(key): new_transition[key] = [qualify(ref, namespace) for ref in new_transition[key]]
+                transitions.append(new_transition)
+            lifecycle["transitions"] = transitions
             ir["lifecycles"].append(lifecycle)
             record_source(ir["sourceMap"], declaration.name, declaration)
         elif declaration.kind == "action":

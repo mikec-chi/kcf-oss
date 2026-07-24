@@ -1,0 +1,77 @@
+// Exercises explicit capability + skill declarations compiling into the IR:
+// top-level `skill`/`capability` definitions, an ACTOR that declares the
+// capabilities/skills it holds, and a WORK that declares the capabilities/skills
+// it requires. All references resolve (analyzer-checked).
+kcf model CapabilitySkill profile business-application {
+  namespace cs;
+
+  entity Ticket {
+    identity ticketId: UUID;
+    required subject: String;
+  }
+
+  actor Engineer {
+    kind PERSON;
+    role SupportRole;
+    authority EscalateTicket;
+    responsible-for ResolveWork;
+    accountable-for Ticket;
+    member-of SupportTeam;
+    availability "on-call rotation";
+    communication NotifyChannel;
+    capability RunDiagnostics;
+    skill Diagnose;
+  }
+
+  actor SupportRole { kind ROLE; }
+  work NotifyChannel { }
+  organization SupportTeam { kind TEAM; member Engineer; }
+
+  authority EscalateTicket {
+    mode may-escalate;
+    subject Engineer;
+    target Ticket;
+    when "ticket age exceeds SLA";
+  }
+
+  work ResolveWork {
+    requires-capability RunDiagnostics;
+    requires-skill Diagnose;
+  }
+
+  skill Diagnose {
+    level expert;
+  }
+
+  capability RunDiagnostics {
+    requires-skill Diagnose;
+    implemented-by ResolveTicket;
+  }
+
+  command ResolveTicket {
+    operation update;
+    scope record;
+    target Ticket;
+    selection identity;
+    input one;
+    output one;
+    mutate subject;
+    idempotency conditional;
+    atomicity atomic;
+    authorization cs.OpsPolicy;
+  }
+
+  rule OpsRule {
+    kind CONSTRAINT;
+    condition "subject is present";
+    effect ResolveWork;
+    applies-to Ticket;
+    authority Engineer;
+  }
+
+  policy OpsPolicy {
+    authority Engineer;
+    rule OpsRule;
+    default-conflict deny-overrides;
+  }
+}

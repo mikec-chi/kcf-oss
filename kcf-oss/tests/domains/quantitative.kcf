@@ -1,0 +1,100 @@
+// Exercises the quantitative cluster: INTENT (desired-state/success/failure/priority/
+// stakeholder/measure/time-horizon/tradeoff), TEMPORAL (start/end/duration/recurrence/
+// calendar/timezone/calculation) + calendar-def, SPATIAL (contained-in/geometry/
+// adjacent-to/route/jurisdiction) + route-def, LOGIC (proposition + predicate), and
+// MATH (formula/function/optimize/distribution/simulation).
+kcf model QuantitativePlanning profile business-application {
+  namespace qp;
+
+  entity Product {
+    identity productId: UUID;
+    required name: String;
+  }
+  actor Owner { kind PERSON; }
+  measure RevenueKPI { kind KPI; subject Product; }
+
+  intent GrowRevenue {
+    kind GOAL;
+    desired-state "quarterly revenue trends upward";
+    success "revenue up at least 10 percent";
+    failure "revenue declines two quarters running";
+    priority 1;
+    stakeholder Owner;
+    measure RevenueKPI;
+    time-horizon FiscalYear;
+    tradeoff Speed against Quality weight 0.6;
+  }
+
+  temporal FiscalYear {
+    kind INTERVAL;
+    start "2026-01-01";
+    end "2026-12-31";
+    duration 12 month;
+    recurrence "FREQ=YEARLY";
+    calendar BusinessCalendar;
+    timezone "UTC";
+    calculation "end minus start";
+  }
+
+  resource DockCapacity { kind CAPACITY; capacity 5; }
+  spatial Region { kind REGION; }
+  spatial Warehouse {
+    kind LOCATION;
+    contained-in Region;
+    geometry point [ 1.5 2.5 ];
+    adjacent-to Region;
+    jurisdiction Region;
+    route SupplyRoute;
+    capacity DockCapacity;
+  }
+
+  calendar BusinessCalendar {
+    timezone "UTC";
+    working-day monday;
+    working-day tuesday;
+    holiday "2026-01-01";
+  }
+
+  route SupplyRoute {
+    from Warehouse;
+    to Region;
+    via Region;
+    distance 42.0 kilometre;
+  }
+
+  proposition AllProductsPriced {
+    expression "every product has a price";
+    mode necessary;
+  }
+
+  predicate IsUnderpriced (product: UUID) {
+    expression "price below cost";
+  }
+
+  formula MarginFormula {
+    result RevenueKPI;
+    expression price - cost * quantity;
+  }
+
+  function UnitMargin (cost: Decimal, price: Decimal) -> Decimal {
+    expression price - cost;
+  }
+
+  optimize MaximizeMargin {
+    objective maximize revenue - cost;
+    variable price;
+    constraint "price is at least cost";
+  }
+
+  distribution DemandModel {
+    family normal;
+    mean 100;
+    stddev 15;
+  }
+
+  simulation DemandSim {
+    model MaximizeMargin;
+    trials 1000;
+    seed 42;
+  }
+}

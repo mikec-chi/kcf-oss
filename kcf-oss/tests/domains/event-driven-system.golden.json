@@ -68,6 +68,11 @@
           "name": "status",
           "type": "String",
           "required": true
+        },
+        {
+          "name": "tenderedAt",
+          "type": "Date",
+          "required": false
         }
       ],
       "metadata": {
@@ -84,22 +89,87 @@
       "id": "TenderShipment",
       "qualifiedName": "fulfillment.TenderShipment",
       "kind": "WORK",
-      "references": []
+      "references": [],
+      "conceptKind": "TASK",
+      "performers": [
+        "fulfillment.Carrier"
+      ],
+      "inputs": [
+        "fulfillment.Shipment"
+      ],
+      "outputs": [
+        "fulfillment.Shipment"
+      ],
+      "outcomes": [
+        "fulfillment.ShipmentTendered"
+      ],
+      "emits": [
+        "fulfillment.ShipmentTendered"
+      ],
+      "preconditions": [
+        "shipment is ready to tender"
+      ],
+      "postconditions": [
+        "shipment is tendered"
+      ]
     },
     {
       "id": "ShipmentTendered",
       "qualifiedName": "fulfillment.ShipmentTendered",
       "kind": "EVENT",
-      "references": []
+      "references": [],
+      "conceptKind": "OCCURRENCE",
+      "occurrenceTime": "tenderedAt",
+      "correlationKeys": [
+        "shipmentId"
+      ],
+      "severity": "info",
+      "expectedness": "expected",
+      "matchCondition": "shipment transitions to Tendered",
+      "subjects": [
+        "fulfillment.Shipment"
+      ],
+      "triggers": [
+        "fulfillment.TenderShipment"
+      ],
+      "sources": [
+        "fulfillment.Carrier"
+      ],
+      "observers": [
+        "fulfillment.Carrier"
+      ],
+      "affectsLifecycle": [
+        "fulfillment.ShipmentLifecycle"
+      ],
+      "evidence": [
+        "fulfillment.TenderManifest"
+      ]
     },
     {
       "id": "TenderCapacity",
       "qualifiedName": "fulfillment.TenderCapacity",
       "kind": "RESOURCE",
       "references": [],
+      "conceptKind": "CAPACITY",
+      "availability": "business hours"
+    },
+    {
+      "id": "TenderManifest",
+      "qualifiedName": "fulfillment.TenderManifest",
+      "kind": "INFORMATION",
+      "references": [
+        "fulfillment.Shipment",
+        "fulfillment.Carrier"
+      ],
       "metadata": {
-        "capacity": 100
+        "informationKind": "DOCUMENT"
       }
+    },
+    {
+      "id": "ShipmentClock",
+      "qualifiedName": "fulfillment.ShipmentClock",
+      "kind": "TEMPORAL",
+      "references": []
     }
   ],
   "relationships": [
@@ -120,7 +190,62 @@
       "definition": "tender-transforms-shipment"
     }
   ],
-  "lifecycles": [],
+  "lifecycles": [
+    {
+      "id": "ShipmentLifecycle",
+      "subject": "fulfillment.Shipment",
+      "states": [
+        "Created",
+        "Tendered",
+        "Delivered"
+      ],
+      "initial": "Created",
+      "terminal": [
+        "Delivered"
+      ],
+      "transitions": [
+        {
+          "from": "Created",
+          "to": "Tendered",
+          "trigger": [
+            "fulfillment.ShipmentTendered"
+          ],
+          "requiresWork": [
+            "fulfillment.TenderShipment"
+          ],
+          "guard": [
+            "shipment is ready to tender"
+          ],
+          "effect": [
+            "fulfillment.Tender"
+          ]
+        },
+        {
+          "from": "Tendered",
+          "to": "Delivered"
+        }
+      ],
+      "governsKind": [
+        "ENTITY"
+      ],
+      "invariants": [
+        "a shipment cannot be delivered before it is tendered"
+      ],
+      "temporalRefs": [
+        "fulfillment.ShipmentClock"
+      ],
+      "stateBodies": {
+        "Tendered": {
+          "entry": [
+            "fulfillment.Tender"
+          ],
+          "invariant": [
+            "a tendered shipment has a carrier"
+          ]
+        }
+      }
+    }
+  ],
   "actions": [
     {
       "id": "Tender",
@@ -143,23 +268,164 @@
   "events": [
     {
       "id": "ShipmentTendered",
-      "mutable": false
+      "qualifiedName": "fulfillment.ShipmentTendered",
+      "mutable": false,
+      "eventKind": "OCCURRENCE",
+      "subjects": [
+        "fulfillment.Shipment"
+      ],
+      "triggers": [
+        "fulfillment.TenderShipment"
+      ],
+      "sources": [
+        "fulfillment.Carrier"
+      ],
+      "observers": [
+        "fulfillment.Carrier"
+      ],
+      "affectsLifecycle": [
+        "fulfillment.ShipmentLifecycle"
+      ],
+      "evidence": [
+        "fulfillment.TenderManifest"
+      ],
+      "correlationKeys": [
+        "shipmentId"
+      ],
+      "occurrenceTime": "tenderedAt",
+      "severity": "info",
+      "expectedness": "expected",
+      "matchCondition": "shipment transitions to Tendered"
     }
   ],
   "resources": [
     {
       "id": "TenderCapacity",
-      "capacity": 100
+      "qualifiedName": "fulfillment.TenderCapacity",
+      "resourceKind": "CAPACITY",
+      "capacity": 100,
+      "availability": "business hours",
+      "consumption": "reserve",
+      "owner": "fulfillment.Carrier"
     }
   ],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [
+    {
+      "id": "TenderProcess",
+      "qualifiedName": "fulfillment.TenderProcess",
+      "nodes": [
+        {
+          "type": "start",
+          "id": "Begin",
+          "triggeredBy": "fulfillment.ShipmentTendered"
+        },
+        {
+          "type": "step",
+          "id": "DoTender",
+          "activity": "fulfillment.TenderShipment",
+          "lane": "CarrierLane"
+        },
+        {
+          "type": "gateway",
+          "id": "Accepted",
+          "gatewayKind": "exclusive"
+        },
+        {
+          "type": "end",
+          "id": "Delivered",
+          "outcome": "fulfillment.ShipmentTendered"
+        },
+        {
+          "type": "end",
+          "id": "Rejected"
+        }
+      ],
+      "flows": [
+        {
+          "from": "Begin",
+          "to": "DoTender"
+        },
+        {
+          "from": "DoTender",
+          "to": "Accepted"
+        },
+        {
+          "from": "Accepted",
+          "to": "Delivered",
+          "when": "carrier accepted",
+          "priority": 1
+        },
+        {
+          "from": "Accepted",
+          "to": "Rejected"
+        }
+      ],
+      "boundaries": [
+        {
+          "id": "TenderTimeout",
+          "on": "DoTender",
+          "uses": "fulfillment.ShipmentTendered"
+        }
+      ],
+      "lanes": [
+        {
+          "id": "CarrierLane",
+          "contains": [
+            "DoTender"
+          ],
+          "performer": "fulfillment.Carrier"
+        }
+      ]
+    }
+  ],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
   "organizations": [],
-  "information": [],
+  "information": [
+    {
+      "id": "TenderManifest",
+      "subjects": [
+        "fulfillment.Shipment"
+      ],
+      "authors": [],
+      "sources": [
+        "fulfillment.Shipment"
+      ],
+      "audiences": [],
+      "evidence": [],
+      "informationKind": "DOCUMENT",
+      "trust": 0.92,
+      "schemaFields": [
+        {
+          "name": "trackingNumber",
+          "type": "String"
+        },
+        {
+          "name": "weightKg",
+          "type": "Decimal"
+        }
+      ],
+      "sourceDocument": "tender-manifest.pdf",
+      "recordedAt": "2026-07-24T12:00:00Z",
+      "reviewedBy": "fulfillment.Carrier",
+      "qualifiedName": "fulfillment.TenderManifest"
+    }
+  ],
   "rules": [],
   "policies": [],
   "reasoning": [],
   "assertions": [],
   "identityResolutions": [],
   "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
   "runtimeRequirements": [
     "Messaging",
     "Correlation",
@@ -175,56 +441,84 @@
       "source": "tests/domains/event-driven-system.kcf",
       "line": 4,
       "column": 3,
-      "endLine": 8,
+      "endLine": 9,
       "endColumn": 4
     },
     "fulfillment.Carrier": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 9,
+      "line": 10,
       "column": 3,
-      "endLine": 9,
+      "endLine": 10,
       "endColumn": 20
     },
     "fulfillment.TenderShipment": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 10,
+      "line": 11,
       "column": 3,
-      "endLine": 10,
-      "endColumn": 26
+      "endLine": 20,
+      "endColumn": 4
     },
     "fulfillment.ShipmentTendered": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 11,
+      "line": 25,
       "column": 3,
-      "endLine": 11,
-      "endColumn": 36
+      "endLine": 39,
+      "endColumn": 4
     },
     "fulfillment.TenderCapacity": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 12,
+      "line": 41,
       "column": 3,
-      "endLine": 12,
-      "endColumn": 44
+      "endLine": 47,
+      "endColumn": 4
+    },
+    "fulfillment.TenderManifest": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 49,
+      "column": 3,
+      "endLine": 59,
+      "endColumn": 4
+    },
+    "ShipmentLifecycle": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 61,
+      "column": 3,
+      "endLine": 78,
+      "endColumn": 4
+    },
+    "fulfillment.ShipmentClock": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 80,
+      "column": 3,
+      "endLine": 80,
+      "endColumn": 29
     },
     "carrier-participates": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 14,
+      "line": 82,
       "column": 3,
-      "endLine": 14,
+      "endLine": 82,
       "endColumn": 91
     },
     "tender-transforms-shipment": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 15,
+      "line": 83,
       "column": 3,
-      "endLine": 15,
+      "endLine": 83,
       "endColumn": 99
+    },
+    "fulfillment.TenderProcess": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 86,
+      "column": 3,
+      "endLine": 101,
+      "endColumn": 4
     },
     "Tender": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 17,
+      "line": 103,
       "column": 3,
-      "endLine": 28,
+      "endLine": 114,
       "endColumn": 4
     }
   }
