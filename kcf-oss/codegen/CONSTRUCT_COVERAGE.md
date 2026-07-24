@@ -6,6 +6,15 @@ tier or explicitly declared *out-of-tier* (it belongs to the other tier) — nev
 silently dropped. It is the reference the system prompt and the coverage
 self-audit are checked against.
 
+The reference `business-application` model exercises the mainstream constructs end
+to end — entity + attributes, actor, work, event, relationships, lifecycle, the
+full action set (create / read / update / delete / **upsert** / **bulk-update**), a
+**data-transformation** (`ActiveCustomers` filter), a **rule** (CONSTRAINT
+validator), and a **policy** (deny-overrides engine) — so each stack's single-shot
+example *demonstrates* every one of them with concrete code and an exhaustive
+self-audit. The longer tail (SPATIAL, TEMPORAL, MEASURE, the knowledge dimension,
+organization) is mapped below and pulled in **only when a model uses it**.
+
 Two tiers:
 
 - **backend** — persistence, the action contract, rules/policies, events,

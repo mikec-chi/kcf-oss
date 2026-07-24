@@ -81,4 +81,38 @@ kcf model CustomerService profile business-application {
     concurrency optimistic;
     authorization customer.CustomerUpdatePolicy;
   }
+
+  command UpsertCustomer {
+    operation upsert;
+    scope record;
+    target Customer;
+    selection identity;
+    input one;
+    output one;
+    idempotency conditional;
+    atomicity atomic;
+    authorization customer.CustomerUpdatePolicy;
+  }
+
+  collection ActiveCustomers {
+    operation filter;
+    inputSchema Customer;
+    outputSchema Customer;
+    predicate "customer status is Active";
+    bounded true;
+  }
+
+  rule CustomerUpdateConstraint {
+    kind CONSTRAINT;
+    condition "email is present when a customer is Active";
+    effect UpdateCustomerWork;
+    applies-to Customer;
+    authority ServiceAgent;
+  }
+
+  policy CustomerUpdatePolicy {
+    authority ServiceAgent;
+    rule CustomerUpdateConstraint;
+    default-conflict deny-overrides;
+  }
 }

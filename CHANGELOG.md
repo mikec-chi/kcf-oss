@@ -112,6 +112,15 @@ First public release of the open standard. Cut this section to a dated version
   Face (now that HF **Docker Spaces require PRO**).
 - **Playground** — a zero-persistence web app (`kcf-oss/playground/`) that runs
   compile → assess → assemble the LLM codegen prompt, in the browser.
+- **Reference model + single-shot examples now construct-complete.** The reference
+  `business-application` model gained a **rule** (CONSTRAINT), a **policy**
+  (deny-overrides; the commands' `authorization` now resolves to it), a
+  **data-transformation** (`ActiveCustomers` filter), and an **`upsert`** command —
+  so it exercises the mainstream IR constructs end to end. All four single-shot
+  codegen examples (FastAPI, Express/Prisma, Django/DRF, React) were extended to
+  realize each construct with concrete code and an **exhaustive coverage self-audit**
+  (every construct → realized / delegated / out-of-tier, `dropped: []`). Golden
+  fixture regenerated; `kcf check` green.
 - **Community contribution area** — a top-level `community/` where the ecosystem
   builds on the standard: **models** (shared `.kcf` domains, gated by
   `community/models/validate.py`), **prompt packs** (elicitation guides + codegen

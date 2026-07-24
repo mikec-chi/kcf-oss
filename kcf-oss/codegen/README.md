@@ -72,7 +72,9 @@ Start from [`overrides.example.md`](overrides.example.md): copy it to
 Every example realizes the **same** reference model
 (`../tests/domains/business-application.kcf`) so backend and frontend line up and
 you can compare stacks apples-to-apples; the model is a committed golden fixture,
-so it can't rot.
+so it can't rot. It deliberately exercises the mainstream constructs — full CRUD +
+`upsert` + `bulk-update`, a data-transformation, a rule, and a policy — so each
+example demonstrates all of them (see [`CONSTRUCT_COVERAGE.md`](CONSTRUCT_COVERAGE.md)).
 
 ## Use it in four steps
 
