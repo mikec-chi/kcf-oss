@@ -21,7 +21,11 @@ kcf model <Name> profile <preset> {
   event  <Event> immutable;          // an immutable fact
   work   <Work> { }                  // a process/activity
 
-  relationship <name>: <ROOTKIND> <Source> -> <Target> strength 1.0;
+  relationship <name>: <ROOTKIND> <Source> -> <Target> strength 1.0
+     cardinality one-to-many source-role "order" target-role "lines" on-delete cascade;
+     // cardinality/roles/on-delete are optional qualifiers that drive UI generation
+     // (one-to-many -> grid/tab, one-to-one -> panel; target-role -> the tab label;
+     //  on-delete: cascade|restrict|detach|archive|set-null|no-action)
 
   lifecycle <Name> for <Entity> {
     initial <State>;
@@ -114,7 +118,12 @@ carry `trigger`/`guard`/`effect`; actors carry `role`/`authority`; work carries 
   command/transform declares `authorization`; claimed patterns are modeled;
   concept traits resolve to declared roles.
 - **Recommended** (enrichment — realize or let the generator fill): full CRUD, a
-  set/bulk op, a lifecycle, and a data-transformation per entity.
+  set/bulk op, a lifecycle, and a data-transformation per entity. **Category-aware**:
+  if an entity states `category`, coverage adjusts — `transactional` expects the full
+  set (incl. a lifecycle), `master` expects CRUD but **not** a lifecycle, and
+  `reference`/`config` are exempt from write/lifecycle recommendations. Coverage
+  rewards *appropriate* modeling, not maximal — don't add an empty lifecycle to close
+  a gap.
 - Generation needs only a **valid** model (no analyzer errors). Run `assess` to
   see the split, then fix required gaps first.
 

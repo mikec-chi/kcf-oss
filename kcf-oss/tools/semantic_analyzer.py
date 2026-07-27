@@ -32,6 +32,23 @@ SET_MUTATIONS = {"bulk-update", "bulk-patch", "bulk-delete", "bulk-upsert", "syn
 # Advisory data-management classification carried as entity metadata (not a primitive).
 # Reconciled against the derived semantic shape; see check_category_consistency.
 ENTITY_CATEGORIES = {"master", "transactional", "reference", "config"}
+# Metadata keys the grammar/normalizer legitimately place on a concept (advisory tags +
+# normalized kind discriminators). Anything else fell through the concept-body catch-all
+# (`<ident> <scalar>;` -> metadata) — most likely a typo or an unsupported field silently
+# captured as free metadata, a real footgun (a mistyped/misversioned field only errors
+# once a later grammar types that slot). See check_concept_metadata (advisory warning).
+KNOWN_CONCEPT_METADATA = {
+    "category", "mutability", "readOnly", "capacity", "policy",
+    "informationKind", "organizationKind", "reasoningKind", "ruleKind",
+}
+# Recognized relationship qualifiers (ride the relationship-decl `{ identifier scalar }`
+# catch-all). cardinality + roles + on-delete drive UI generation (grid/tab vs panel,
+# tab label, cascade/restrict). Advisory-checked, like concept metadata.
+KNOWN_RELATIONSHIP_QUALIFIERS = {
+    "cardinality", "source-role", "target-role", "on-delete", "inverse",
+    "validations", "inferences", "min", "max",
+}
+ON_DELETE_POLICIES = {"cascade", "restrict", "detach", "archive", "set-null", "no-action"}
 ACTION_OPERATIONS = {
     "create", "read", "replace", "update", "patch", "delete", "upsert", "exists",
     "query", "count", "bulk-create", "bulk-update", "bulk-patch", "bulk-delete",
@@ -1033,6 +1050,44 @@ class Analyzer:
                 if allocation.get(field) and not self.reference_exists(allocation[field]):
                     self.report("error", "kcf.allocation.reference", aid, f"Unresolved {field} {allocation[field]!r}.")
 
+    def check_relationship_qualifiers(self):
+        """Advisory — warnings only. Relationship qualifiers (cardinality / source-role /
+        target-role / on-delete) ride the relationship-decl catch-all and drive UI
+        generation (master-detail grid vs single panel, tab label, cascade/restrict).
+        Flag an unrecognized qualifier key (typo) and an out-of-vocabulary `on-delete`."""
+        for rel in self.model.get("relationships", []):
+            rid = rel.get("id", "<relationship>")
+            for key, value in (rel.get("qualifiers") or {}).items():
+                if key not in KNOWN_RELATIONSHIP_QUALIFIERS:
+                    self.report(
+                        "warning", "kcf.relationship.unknown-qualifier", rid,
+                        f"Relationship qualifier {key!r} is not recognized — verify it is "
+                        f"not a typo.")
+                elif key == "on-delete" and isinstance(value, str) and value not in ON_DELETE_POLICIES:
+                    self.report(
+                        "warning", "kcf.relationship.on-delete-vocab", rid,
+                        f"on-delete {value!r} is not a known policy "
+                        f"({', '.join(sorted(ON_DELETE_POLICIES))}).")
+
+    def check_concept_metadata(self):
+        """Advisory — warnings only. The concept-body grammar has a catch-all that turns
+        an unrecognized ``field value;`` line into free ``metadata`` (this is how advisory
+        tags like ``mutability``/``category`` ride in). That same catch-all silently
+        swallows typos and unsupported fields — which then surface only as a hard error
+        once a later grammar version types that slot. Flag concept metadata keys outside
+        the known-legitimate set so the author can catch a typo at authoring time."""
+        for concept in self.model.get("concepts", []):
+            name = concept.get("qualifiedName") or concept.get("id", "<concept>")
+            for key in (concept.get("metadata") or {}):
+                if key not in KNOWN_CONCEPT_METADATA:
+                    self.report(
+                        "warning", "kcf.concept.unknown-field", name,
+                        f"Field {key!r} on {name!r} was captured as free metadata "
+                        f"(unrecognized concept field) — verify it is not a typo or an "
+                        f"unsupported field.",
+                        correction=f"Correct or remove {key!r} on {name!r}, or use a "
+                                   f"recognized field or advisory tag.")
+
     def check_category_consistency(self):
         """Reconcile a stated entity ``category`` metadata tag against the model's
         derived semantic shape. Advisory — warnings only. A flat category is a
@@ -1123,6 +1178,8 @@ class Analyzer:
         self.check_organizational_knowledge()
         self.check_events_resources_plans()
         self.check_category_consistency()
+        self.check_concept_metadata()
+        self.check_relationship_qualifiers()
         self.check_profile_patterns()
         return self.diagnostics
 

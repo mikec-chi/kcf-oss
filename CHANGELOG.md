@@ -218,6 +218,46 @@ First public release of the open standard. Cut this section to a dated version
   reference→static). New `entity-category` reference domain + a conformance assertion
   lock the behavior. `CONCEPTS.md` documents the ontology decision.
 
+- **Model-quality guardrails — three additions from real authoring friction.**
+  - **Category-aware coverage.** `kcf assess` coverage now respects an entity's
+    advisory `category`: `transactional` expects the full treatment (CRUD + set +
+    lifecycle), `master` expects CRUD but not a lifecycle, and `reference`/`config`
+    are exempt from write/lifecycle obligations. Coverage rewards *appropriate*
+    modeling, not maximal — closing the anti-pattern where chasing `recommendedGaps: 0`
+    added empty lifecycles to master/config entities and destroyed record-nature
+    inference. Behavior is unchanged when no `category` is stated.
+  - **Unknown-concept-field warning.** A new advisory analyzer check
+    (`kcf.concept.unknown-field`, **warning only**) flags a concept field captured by
+    the concept-body metadata catch-all that isn't a recognized advisory tag — so a
+    typo or an unsupported field is caught at authoring time instead of surfacing as a
+    hard error only after a later grammar version types that slot.
+  - **Doc↔grammar drift gate.** `tools/check_doc_examples.py` (wired into `kcf check`)
+    compiles every *complete* ` ```kcf ` example in the docs against the current parser;
+    illustrative blocks opt out with a `// doc-skip` first line. Directly guards the
+    "docs were ahead of the compiler" drift class. (It immediately caught one stale
+    example.)
+
+- **Source-fidelity + UI-generation upgrades (from real build friction).**
+  - **DBML importer.** `kcf import-dbml` (`tools/import_dbml.py`) deterministically
+    turns a DBML schema into a KCF model + source document + trace — tables→entities,
+    columns→attributes, refs→relationships carrying **`cardinality`** and **`on-delete`**,
+    and a DBML **`category`** (table setting or `Note`) → advisory `metadata.category`.
+    Complete by construction, so hand-translation no longer silently drops columns,
+    cardinality, or the category. Conformance-tested.
+  - **Source-coverage surfaced.** A new `source_coverage` MCP tool + an elicitation
+    prompt report *what fraction of a source document the model captures* ("covers 71%;
+    5 segments dropped"), so fidelity loss is visible by default, not discovered later.
+  - **Relationship qualifiers drive UI.** `cardinality`/`source-role`/`target-role`/
+    `on-delete` (which ride the relationship catch-all — no grammar change) are now
+    documented, advisory-checked (`kcf.relationship.unknown-qualifier` /
+    `on-delete-vocab`), and mapped in codegen: `one-to-many`→master-detail grid/tab
+    (labeled by `target-role`), `one-to-one`→panel, `on-delete`→the FK delete rule.
+  - **Codegen floor raised.** `COOKBOOK.md` gained a *Frontend depth* section
+    (master-detail, typed inputs, enum-from-rules, lifecycle controls) and the system
+    prompt now mandates emitting **OpenAPI from the live server, never a static file**
+    (which goes stale). A brand-neutral **`design-system-default.md`** is applied when a
+    model declares no `design` block, so every generated app has a coherent baseline.
+
 ### Notes
 - Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.

@@ -93,13 +93,22 @@ categorizer; EXCEPTION → an override rule with higher `priority`. Honor `mode`
 gating (server authoritative). **Platform**: `beforeSubmit`/workflow validations + role
 permissions.
 
-### A7 · relationship `rootKind` variants
+### A7 · relationship `rootKind` variants + qualifiers (cardinality/roles/on-delete)
 composition → cascade FK/child table; association → nullable FK / join + picker;
 participation → membership join; governance → an authz edge; transformation → a
 provenance link (source→target); identity → a same-as/merge edge; dependency → an
 ordering FK; causation → an event-link; ordering → a sequence column; classification →
-a type/category FK. Realize the storage per kind; **Frontend** renders the matching
-navigation (nested list, selector, breadcrumb).
+a type/category FK. Realize the storage per kind.
+
+Qualifiers on `relationship.qualifiers` drive the **UI shape** (this is what separates a
+grid from a panel): **`cardinality`** — `one-to-many`/`one-or-many` → a related-list
+**grid or tab** on the parent; `one-to-one` → an inline **panel**; `many-to-many` → a
+dual-selector. **`target-role`** → the tab/section **label** (and the reverse nav name
+via `source-role`). **`on-delete`** (`cascade`/`restrict`/`detach`/`archive`/`set-null`/
+`no-action`) → the backend FK delete rule + the confirm-dialog copy. Without cardinality
+a generator can't tell a grid from a single panel, so capture it when the domain implies
+it. **Backend**: `on-delete` → the FK constraint / cascade logic. **Platform**:
+one-to-many → a sublist; on-delete → the record deletion rule.
 
 ---
 
@@ -251,6 +260,32 @@ ones present; note the others out-of-tier — never drop.
 | `design` | `designSystems/pages` | ⬚ out-of-tier | theming / design tokens | form/portlet styling |
 
 ---
+
+## F. Frontend depth — the patterns that separate a skeleton from an app
+
+The stack `EXAMPLE.md` shows `UpdateCustomer` in depth; these are the frontend patterns
+that make generated UI real rather than a CRUD skeleton. Realize them from what the IR
+already declares — don't invent.
+
+- **Master-detail from `cardinality`.** A `one-to-many`/`one-or-many` relationship →
+  the parent detail page hosts a **related-list grid or tab** of children (labeled by
+  `target-role`), with inline create/edit that calls the child's action endpoints; a
+  `one-to-one` → an inline **panel**; `many-to-many` → a dual-list selector. (See A7.)
+  Without cardinality you can only render a single panel — so the qualifier is what
+  unblocks correct navigation.
+- **Typed inputs from `attribute.type`.** Map each type to the right control:
+  String→text, Decimal/Integer→number, Boolean→checkbox/switch, Date→date-picker,
+  DateTime→datetime, UUID/reference→a **select bound to the referenced entity** (not a
+  free-text id), Json→a structured editor. `required` → validation; `identity` →
+  read-only after create.
+- **Enum-from-rules.** When a field's domain is fixed by a CONSTRAINT/CLASSIFICATION
+  `rule` or a lifecycle's state list, render a **select of exactly those options**
+  (and mirror the rule client-side for instant feedback) rather than a free text box.
+- **Lifecycle controls.** Render the state as a badge and offer **only the transitions
+  legal from the current state** (from the lifecycle guard), each calling the action
+  that drives it — never a free status dropdown.
+- **Dashboards from MEASURE/analytics** (B1, D): KPI tiles with the `unit` and
+  target/threshold bands; charts bound to the metric/aggregate endpoints.
 
 ## Coverage self-audit for cookbook realizations
 

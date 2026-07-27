@@ -17,6 +17,8 @@
 | `semantic_delta.py` | Classify compatibility between two semantic IR versions |
 | `run_conformance.py` | Run fixtures, resolution, validation, lint, delta, and emitter checks |
 | `check_codegen_coverage.py` | Cross-stage codegen gate: every construct is elicited (`mcp/`), IR-reachable (reference models), and shown in an example/`COOKBOOK.md` |
+| `check_doc_examples.py` | Doc↔grammar drift gate: every complete ` ```kcf ` example in the docs compiles against the current parser (mark illustrative blocks `// doc-skip`) |
+| `import_dbml.py` | Deterministic DBML→KCF importer: tables→entities, columns→attributes, refs→relationships (carrying cardinality + on_delete + category), plus a source document + trace for `source-coverage` |
 
 Run tools from the `kcf-oss` directory or pass paths relative to the
 current working directory. Each tool derives the package root from its own file

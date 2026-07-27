@@ -32,6 +32,7 @@ from compiler import compile_text  # noqa: E402
 from semantic_analyzer import Analyzer  # noqa: E402
 from assess import assess as _assess_ir  # noqa: E402
 from coverage_report import report as _coverage_report, by_concept as _by_concept, load_coverage_model  # noqa: E402
+from source_coverage import source_coverage as _source_coverage  # noqa: E402
 from profile_resolver import resolve_profile  # noqa: E402
 from scaffold import build_scaffold  # noqa: E402
 from pattern_contracts import load_contracts  # noqa: E402
@@ -134,8 +135,11 @@ the `assess` verdict as you go, and ask before assuming.
    above only when the user's facts imply it, never to fill the template.
 10. Check & iterate. `compile` to catch syntax, `assess` for the verdict, `coverage`
    for the gap to-do list. Fix required gaps; enrich or synthesize the recommended
-   ones (see the gap-filling capability). Stop when the user confirms it reflects
-   their domain and it is valid.
+   ones (see the gap-filling capability). **When you modeled from a source** (a DBML/SQL
+   schema, a spec), run `source_coverage` — it reports what fraction of the source the
+   model captures and names the dropped segments, so fidelity loss (a missing attribute,
+   relationship, or tag) is visible now, not discovered later. Stop when the user
+   confirms it reflects their domain and it is valid.
 
 Discipline: one concept = one primary kind (connect cross-cutting meaning with
 relationships); events are immutable (corrections are new events); if the user did
@@ -493,6 +497,38 @@ def _uses_tail_constructs(ir: dict) -> bool:
     if any(c.get("kind") in _TAIL_CONCEPT_KINDS for c in ir.get("concepts", [])):
         return True
     return any(ir.get(k) for k in _TAIL_KEYS)
+
+
+def source_coverage(model_ir: dict | None = None, source: str = "",
+                    document: dict | None = None, trace: dict | None = None) -> dict:
+    """Source-fidelity check: how much of a SOURCE document (a DBML/SQL schema, a spec)
+    the model actually captures — so silently dropped attributes/relationships/tags are
+    **visible by default, not discovered later**. Pass the ``document``
+    (``{documentId, segments: [{segmentId, ...}]}``) and a ``trace``
+    (``{links: [{segmentId, constructs: [qualifiedName, ...]}]}``); ``import-dbml`` and
+    ``ingest`` emit both. Returns coverage counts, a ``percentCovered``, a human
+    ``summary``, and exactly what was dropped (``uncoveredSegments``) or is unsourced."""
+    if model_ir is not None:
+        ir = model_ir
+    else:
+        ir, err = _compile_or_error(source)
+        if err:
+            return err
+    if not document or trace is None:
+        return {"ok": False, "error": "pass `document` and `trace` (from import-dbml / ingest)"}
+    rep = _source_coverage(document, ir, trace)
+    segments = rep["counts"]["segments"] or 1
+    pct = round(100 * rep["counts"]["coveredSegments"] / segments)
+    dropped = len(rep["uncoveredSegments"])
+    unsourced = len(rep["unsourcedConstructs"])
+    rep["percentCovered"] = pct
+    rep["summary"] = (
+        f"The model covers {pct}% of the source "
+        f"({rep['counts']['coveredSegments']}/{rep['counts']['segments']} segments); "
+        f"{dropped} source segment(s) dropped"
+        + (f"; {unsourced} model construct(s) have no source" if unsourced else "") + ".")
+    rep["ok"] = True
+    return rep
 
 
 def codegen_prompt(source: str, stack: str, instructions: str = "",

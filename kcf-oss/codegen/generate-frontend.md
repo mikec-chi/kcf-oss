@@ -68,6 +68,9 @@ coverage self-audit still must hold.*
   remains the source of truth.
 - Add a charting lib only if the model uses `MEASURE`/`analytics`, and a map lib
   only for `SPATIAL`.
+- If the model declares no `design` block, apply `design-system-default.md` (a
+  brand-neutral, accessible baseline theme) so the app is coherent by default;
+  declared design tokens override it.
 - If the model uses **tail** constructs (measures, temporal/spatial, logic/math,
   information/resource/organization/reasoning, rich events, profile blocks), also
   paste `COOKBOOK.md` and realize each per its frontend column.

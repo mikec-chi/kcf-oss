@@ -44,6 +44,7 @@ only after its concepts, relationships, lifecycles, actions, policies, and
 evidence have been modeled:
 
 ```kcf
+// doc-skip: illustrates pattern-claim syntax with example profile/pattern names
 kcf model CustomerOperations profile customer-relationship-management {
   namespace customer;
   implements party.identity;
@@ -104,6 +105,12 @@ sixteen dimension grammars plus the core ACTION/RELATIONSHIP algebra:
   tradeoffs; temporal fields + `calendar`; spatial fields + geometry + `route`;
   `proposition`/`predicate`; and `formula`/`function`/`optimize`/`distribution`/
   `simulation` with real math-expression ASTs.
+- **RELATIONSHIP** — typed edges (`rootKind` source `->` target) with `strength` and
+  optional qualifiers `cardinality` (`one-to-one`/`one-to-many`/`many-to-many`),
+  `source-role`/`target-role` (nav labels), and `on-delete`
+  (cascade/restrict/detach/archive/set-null/no-action). These land in
+  `relationship.qualifiers`, are advisory-checked, and drive UI generation
+  (master-detail grid vs single panel) — capture them when the domain implies them.
 - **Operational + emitter PROFILES** — authored as top-level blocks
   `integration { … }`, `security { … }`, `lineage { … }`, `architecture { … }`,
   `experience { … }`, `design { … }`, `analytics { … }`, `ai { … }`, each

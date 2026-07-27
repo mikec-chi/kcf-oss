@@ -23,6 +23,7 @@ from assess import assess as assess_model
 from execution_plan import execution_plan
 from document_profile import check_document, is_conformant as document_conformant, load_document_profiles
 from import_mermaid import import_mermaid
+from import_dbml import import_dbml
 from ingest import ingest as ingest_model
 from pattern_contracts import contract_role_errors, load_contracts as load_pattern_contracts, report as pattern_report, role_report
 from review_queue import by_segment as review_by_segment, review_queue
@@ -291,6 +292,23 @@ def main():
     check(len(imported["model"]["relationships"]) == 5 and len(imported["model"]["concepts"]) == 5, "mermaid import lost nodes or edges")
     import_coverage = source_coverage(imported["document"], imported["model"], imported["trace"])
     check(source_complete(import_coverage), f"deterministic import was not source-complete: {import_coverage}")
+
+    # Deterministic DBML importer: complete-by-construction, carries category + cardinality + on_delete.
+    dbml_out = import_dbml((source_root / "crm.dbml").read_text(encoding="utf-8"), "Crm", "crm")
+    validate(dbml_out["model"], "model-ir-v1.schema.json")
+    validate(dbml_out["document"], "source-document-v1.schema.json")
+    validate(dbml_out["trace"], "source-trace-v1.schema.json")
+    check(not any(d["severity"] == "error" for d in Analyzer(dbml_out["model"]).run()), "DBML-imported model failed the analyzer")
+    _by_id = {c["id"]: c for c in dbml_out["model"]["concepts"]}
+    check(len(_by_id) == 3 and _by_id["accounts"]["metadata"]["category"] == "master"
+          and _by_id["opportunities"]["metadata"]["category"] == "transactional",
+          "DBML import lost tables or the category tag")
+    _rels = dbml_out["model"]["relationships"]
+    check(len(_rels) == 2 and all(r["qualifiers"].get("cardinality") for r in _rels)
+          and any(r["qualifiers"].get("on-delete") == "cascade" for r in _rels),
+          "DBML import lost relationship cardinality / on_delete")
+    check(source_complete(source_coverage(dbml_out["document"], dbml_out["model"], dbml_out["trace"])),
+          "DBML import was not source-complete")
     doc_check = check_document(imported["document"], document_profiles)
     check(document_conformant(doc_check) and doc_check["documentKind"] == "flowchart", f"imported flowchart failed document-check: {doc_check}")
     drifted_doc = dict(imported["document"], segments=[*imported["document"]["segments"], {"segmentId": "x", "text": "?", "kind": "field"}])
@@ -358,10 +376,11 @@ def main():
     subprocess.run([sys.executable, str(TOOLS_ROOT / "lint_stack.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     subprocess.run([sys.executable, str(TOOLS_ROOT / "property_tests.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     subprocess.run([sys.executable, str(TOOLS_ROOT / "check_codegen_coverage.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
+    subprocess.run([sys.executable, str(TOOLS_ROOT / "check_doc_examples.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     print(
         f"PASS valid fixture; PASS invalid fixture ({len(invalid_diagnostics)} diagnostics); "
         f"PASS semantic delta ({len(delta)} changes); "
-        f"PASS {len(manifest['modules'])} resolved modules; PASS schemas, profiles, compiler goldens, migration, locks, codegen coverage"
+        f"PASS {len(manifest['modules'])} resolved modules; PASS schemas, profiles, compiler goldens, migration, locks, codegen coverage, doc examples"
     )
 
 

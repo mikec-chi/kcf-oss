@@ -278,6 +278,23 @@ def coverage(
     return t.coverage_report(source, by_concept=by_concept)
 
 
+@mcp.tool(title="Check source-document fidelity", annotations=_READ_ONLY)
+def source_coverage(
+    document: Annotated[dict, Field(description="The source document: "
+        "`{documentId, segments: [{segmentId, ...}]}` (import-dbml / ingest emit this).")],
+    trace: Annotated[dict, Field(description="Segment→construct links: "
+        "`{links: [{segmentId, constructs: [qualifiedName, ...]}]}`.")],
+    model_ir: Annotated[dict | None, Field(description="A compiled IR (from `compile`).")] = None,
+    source: Annotated[str, Field(description="Alternatively, `.kcf` text to compile first.")] = "",
+) -> dict:
+    """How much of a SOURCE document (a DBML/SQL schema, a spec) the model captures —
+    surfaces silently dropped attributes/relationships/tags **by default**. Returns
+    `percentCovered`, a `summary` ("covers 71% of the source; 5 segments dropped"), and
+    the dropped `uncoveredSegments` / `unsourcedConstructs`. Run it after importing or
+    hand-translating a source so fidelity loss is visible, not discovered later."""
+    return t.source_coverage(model_ir=model_ir, source=source, document=document, trace=trace)
+
+
 @mcp.tool(title="Tier synthetic fills for approval", annotations=_READ_ONLY)
 def review_queue(
     model_ir: Annotated[dict | None, Field(description="A compiled IR (from `compile`) "

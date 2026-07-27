@@ -47,7 +47,7 @@ other tier (calls the API / enforced server-side) · ⬚ out-of-tier.
 | `concept` **INFORMATION** (`informationKind`, confidentiality, freshness, completeness) | ✅ document/record/message store; `confidentiality`→access control; freshness/completeness columns | ✅ document viewer/editor; confidentiality badge; freshness indicator |
 | `concept` **RESOURCE** + `allocations` | ✅ resource entities + allocation records | ✅ resource browser / allocation UI |
 | `concept` **ORGANIZATIONAL** + `organizations` (unit/team/position, reporting, authorityDomains) | ✅ org tables + reporting edges → **RBAC scoping** | ✅ org switcher, member/role management, scope selector |
-| `relationship` (`rootKind`: composition/association/participation/governance/transformation/identity/dependency/causation/ordering/classification) | ✅ FK / join table; composition→cascade, governance→authz link, participation→membership | ✅ navigation, nested/related lists, selectors (association→picker) |
+| `relationship` (`rootKind`: composition/association/participation/governance/transformation/identity/dependency/causation/ordering/classification) + qualifiers (`cardinality`/`source-role`/`target-role`/`on-delete`) | ✅ FK / join table; composition→cascade, governance→authz link, participation→membership; **`on-delete`** (cascade/restrict/detach/archive/set-null/no-action) → the FK delete rule | ✅ navigation driven by **`cardinality`**: one-to-many→a related-list **grid/tab** (labeled by **`target-role`**), one-to-one→an inline **panel**; association→picker |
 | `lifecycle` + `transition` | ✅ status column + transition guard (reject undeclared transitions) | ✅ state badge + controls that offer **only the transitions legal from the current state** |
 
 ### Entity metadata — `mutability` and `category`
@@ -130,7 +130,7 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 | `lineage` | ✅ provenance/audit columns, data-lineage records | ✅ provenance/history views |
 | `architecture` | ✅ deployment/module structure (informational) | ⬚ n/a |
 | `experience` | ⬚ **out-of-tier** (frontend owns UX) | ✅ **primary driver**: screens, flows, navigation |
-| `design` | ⬚ **out-of-tier** | ✅ theming / design tokens / component styling |
+| `design` | ⬚ **out-of-tier** | ✅ theming / design tokens / component styling. **No `design` block declared → apply `design-system-default.md`** (brand-neutral, accessible baseline); declared tokens override it. |
 | `emitters`, `runtimeRequirements`, `runtimeBindings` | ✅ runtime wiring / deployment metadata | ⬚ n/a |
 | pattern arrays, `modules`, `profiles`, `moduleVersions` | ✅ inform which constructs must exist (proof context) | ✅ same (informs which views/flows must exist) |
 

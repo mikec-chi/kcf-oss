@@ -1,0 +1,27 @@
+// A small CRM schema exercising the import-dbml subset: category settings, a Note
+// category, column settings (pk / not null / unique), inline + explicit Refs with
+// cardinality operators and on_delete.
+Table accounts [category: master] {
+  id uuid [pk]
+  name varchar [not null]
+  industry varchar
+}
+
+Table contacts {
+  id uuid [pk]
+  full_name varchar [not null]
+  email varchar [unique]
+  account_id uuid [ref: > accounts.id, delete: cascade]
+  Note: 'category: master'
+}
+
+Table opportunities {
+  id uuid [pk]
+  title varchar [not null]
+  amount decimal
+  stage varchar
+  account_id uuid
+  Note: 'category: transactional'
+}
+
+Ref: opportunities.account_id > accounts.id [delete: restrict]

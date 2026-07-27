@@ -18,6 +18,7 @@ from coverage_report import by_concept, load_coverage_model, report as coverage_
 from assess import assess as assess_model  # noqa: E402
 from document_profile import check_document, is_conformant, load_document_profiles  # noqa: E402
 from import_mermaid import import_mermaid  # noqa: E402
+from import_dbml import import_dbml  # noqa: E402
 from ingest import ingest as ingest_model  # noqa: E402
 from execution_plan import execution_plan  # noqa: E402
 from init_project import init_project, PROFILES  # noqa: E402
@@ -130,6 +131,15 @@ def main() -> int:
     mermaid_command.add_argument("--output", "-o", type=Path)
     mermaid_command.add_argument("--source-doc", type=Path)
     mermaid_command.add_argument("--trace", type=Path)
+
+    dbml_command = commands.add_parser("import-dbml")
+    dbml_command.add_argument("source", type=Path)
+    dbml_command.add_argument("--id", required=True)
+    dbml_command.add_argument("--namespace", required=True)
+    dbml_command.add_argument("--profile", default="business-application")
+    dbml_command.add_argument("--output", "-o", type=Path)
+    dbml_command.add_argument("--source-doc", type=Path)
+    dbml_command.add_argument("--trace", type=Path)
 
     confirm_command = commands.add_parser("confirm")
     confirm_command.add_argument("model", type=Path)
@@ -266,6 +276,14 @@ def main() -> int:
         return 0 if is_conformant(report) else 1
     if args.command == "import-mermaid":
         result = import_mermaid(args.source.read_text(encoding="utf-8"), args.id, args.namespace)
+        write_json(result["model"], args.output)
+        if args.source_doc:
+            write_json(result["document"], args.source_doc)
+        if args.trace:
+            write_json(result["trace"], args.trace)
+        return 0
+    if args.command == "import-dbml":
+        result = import_dbml(args.source.read_text(encoding="utf-8"), args.id, args.namespace, args.profile)
         write_json(result["model"], args.output)
         if args.source_doc:
             write_json(result["document"], args.source_doc)

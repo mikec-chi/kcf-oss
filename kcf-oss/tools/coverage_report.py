@@ -39,6 +39,20 @@ def _identity(item: dict) -> str:
     return item.get("qualifiedName") or item.get("id")
 
 
+# Advisory data-management category (see semantic_analyzer.ENTITY_CATEGORIES). When an
+# entity *states* one, coverage becomes appropriate rather than maximal — it rewards
+# right-modeling, not max-modeling. Read-mostly reference/config data is exempt from
+# write obligations; only transactional data is expected to carry a lifecycle (master
+# data is a managed catalogue — CRUD/admin, but no operational state machine). When no
+# category is stated, behavior is unchanged (obligations apply as before).
+_WRITE_EXEMPT_CATEGORIES = {"reference", "config"}
+_NO_LIFECYCLE_CATEGORIES = {"reference", "config", "master"}
+
+
+def _category(concept: dict):
+    return (concept.get("metadata") or {}).get("category")
+
+
 def ev_entity_has_identity(model: dict, obligation: dict) -> list[dict]:
     gaps = []
     for concept in model.get("concepts", []):
@@ -55,6 +69,11 @@ def ev_concept_kind_has_lifecycle(model: dict, obligation: dict) -> list[dict]:
     gaps = []
     for concept in model.get("concepts", []):
         if concept.get("kind") != obligation["conceptKind"]:
+            continue
+        # reference/config/master entities are not operational state machines — do not
+        # recommend a lifecycle for them (recommending one incentivized adding empty
+        # lifecycles, which distorts the shape that record-nature is inferred from).
+        if _category(concept) in _NO_LIFECYCLE_CATEGORIES:
             continue
         subject = _identity(concept)
         if subject not in subjects:
@@ -181,6 +200,10 @@ def _is_exempt(concept: dict, obligation: dict) -> bool:
     ``exemptTraits`` also exempts it."""
     meta = concept.get("metadata") or {}
     if meta.get("mutability") == "read-only" or meta.get("readOnly") is True:
+        return True
+    # reference/config entities are read-mostly lookups/settings — exempt from write
+    # obligations (CRUD-write / set / transform), same spirit as read-only.
+    if meta.get("category") in _WRITE_EXEMPT_CATEGORIES:
         return True
     return bool(set(obligation.get("exemptTraits", [])) & set(concept.get("traits") or []))
 
