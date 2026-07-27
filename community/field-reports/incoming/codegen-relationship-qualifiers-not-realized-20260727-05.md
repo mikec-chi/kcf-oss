@@ -47,3 +47,11 @@ workaround: >
   child FKs non-nullable and required in the Create schema.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the codegen pack: system-prompt **rule 10 (COMPOSITION integrity)** — the
+child's parent FK is **NOT NULL and required in the Create schema** (a part cannot
+exist without its whole), and `on-delete` is realized from `relationship.qualifiers`
+(cascade → delete children in-tx; restrict → block; set-null → null the FK). No bare
+nullable FK that lets parts orphan or outlive their whole.

@@ -44,3 +44,9 @@ workaround: >
   of the command's work.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the codegen pack: system-prompt **rule 11** — a command realizing a WORK
+emits **all** events that are `CAUSATION` targets of that work (iterate relationships
+where `rootKind == CAUSATION` and `source ==` the work), not a single "primary".

@@ -59,3 +59,11 @@ workaround: >
   measures at the guarded `state`; drop the free-string `status` from the Create schema.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the codegen pack: system-prompt **rule 9** — when an entity has both a
+lifecycle and a status-like attribute over the same states, drive the attribute from
+the single **guarded** `state` (or sync it on every write), keep it **out of the
+Create schema**, and point measures/queries at the guarded state — never the
+unguarded free string.

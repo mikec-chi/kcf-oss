@@ -76,6 +76,16 @@
       "profiles": ["analytics-platform"],
       "conceptKind": "MEASURE",
       "dimension": "MEASURE"
+    },
+    {
+      "id": "coverage.event.producer",
+      "title": "Every event has a producer",
+      "obligation": "concept-kind-targeted-by",
+      "level": "recommended",
+      "profiles": ["*"],
+      "conceptKind": "EVENT",
+      "rootKind": "CAUSATION",
+      "dimension": "EVENT"
     }
   ]
 }
