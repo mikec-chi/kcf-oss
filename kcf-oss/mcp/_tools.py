@@ -78,8 +78,12 @@ the `assess` verdict as you go, and ask before assuming.
    `scaffold`), but let the user's facts, not the preset, drive the content.
 2. Concepts (nouns). Elicit the core `entity`s and, for each, its `identity` and the
    attributes the user names — required vs optional. Mark reference/lookup data
-   `mutability "read-only"`. Name the `actor`s (roles/principals), the `event`s
-   (immutable facts), and any `work` (processes).
+   `mutability "read-only"`. When the source states an entity's data-management role,
+   capture it as advisory `category master|transactional|reference|config;` metadata —
+   it's ground truth and a codegen driver, and the analyzer reconciles it against the
+   entity's shape. Do NOT bolt a lifecycle/CRUD onto an entity just to close a coverage
+   gap: it distorts the shape signals record-nature is derived from. Name the `actor`s
+   (roles/principals), the `event`s (immutable facts), and any `work` (processes).
 3. Relationships. How are concepts connected? Choose the `rootKind` that matches the
    meaning (composition/association/participation/governance/…), not just "has a".
 4. Lifecycles. For anything with states ("open→closed", "draft→approved"), elicit the

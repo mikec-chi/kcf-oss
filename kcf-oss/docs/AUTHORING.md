@@ -82,7 +82,11 @@ sixteen dimension grammars plus the core ACTION/RELATIONSHIP algebra:
 
 - **ENTITY** — identity (with `generated`), attributes (cardinality + qualifiers),
   `compose`, named `reference` (cardinality + inverse), embedded `collection`,
-  inline `lifecycle`/`constraint` binding, and entity `mutation` blocks.
+  inline `lifecycle`/`constraint` binding, and entity `mutation` blocks. Advisory
+  metadata lines (same mechanism, land in `metadata`): `mutability "read-only";`
+  (exempts CRUD/set coverage) and `category master|transactional|reference|config;`
+  (data-management nature — advisory provenance, reconciled against the entity's
+  derived shape by the analyzer; it is **not** a primitive, see CONCEPTS.md).
 - **EVENT** — `kind`, subject/source/observer/trigger/affect-lifecycle/evidence,
   occurrence/detection time, correlation-key, severity, expectedness, match.
 - **ACTOR** — kind, role/authority/responsible-for/accountable-for/member-of,

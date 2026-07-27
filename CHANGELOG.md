@@ -200,6 +200,24 @@ First public release of the open standard. Cut this section to a dated version
   (allocation, BPMN `process`, assertion, identity-resolution, knowledge-query); all
   reference models are analyzer-valid and golden-locked.
 
+- **Entity `category` — advisory data-management classification, reconciled.**
+  Restores the record-nature ground truth (DBML-style master/transactional/reference/
+  config) that semantic modeling otherwise drops — but as **advisory metadata, not a
+  primitive**, honoring KCF's rule that record-nature is *emergent shape* (lifecycle/
+  event/transformation/mutability), not a flat tag. Author `category <value>;` on an
+  entity (same mechanism as `mutability`, lands in `concept.metadata.category`; no
+  grammar change). A new analyzer check (`kcf.entity.category-shape` /
+  `kcf.entity.category-vocab`, **warnings only**) reconciles the stated tag against the
+  derived shape — flagging e.g. an entity marked `master` that is a TRANSFORMATION
+  target and emits events (likely `transactional`), or a bad vocabulary value —
+  without ever blocking a model, and conservatively (it never guesses master vs config
+  vs reference, which shape can't separate). Elicitation now captures it (with a
+  caution not to bolt on lifecycles/CRUD just to close coverage gaps, which distorts
+  the signal); `system-prompt.md`/`CONSTRUCT_COVERAGE.md` use it as a UI/topology
+  driver (master→pickers+stewardship, transactional→workflow lists, config→settings,
+  reference→static). New `entity-category` reference domain + a conformance assertion
+  lock the behavior. `CONCEPTS.md` documents the ontology decision.
+
 ### Notes
 - Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.

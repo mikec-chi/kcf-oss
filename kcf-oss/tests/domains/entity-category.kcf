@@ -1,0 +1,50 @@
+// Exercises the advisory entity `category` metadata + the analyzer's shape
+// reconciliation (check_category_consistency). Lead is deliberately MIS-tagged
+// `master` while having the shape of transactional data (a TRANSFORMATION target
+// that emits an event) — the analyzer flags it as a warning, not an error. Account
+// is correctly `master` (stable, referenced, no transactional shape); AuditEntry is
+// `reference` and read-only. The model stays valid (warnings only).
+kcf model CategoryDemo profile business-application {
+  namespace crm;
+
+  entity Account {
+    identity accountId: UUID;
+    required name: String;
+    category master;
+  }
+
+  entity Lead {
+    identity leadId: UUID;
+    required title: String;
+    category master;            // MIS-tagged: shape below is transactional
+  }
+
+  entity AuditEntry {
+    identity entryId: UUID;
+    required message: String;
+    category reference;
+    mutability "read-only";
+  }
+
+  actor SalesRep { }
+  work QualifyWork { }
+  event LeadQualified { immutable; subject Lead; }
+
+  relationship account-has-lead: ASSOCIATION Account -> Lead strength 1.0;
+  relationship qualify-transforms-lead: TRANSFORMATION QualifyWork -> Lead strength 1.0;
+  relationship rep-performs-qualify: PARTICIPATION SalesRep -> QualifyWork strength 1.0;
+
+  lifecycle LeadLifecycle for Lead {
+    initial New;
+    terminal Converted;
+    transition New -> Converted;
+  }
+
+  command CreateLead {
+    operation create; scope record; target Lead;
+    input one; output one; idempotency conditional; atomicity atomic;
+    authorization crm.LeadPolicy;
+  }
+  rule LeadRule { kind CONSTRAINT; condition "title is present"; effect QualifyWork; applies-to Lead; authority SalesRep; }
+  policy LeadPolicy { authority SalesRep; rule LeadRule; default-conflict deny-overrides; }
+}

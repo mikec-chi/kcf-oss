@@ -151,4 +151,15 @@ as plain `command`/`lifecycle` constructs and need no provenance tag.
 - Events are immutable — corrections are new events, not edits.
 - Reference data synced from elsewhere → `mutability "read-only";` (exempts it
   from the CRUD/set recommendations).
+- **Data-management nature** (optional, advisory): tag an entity's role with
+  `category master | transactional | reference | config;` — a metadata line (same
+  mechanism as `mutability`, lands in `metadata.category`). It is **advisory
+  provenance, not a primitive**: KCF's real classification is the *shape*
+  (lifecycle/event/transformation/mutability), and the analyzer **reconciles** your
+  tag against that shape — flagging, e.g., an entity marked `master` that is a
+  TRANSFORMATION target and emits events (likely `transactional`). Don't add a
+  lifecycle or CRUD to an entity just to close a coverage gap — it distorts this
+  shape signal. Generators use `category` for UI (master → reference pickers +
+  stewardship/admin; transactional → high-volume list + workflow; config →
+  settings; reference → static).
 - Don't invent fields/statuses the domain didn't state; ask the user if unsure.

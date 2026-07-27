@@ -10,6 +10,28 @@ permissions:
   contents: read
 
 jobs:
+  boundary:
+    name: Open-core boundary (no proprietary markers)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan substance trees
+        # Fail if a proprietary marker leaked into the open-source substance
+        # (kcf-oss/, semantic-core/, community/). The repo-root scaffold
+        # (OPEN_CORE.md, NOTICE, README) names the proprietary platform on purpose
+        # and is out of scope; .github/ is not scanned, so this workflow's own
+        # pattern list never self-trips.
+        run: |
+          dirs=""
+          for d in kcf-oss semantic-core community; do [ -d "$d" ] && dirs="$dirs $d"; done
+          if grep -rIilE --exclude-dir=.git --exclude-dir=__pycache__ --exclude-dir=tmp --exclude-dir=packaging \
+               -e 'taliden|licenseref-taliden-proprietary|confidential & proprietary|vendor/kcf|knowledge-graph emitter|knowledge_graph' \
+               $dirs; then
+            echo "::error::Proprietary marker found in the open-source substance trees (see files above)."
+            exit 1
+          fi
+          echo "OK: open-core boundary clean —$dirs"
+
   gate:
     name: kcf check (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest

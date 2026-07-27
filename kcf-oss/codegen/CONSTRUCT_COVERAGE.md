@@ -50,6 +50,23 @@ other tier (calls the API / enforced server-side) · ⬚ out-of-tier.
 | `relationship` (`rootKind`: composition/association/participation/governance/transformation/identity/dependency/causation/ordering/classification) | ✅ FK / join table; composition→cascade, governance→authz link, participation→membership | ✅ navigation, nested/related lists, selectors (association→picker) |
 | `lifecycle` + `transition` | ✅ status column + transition guard (reject undeclared transitions) | ✅ state badge + controls that offer **only the transitions legal from the current state** |
 
+### Entity metadata — `mutability` and `category`
+
+Two advisory metadata tags on an entity steer generation (neither is a primitive;
+both live in `concept.metadata`):
+
+- `mutability "read-only"` → reference/immutable entity: skip write endpoints and
+  CRUD forms; render read-only views. Exempt from CRUD/set coverage.
+- `category master|transactional|reference|config` → the data-management role, a
+  UI/topology driver: **master** → reference pickers across the app + a stewardship/
+  admin CRUD surface; **transactional** → high-volume paginated lists + workflow/
+  lifecycle UI; **config** → a settings screen; **reference** → static lookups
+  (usually also read-only). It is advisory provenance the analyzer reconciles against
+  the entity's shape (a `master` tag on a TRANSFORMATION target that emits events is
+  flagged) — so treat it as guidance, and if it is absent, infer the grouping from the
+  shape rather than inventing a tag. A frontend may group navigation by `category`
+  (Master data / Transactions / Configuration) instead of a flat entity list.
+
 ### Rich example — an event that drives a lifecycle
 
 When the model declares the rich fields, realize them literally. For example this IR:

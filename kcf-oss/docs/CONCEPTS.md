@@ -68,6 +68,16 @@ concept be two things at once. A few consequences worth internalizing:
 - **Events** are immutable facts; a correction is a new event, not an edit.
 - **Information** (encoded meaning) is distinct from **Entity** (a managed
   subject); **Output** of work is distinct from **Intent**/outcome.
+- **Record nature** (master / transactional / reference / config) is **not** a
+  primitive. Persistence languages (e.g. DBML's `category`) tag the table with a
+  flat enum; KCF factors that role into orthogonal dimensions — *lifecycle* (moves
+  through states?), *event* (emits immutable facts?), *work/transformation* (changed
+  by processes?), *mutability* (read-only?) — so "transactional-ness" is *emergent
+  shape*, not a stored label; at the pattern layer, `implements master-data` asserts
+  it as a bundle of obligations. You *may* still carry the modeler's stated class as
+  advisory `metadata.category` (ground truth from the source, a codegen driver), and
+  the analyzer **reconciles** it against the shape — but promoting it to a first-class
+  field would re-import the denormalized dual-source-of-truth KCF avoids.
 
 ## The loop you'll actually run
 

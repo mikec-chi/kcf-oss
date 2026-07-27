@@ -338,6 +338,14 @@ def main():
         diagnostics = Analyzer(compiled).run()
         check(not any(item["severity"] == "error" for item in diagnostics), f"domain trial {source.name} failed: {diagnostics}")
 
+    # Entity `category` metadata is reconciled against the derived shape (advisory,
+    # warning-only). Lock that behavior: the mis-tagged Lead is flagged; the correctly
+    # tagged Account/AuditEntry are not.
+    cat_diags = Analyzer(compile_file(DOMAINS_ROOT / "entity-category.kcf")).run()
+    cat_shape = [d for d in cat_diags if d["rule_id"] == "kcf.entity.category-shape"]
+    check(len(cat_shape) == 1 and cat_shape[0]["subject"] == "crm.Lead",
+          f"category-shape reconciliation regressed: {cat_shape}")
+
     legacy = dict(valid)
     legacy.pop("$schema")
     legacy.pop("irVersion")

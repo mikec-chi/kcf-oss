@@ -182,7 +182,10 @@ aren't implied (statuses, business rules, extra fields).
 4. **Enforce lifecycles.** Reject transitions not declared for the concept;
    implement the state field and the transition guards.
 5. **Preserve identity and immutability.** `identity` attributes are primary keys
-   / natural keys; events are append-only.
+   / natural keys; events are append-only. Honor advisory entity metadata:
+   `mutability "read-only"` → no write path; `metadata.category`
+   (master/transactional/reference/config) → the UI/topology role (see
+   `CONSTRUCT_COVERAGE.md` → *Entity metadata*) — it's guidance, not new meaning.
 6. **Keep the four layers distinct.** Grammar meaning → domain assertions →
    runtime instances → generated artifacts. You are producing the fourth layer;
    do not fold runtime concerns back into the model.

@@ -1,0 +1,390 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "CategoryDemo",
+  "module": "KCF",
+  "namespace": "crm",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Account",
+      "qualifiedName": "crm.Account",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "accountId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "category": "master"
+      }
+    },
+    {
+      "id": "Lead",
+      "qualifiedName": "crm.Lead",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "leadId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "category": "master"
+      }
+    },
+    {
+      "id": "AuditEntry",
+      "qualifiedName": "crm.AuditEntry",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "entryId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "message",
+          "type": "String",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "category": "reference",
+        "mutability": "read-only"
+      }
+    },
+    {
+      "id": "SalesRep",
+      "qualifiedName": "crm.SalesRep",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "QualifyWork",
+      "qualifiedName": "crm.QualifyWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "LeadQualified",
+      "qualifiedName": "crm.LeadQualified",
+      "kind": "EVENT",
+      "references": [],
+      "subjects": [
+        "crm.Lead"
+      ]
+    },
+    {
+      "id": "LeadRule",
+      "qualifiedName": "crm.LeadRule",
+      "kind": "RULE",
+      "references": [
+        "crm.Lead",
+        "crm.QualifyWork",
+        "crm.SalesRep"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "LeadPolicy",
+      "qualifiedName": "crm.LeadPolicy",
+      "kind": "RULE",
+      "references": [
+        "crm.SalesRep",
+        "crm.LeadRule"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "account-has-lead",
+      "rootKind": "ASSOCIATION",
+      "source": "crm.Account",
+      "target": "crm.Lead",
+      "strength": 1.0,
+      "definition": "account-has-lead"
+    },
+    {
+      "id": "qualify-transforms-lead",
+      "rootKind": "TRANSFORMATION",
+      "source": "crm.QualifyWork",
+      "target": "crm.Lead",
+      "strength": 1.0,
+      "definition": "qualify-transforms-lead"
+    },
+    {
+      "id": "rep-performs-qualify",
+      "rootKind": "PARTICIPATION",
+      "source": "crm.SalesRep",
+      "target": "crm.QualifyWork",
+      "strength": 1.0,
+      "definition": "rep-performs-qualify"
+    }
+  ],
+  "lifecycles": [
+    {
+      "id": "LeadLifecycle",
+      "subject": "crm.Lead",
+      "states": [
+        "New",
+        "Converted"
+      ],
+      "initial": "New",
+      "terminal": [
+        "Converted"
+      ],
+      "transitions": [
+        {
+          "from": "New",
+          "to": "Converted"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "CreateLead",
+      "effect": "command",
+      "mutations": [],
+      "operation": "create",
+      "scope": "record",
+      "target": "crm.Lead",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "crm.LeadPolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [
+    {
+      "id": "LeadQualified",
+      "qualifiedName": "crm.LeadQualified",
+      "mutable": false,
+      "subjects": [
+        "crm.Lead"
+      ]
+    }
+  ],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [
+    {
+      "id": "LeadRule",
+      "appliesTo": [
+        "crm.Lead"
+      ],
+      "effects": [
+        "crm.QualifyWork"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "title is present",
+      "authority": "crm.SalesRep",
+      "qualifiedName": "crm.LeadRule"
+    }
+  ],
+  "policies": [
+    {
+      "id": "LeadPolicy",
+      "rules": [
+        "crm.LeadRule"
+      ],
+      "evidence": [],
+      "authority": "crm.SalesRep",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "crm.LeadPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "crm.Account": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 14,
+      "endColumn": 4
+    },
+    "crm.Lead": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 16,
+      "column": 3,
+      "endLine": 20,
+      "endColumn": 4
+    },
+    "crm.AuditEntry": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 22,
+      "column": 3,
+      "endLine": 27,
+      "endColumn": 4
+    },
+    "crm.SalesRep": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 29,
+      "column": 3,
+      "endLine": 29,
+      "endColumn": 21
+    },
+    "crm.QualifyWork": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 30,
+      "column": 3,
+      "endLine": 30,
+      "endColumn": 23
+    },
+    "crm.LeadQualified": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 31,
+      "column": 3,
+      "endLine": 31,
+      "endColumn": 51
+    },
+    "account-has-lead": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 33,
+      "column": 3,
+      "endLine": 33,
+      "endColumn": 75
+    },
+    "qualify-transforms-lead": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 34,
+      "column": 3,
+      "endLine": 34,
+      "endColumn": 89
+    },
+    "rep-performs-qualify": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 35,
+      "column": 3,
+      "endLine": 35,
+      "endColumn": 89
+    },
+    "LeadLifecycle": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 37,
+      "column": 3,
+      "endLine": 41,
+      "endColumn": 4
+    },
+    "CreateLead": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 43,
+      "column": 3,
+      "endLine": 47,
+      "endColumn": 4
+    },
+    "crm.LeadRule": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 48,
+      "column": 3,
+      "endLine": 48,
+      "endColumn": 124
+    },
+    "crm.LeadPolicy": {
+      "source": "tests/domains/entity-category.kcf",
+      "line": 49,
+      "column": 3,
+      "endLine": 49,
+      "endColumn": 92
+    }
+  }
+}

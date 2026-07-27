@@ -5,7 +5,9 @@ reference catalogues them, gives the natural-language sentence each forms, and
 classifies **how each is realized** at build/run time into three modes:
 
 - **`deterministic`** — the content is a structured, machine-evaluable expression;
-  an **emitter compiles it** to a guard, query, or state machine. No LLM.
+  a **downstream generator compiles it** to a guard, query, or state machine. No
+  LLM. (KCF-OSS stops at the IR + this classification; realization is done by the
+  OSS `codegen/` pack or any generator built on the IR.)
 - **`codegen`** — the content is a free-text but *checkable* predicate; a
   **code-generation LLM turns it into a runtime artifact once** (a validator/query
   function), which is reviewed and then runs deterministically.
@@ -17,6 +19,10 @@ The dividing line is *not the construct type* but whether a given `condition` /
 or **prose** (→ codegen or runtime-llm). `kcf.py execution-plan <model>` computes
 this classification for a model (schema `execution-plan-v1`); an explicit
 `executionMode` on a construct overrides the default.
+
+Scope: KCF-OSS provides only the *classification* below — it names no proprietary
+component and ships no runtime. How each disposition is realized (deterministic
+generation, build-time code-gen, or a runtime interpreter) is downstream of the IR.
 
 ## The sentence-like constructs (grammar-level)
 
@@ -37,17 +43,20 @@ this classification for a model (schema `execution-plan-v1`); an explicit
 
 ## How each is realized (the three modes)
 
-### Deterministic emit (no LLM)
+### Deterministic (no LLM)
 Everything that is fully **structural**, plus condition slots holding a
-**structured expression**:
+**structured expression**. KCF-OSS classifies these as deterministically
+realizable and stops there; a downstream generator (the OSS `codegen/` pack, or
+any generator built on the IR) produces the artifact:
 
 - Concepts, attributes, typed relationships, lifecycles (state machines), action
-  contracts, collection transforms, org reporting — emitters already produce these.
+  contracts, collection transforms, org reporting — a generator produces these
+  mechanically from the IR.
 - A `condition` / `where` / `predicate` written symbolically
   (`discount.rate <= 0.2`, `ruleKind == CONSTRAINT`, `all x in S : x.total > 0`)
   compiles to a guard or query. `execution-plan` marks these `deterministic`.
-- Assertions (`subject predicate object`) emit as graph triples (the
-  knowledge-graph emitter does this deterministically).
+- Assertions (`subject predicate object`) are a graph triple by construction and
+  project deterministically.
 
 ### Build-time code-gen artifact (LLM once, then deterministic)
 Condition slots holding **free-text but checkable predicates** — statements that

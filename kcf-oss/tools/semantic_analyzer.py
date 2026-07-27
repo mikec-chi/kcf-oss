@@ -29,6 +29,9 @@ COMMANDS = {
     "invoke", "emit", "allocate", "release",
 }
 SET_MUTATIONS = {"bulk-update", "bulk-patch", "bulk-delete", "bulk-upsert", "synchronize"}
+# Advisory data-management classification carried as entity metadata (not a primitive).
+# Reconciled against the derived semantic shape; see check_category_consistency.
+ENTITY_CATEGORIES = {"master", "transactional", "reference", "config"}
 ACTION_OPERATIONS = {
     "create", "read", "replace", "update", "patch", "delete", "upsert", "exists",
     "query", "count", "bulk-create", "bulk-update", "bulk-patch", "bulk-delete",
@@ -1030,6 +1033,68 @@ class Analyzer:
                 if allocation.get(field) and not self.reference_exists(allocation[field]):
                     self.report("error", "kcf.allocation.reference", aid, f"Unresolved {field} {allocation[field]!r}.")
 
+    def check_category_consistency(self):
+        """Reconcile a stated entity ``category`` metadata tag against the model's
+        derived semantic shape. Advisory — warnings only. A flat category is a
+        denormalized convenience (DBML-style); KCF treats record-nature as emergent
+        from lifecycle/event/transformation/mutability, so this never blocks a model.
+        It flags only HIGH-CONFIDENCE contradictions: shape can separate transactional
+        (a TRANSFORMATION target and/or event emitter) from stable, but cannot tell
+        master/config/reference apart, so those are never flagged against each other.
+        """
+        entities = [c for c in self.model.get("concepts", []) if c.get("kind") == "ENTITY"]
+        names = {c.get("qualifiedName") or c.get("id") for c in entities}
+        lifecycle_subjects = {lc.get("subject") for lc in self.model.get("lifecycles", [])}
+        transformation_targets = {r.get("target") for r in self.model.get("relationships", [])
+                                  if r.get("rootKind") == "TRANSFORMATION"}
+        event_subjects = set()
+        for ev in self.model.get("events", []):
+            event_subjects.update(ev.get("subjects", []) or [])
+            if ev.get("subject"):
+                event_subjects.add(ev["subject"])
+        # reference in-degree: relationship edges + concept references pointing at it
+        in_degree = {}
+        for rel in self.model.get("relationships", []):
+            tgt = rel.get("target")
+            if tgt in names:
+                in_degree[tgt] = in_degree.get(tgt, 0) + 1
+        for concept in self.model.get("concepts", []):
+            for ref in concept.get("references", []):
+                tgt = ref.get("target") if isinstance(ref, dict) else ref
+                if tgt in names:
+                    in_degree[tgt] = in_degree.get(tgt, 0) + 1
+        HIGH_INDEGREE = 3
+        for concept in entities:
+            name = concept.get("qualifiedName") or concept.get("id", "<entity>")
+            meta = concept.get("metadata", {}) or {}
+            stated = meta.get("category")
+            if stated is None:
+                continue
+            if stated not in ENTITY_CATEGORIES:
+                self.report("warning", "kcf.entity.category-vocab", name,
+                            f"Unknown entity category {stated!r}; expected one of "
+                            f"{', '.join(sorted(ENTITY_CATEGORIES))}.",
+                            correction=f"Set {name!r} category to a known value or remove it.")
+                continue
+            read_only = meta.get("mutability") == "read-only" or meta.get("readOnly") is True
+            transactional_shape = name in transformation_targets or name in event_subjects
+            referenced = in_degree.get(name, 0)
+            if stated in {"master", "reference", "config"} and transactional_shape:
+                self.report(
+                    "warning", "kcf.entity.category-shape", name,
+                    f"Marked category {stated!r} but the shape is transactional "
+                    f"(a TRANSFORMATION target and/or emits events) — likely 'transactional'.",
+                    correction=f"Reconcile {name!r}: set category 'transactional', or drop the "
+                               f"transformation/event shape if it is truly {stated}.")
+            elif (stated == "transactional" and read_only and not transactional_shape
+                  and referenced >= HIGH_INDEGREE):
+                self.report(
+                    "warning", "kcf.entity.category-shape", name,
+                    f"Marked 'transactional' but read-only, referenced by {referenced}, with no "
+                    f"events/transformation — likely 'reference' or 'master'.",
+                    correction=f"Reconcile {name!r}: set category 'reference'/'master', or give it "
+                               f"a mutable, event/transformation shape if it is truly transactional.")
+
     def run(self):
         self.build_symbols()
         self.check_refs()
@@ -1057,6 +1122,7 @@ class Analyzer:
         self.check_ai()
         self.check_organizational_knowledge()
         self.check_events_resources_plans()
+        self.check_category_consistency()
         self.check_profile_patterns()
         return self.diagnostics
 
