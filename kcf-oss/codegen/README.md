@@ -11,6 +11,15 @@ The IR is the durable contract, and **OSS stops there**. A tech-stack-agnostic
 target any stack and keep up with framework changes, while the IR guarantees the
 model it builds from is complete and lossless.
 
+**Who is "the generator"?** The **LLM is the generator** — it authors the code
+directly from the IR by following `system-prompt.md` + a stack `EXAMPLE.md`. Do
+**not** write a script that templates the IR into code and treat that as the
+generator: that is the fixed per-framework generator this pack replaces, and it
+under-realizes the model (flat relationships, no lifecycle controls, untyped
+forms). Scripts are allowed only as a *verification harness* (compile/typecheck/
+test) over code the LLM generated. See the "Who — and what — 'the generator' is"
+section at the top of `system-prompt.md`.
+
 ## Two tiers that connect via OpenAPI
 
 - **backend** stacks generate persistence, the full action contract,
