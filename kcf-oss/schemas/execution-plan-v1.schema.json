@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/execution-plan-v1.schema.json",
+  "title": "KCF Execution Plan v1",
+  "description": "Classifies each sentence-like, condition-bearing construct in a model by how it should be realized: compiled/emitted deterministically, generated once as a runtime artifact by a code-generation LLM, or carried as-is and interpreted live by an LLM at runtime.",
+  "type": "object",
+  "required": ["executionPlanVersion", "model", "summary", "elements"],
+  "properties": {
+    "executionPlanVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "summary": {
+      "type": "object",
+      "required": ["deterministic", "codegen", "runtimeLlm"],
+      "properties": {
+        "deterministic": {"type": "integer", "minimum": 0},
+        "codegen": {"type": "integer", "minimum": 0},
+        "runtimeLlm": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["construct", "id", "field", "content", "disposition", "reason", "overridden"],
+        "properties": {
+          "construct": {"type": "string"},
+          "id": {"type": "string"},
+          "field": {"type": "string"},
+          "content": {"type": "string"},
+          "disposition": {"enum": ["deterministic", "codegen", "runtime-llm"]},
+          "reason": {"type": "string"},
+          "overridden": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

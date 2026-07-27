@@ -1,0 +1,324 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "KnowledgeOps",
+  "module": "KCF",
+  "namespace": "ko",
+  "profile": "organizational-knowledge",
+  "profiles": [
+    "organizational-knowledge"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "RULE",
+    "INFORMATION",
+    "TEMPORAL",
+    "ORGANIZATION",
+    "INTENT",
+    "REASONING",
+    "MEASURE",
+    "SECURITY",
+    "LINEAGE"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "TEMPORAL": "1.0.0",
+    "ORGANIZATION": "1.0.0",
+    "INTENT": "1.0.0",
+    "REASONING": "1.0.0",
+    "MEASURE": "1.0.0",
+    "SECURITY": "1.0.0",
+    "LINEAGE": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Account",
+      "qualifiedName": "ko.Account",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "accountId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "Analyst",
+      "qualifiedName": "ko.Analyst",
+      "kind": "ACTOR",
+      "references": [],
+      "conceptKind": "PERSON"
+    },
+    {
+      "id": "TriageWork",
+      "qualifiedName": "ko.TriageWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "ResolveWork",
+      "qualifiedName": "ko.ResolveWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "AnalystPool",
+      "qualifiedName": "ko.AnalystPool",
+      "kind": "RESOURCE",
+      "references": [],
+      "conceptKind": "CAPACITY"
+    }
+  ],
+  "relationships": [],
+  "lifecycles": [],
+  "actions": [],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [
+    {
+      "id": "AnalystPool",
+      "qualifiedName": "ko.AnalystPool",
+      "resourceKind": "CAPACITY",
+      "capacity": 10
+    }
+  ],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [
+    {
+      "id": "CaseHandling",
+      "qualifiedName": "ko.CaseHandling",
+      "nodes": [
+        {
+          "type": "start",
+          "id": "Received",
+          "triggeredBy": "ko.TriageWork"
+        },
+        {
+          "type": "step",
+          "id": "Triage",
+          "activity": "ko.TriageWork"
+        },
+        {
+          "type": "gateway",
+          "id": "Decide",
+          "gatewayKind": "exclusive"
+        },
+        {
+          "type": "step",
+          "id": "Resolve",
+          "activity": "ko.ResolveWork"
+        },
+        {
+          "type": "end",
+          "id": "Closed"
+        }
+      ],
+      "flows": [
+        {
+          "from": "Received",
+          "to": "Triage"
+        },
+        {
+          "from": "Triage",
+          "to": "Decide"
+        },
+        {
+          "from": "Decide",
+          "to": "Resolve",
+          "when": "case is actionable",
+          "priority": 1
+        },
+        {
+          "from": "Resolve",
+          "to": "Closed"
+        }
+      ],
+      "boundaries": [],
+      "lanes": []
+    }
+  ],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [
+    {
+      "id": "TriageAllocation",
+      "qualifiedName": "ko.TriageAllocation",
+      "resource": "ko.AnalystPool",
+      "consumer": "ko.Analyst",
+      "quantity": 2
+    }
+  ],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [
+    {
+      "id": "AccountBillingFact",
+      "evidence": [
+        "ko.Account"
+      ],
+      "contradicts": [],
+      "subject": "ko.Account",
+      "predicate": "is-billed-to",
+      "object": "ko.Account",
+      "objectIsReference": true,
+      "status": "asserted",
+      "recordedAt": "2026-07-24T00:00:00Z",
+      "validFrom": "2026-01-01",
+      "qualifiedName": "ko.AccountBillingFact"
+    }
+  ],
+  "identityResolutions": [
+    {
+      "id": "AccountDedup",
+      "aliases": [
+        "acct-legacy-id"
+      ],
+      "externalIds": [],
+      "sameAs": [],
+      "mergeSources": [],
+      "splitTargets": [],
+      "evidence": [],
+      "canonical": "ko.Account",
+      "status": "active",
+      "qualifiedName": "ko.AccountDedup"
+    }
+  ],
+  "knowledgeQueries": [
+    {
+      "id": "OpenAccounts",
+      "qualifiedName": "ko.OpenAccounts",
+      "selectKind": "Account",
+      "where": "account has no closing date",
+      "world": "open",
+      "negation": "explicit",
+      "inference": "declared",
+      "temporal": "current"
+    }
+  ],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "KnowledgeGraph",
+    "Provenance",
+    "TemporalQuery",
+    "PolicyEvaluation",
+    "Inference",
+    "IdentityResolution",
+    "AccessControl",
+    "Audit"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "ko.Account": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 7,
+      "column": 3,
+      "endLine": 11,
+      "endColumn": 4
+    },
+    "ko.Analyst": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 13,
+      "column": 3,
+      "endLine": 13,
+      "endColumn": 33
+    },
+    "ko.TriageWork": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 14,
+      "column": 3,
+      "endLine": 14,
+      "endColumn": 22
+    },
+    "ko.ResolveWork": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 15,
+      "endColumn": 23
+    },
+    "ko.AnalystPool": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 17,
+      "column": 3,
+      "endLine": 17,
+      "endColumn": 55
+    },
+    "ko.TriageAllocation": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 19,
+      "column": 3,
+      "endLine": 23,
+      "endColumn": 4
+    },
+    "ko.CaseHandling": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 25,
+      "column": 3,
+      "endLine": 35,
+      "endColumn": 4
+    },
+    "ko.AccountBillingFact": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 37,
+      "column": 3,
+      "endLine": 45,
+      "endColumn": 4
+    },
+    "ko.AccountDedup": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 47,
+      "column": 3,
+      "endLine": 51,
+      "endColumn": 4
+    },
+    "ko.OpenAccounts": {
+      "source": "tests/domains/knowledge-ops.kcf",
+      "line": 53,
+      "column": 3,
+      "endLine": 60,
+      "endColumn": 4
+    }
+  }
+}

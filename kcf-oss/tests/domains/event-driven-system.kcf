@@ -46,6 +46,12 @@ kcf model FulfillmentEvents profile event-driven-system {
     consumption reserve;
   }
 
+  allocation CarrierTender {
+    resource TenderCapacity;
+    consumer Carrier;
+    quantity 10;
+  }
+
   information TenderManifest {
     kind DOCUMENT;
     subject Shipment;

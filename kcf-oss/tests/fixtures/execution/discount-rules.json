@@ -1,0 +1,23 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "DiscountGovernance",
+  "module": "KCF",
+  "namespace": "acme",
+  "concepts": [
+    {"id": "Discount", "qualifiedName": "acme.Discount", "kind": "ENTITY", "attributes": [{"name": "discountId", "type": "UUID", "identity": true}]},
+    {"id": "LegalOfficer", "qualifiedName": "acme.LegalOfficer", "kind": "ACTOR"},
+    {"id": "ApproveDiscountWork", "qualifiedName": "acme.ApproveDiscountWork", "kind": "WORK"}
+  ],
+  "rules": [
+    {"id": "DiscountCap", "qualifiedName": "acme.DiscountCap", "ruleKind": "CONSTRAINT", "condition": "discount.rate <= 0.2", "effects": ["acme.ApproveDiscountWork"], "appliesTo": ["acme.Discount"]},
+    {"id": "ApprovalPolicy", "qualifiedName": "acme.ApprovalPolicy", "ruleKind": "OBLIGATION", "condition": "a discount over the standard threshold requires management approval", "effects": ["acme.ApproveDiscountWork"], "appliesTo": ["acme.Discount"]},
+    {"id": "ManualReviewRule", "qualifiedName": "acme.ManualReviewRule", "ruleKind": "DECISION", "condition": "amount > 1000", "effects": ["acme.ApproveDiscountWork"], "executionMode": "runtime-llm"}
+  ],
+  "reasoning": [
+    {"id": "MarginRationale", "qualifiedName": "acme.MarginRationale", "reasoningKind": "FACT", "proposition": "large discounts erode margin and require oversight", "method": "DEDUCTIVE"}
+  ],
+  "knowledgeQueries": [
+    {"id": "ActiveConstraints", "qualifiedName": "acme.ActiveConstraints", "selectKind": "RULE", "where": "ruleKind == CONSTRAINT", "world": "open", "negation": "explicit", "inference": "declared", "temporal": "current"}
+  ]
+}

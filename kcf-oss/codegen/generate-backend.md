@@ -57,6 +57,9 @@ self-audit still must hold.*
   in it — this is the contract the frontend will consume.
 - Pull in a geo binding only if the model uses `SPATIAL`, and a task queue only
   for long-running `processes`/`plans`.
+- If the model uses **tail** constructs (measures, temporal/spatial, logic/math,
+  information/resource/organization/reasoning, rich events, profile blocks), also
+  paste `COOKBOOK.md` and realize each per its backend column.
 - Output files as labelled code blocks (one per file, with its path).
 - Finish with the **Coverage self-audit** (`tier: backend`; every construct →
   realized / out-of-tier / unsupported; `dropped: []`).

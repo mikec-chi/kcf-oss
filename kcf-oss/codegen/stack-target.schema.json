@@ -16,15 +16,16 @@
     "title": { "type": "string" },
     "tier": {
       "type": "string",
-      "enum": ["backend", "frontend", "fullstack"],
-      "description": "Which tier this stack generates. backend = persistence + action contract + OpenAPI/Swagger; frontend = UI generated against a backend's OpenAPI."
+      "enum": ["backend", "frontend", "fullstack", "platform"],
+      "description": "Which tier this stack generates. backend = persistence + action contract + OpenAPI/Swagger; frontend = UI generated against a backend's OpenAPI; platform = customizations for a SaaS/low-code platform (e.g. NetSuite, Salesforce) — the platform owns the datastore, runtime, and UI, and the pack emits platform-native objects/scripts packaged for its deployment framework (no OpenAPI mandate)."
     },
-    "language": { "type": "string", "description": "Primary language, e.g. Python, TypeScript" },
-    "framework": { "type": "string", "description": "Web/app/UI framework, e.g. FastAPI, Express, Django + DRF, React" },
-    "orm": { "type": "string", "description": "Data-access layer (backend), e.g. SQLModel, Prisma, Django ORM" },
-    "database": { "type": "string", "description": "Datastore (backend), e.g. PostgreSQL" },
+    "language": { "type": "string", "description": "Primary language, e.g. Python, TypeScript, SuiteScript 2.1" },
+    "framework": { "type": "string", "description": "Web/app/UI framework or platform SDK, e.g. FastAPI, Express, Django + DRF, React, SuiteCloud SDF" },
+    "orm": { "type": "string", "description": "Data-access layer (backend), e.g. SQLModel, Prisma, Django ORM. For a platform: the record/data API, e.g. SuiteScript N/record + N/search." },
+    "database": { "type": "string", "description": "Datastore (backend), e.g. PostgreSQL. For a platform: its native record store, e.g. 'NetSuite records (native)'." },
     "apiStyle": { "type": "string", "enum": ["rest", "graphql", "rpc", "none"], "default": "rest" },
-    "apiDocs": { "type": "string", "description": "Backend: how the OpenAPI/Swagger interface is exposed (tool + path), e.g. 'FastAPI built-in /docs', 'drf-spectacular /api/docs', 'swagger-ui-express /docs'. Frontend: the OpenAPI client generator, e.g. 'openapi-typescript + openapi-fetch'." },
+    "apiDocs": { "type": "string", "description": "Backend: how the OpenAPI/Swagger interface is exposed (tool + path), e.g. 'FastAPI built-in /docs', 'drf-spectacular /api/docs', 'swagger-ui-express /docs'. Frontend: the OpenAPI client generator, e.g. 'openapi-typescript + openapi-fetch'. Platform: how the programmatic surface is exposed, e.g. 'RESTlet endpoints (SuiteScript); no native OpenAPI'." },
+    "deployment": { "type": "string", "description": "Platform tier: how the emitted customization project is packaged and deployed, e.g. 'SuiteCloud SDF project deployed with `suitecloud project:deploy`'." },
     "testing": { "type": "string", "description": "Test framework, e.g. pytest, vitest" },
     "conventions": {
       "type": "array",

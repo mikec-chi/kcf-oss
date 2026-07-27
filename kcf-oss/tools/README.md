@@ -16,6 +16,7 @@
 | `semantic_analyzer.py` | Validate normalized KCF semantic IR |
 | `semantic_delta.py` | Classify compatibility between two semantic IR versions |
 | `run_conformance.py` | Run fixtures, resolution, validation, lint, delta, and emitter checks |
+| `check_codegen_coverage.py` | Cross-stage codegen gate: every construct is elicited (`mcp/`), IR-reachable (reference models), and shown in an example/`COOKBOOK.md` |
 
 Run tools from the `kcf-oss` directory or pass paths relative to the
 current working directory. Each tool derives the package root from its own file

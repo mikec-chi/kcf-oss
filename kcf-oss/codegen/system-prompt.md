@@ -102,6 +102,10 @@ rigor to whichever operations the model actually declares.
 - **Frontend:** generate a typed API client **from the backend's OpenAPI
   document** (supplied with the run) and call it for all data and actions. Do not
   hand-roll fetch calls that bypass the contract.
+- **Platform:** no OpenAPI mandate — the platform owns integration. Expose the
+  action contract through the platform's native programmatic surface (e.g. a
+  NetSuite RESTlet) **only when the model declares programmatic actions**; a
+  hand-written OpenAPI for those endpoints is optional, not required.
 
 ## Tiers
 
@@ -117,9 +121,31 @@ Every run targets one **tier**:
   re-implements persistence, the action contract, or policy authority; it may
   mirror validation/permission checks for UX only. Persistence and enforcement
   are out-of-tier for a frontend.
+- **platform** — customizations for a SaaS/low-code platform (e.g. NetSuite,
+  Salesforce) that already owns the datastore, runtime, and default UI. You do
+  **not** stand up persistence or a web server, and there is **no OpenAPI/Swagger
+  mandate** (that is a backend concern). Instead you map the IR onto the platform's
+  native building blocks and **package the result for the platform's deployment
+  framework**: entities → the platform's custom data objects + fields (types mapped
+  to the platform's field types); the action contract → the platform's scripts /
+  endpoints (honoring the same contract — atomicity, optimistic concurrency, the
+  `mutate` set, conditional idempotency); lifecycle → the platform's workflow /
+  state mechanism *and* a script-level guard so programmatic changes are checked
+  too; rules → platform validations; policy → the platform's roles/permissions plus
+  an in-script deny/permit gate; data-transformations → the platform's saved
+  query/search; immutable events → an append-only object written from an
+  after-save hook. `experience`/`design` are usually delegated to the platform's
+  native forms unless the model declares them. The stack's `stack.json` names the
+  platform's field-type map, deployment command, and conventions; its `EXAMPLE.md`
+  is the authoritative shape to imitate.
 
 `CONSTRUCT_COVERAGE.md` maps every IR construct to its representation in each
-tier. Treat it as the authoritative checklist.
+tier (including a platform column). Treat it as the authoritative checklist. The
+single-shot example shows the **mainstream** constructs in depth; for the
+quantitative, knowledge, and cross-cutting **tail** (measures, temporal/spatial,
+logic/math, information/resource/organization/reasoning, rich events, the profile
+blocks, …) the worked realization per tier is in `COOKBOOK.md` — use it whenever the
+model declares one of those.
 
 ## The gate: valid, not fully complete
 

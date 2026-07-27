@@ -19,6 +19,7 @@ from assess import assess as assess_model  # noqa: E402
 from document_profile import check_document, is_conformant, load_document_profiles  # noqa: E402
 from import_mermaid import import_mermaid  # noqa: E402
 from ingest import ingest as ingest_model  # noqa: E402
+from execution_plan import execution_plan  # noqa: E402
 from init_project import init_project, PROFILES  # noqa: E402
 from pattern_contracts import load_contracts, report as pattern_report, role_report  # noqa: E402
 from review_queue import by_segment as review_by_segment, review_queue  # noqa: E402
@@ -95,6 +96,10 @@ def main() -> int:
     assess_command = commands.add_parser("assess")
     assess_command.add_argument("model", type=Path)
     assess_command.add_argument("--output", "-o", type=Path)
+
+    execplan_command = commands.add_parser("execution-plan")
+    execplan_command.add_argument("model", type=Path)
+    execplan_command.add_argument("--output", "-o", type=Path)
 
     review_command = commands.add_parser("review-queue")
     review_command.add_argument("model", type=Path)
@@ -226,6 +231,10 @@ def main() -> int:
         result = assess_model(model)
         write_json(result, args.output)
         return 0 if result["ready"] else 1
+    if args.command == "execution-plan":
+        model = json.loads(args.model.read_text(encoding="utf-8"))
+        write_json(execution_plan(model), args.output)
+        return 0
     if args.command == "review-queue":
         model = json.loads(args.model.read_text(encoding="utf-8"))
         if args.by_segment:

@@ -83,6 +83,13 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 | `rule` (`ruleKind` CONSTRAINT/PERMISSION/PROHIBITION/OBLIGATION/DERIVATION/DECISION/…, `mode`, `priority`, `conflict`) | ✅ CONSTRAINT→validator, PERMISSION/PROHIBITION→authz, OBLIGATION→required step, DERIVATION→computed field, DECISION→policy eval | ↔ mirror CONSTRAINT for instant feedback; gate UI on PERMISSION/PROHIBITION (server is source of truth) |
 | `policies` (authority, rules, `defaultConflict`) | ✅ authorization policy engine with conflict resolution | ↔ consume decisions; render allowed/denied affordances |
 
+> **Authoring-surface note — `plans`.** `plans` is a first-class IR construct (the
+> analyzer validates step-index uniqueness; merge/migrate carry it) but it is the one
+> construct **not yet exposed in the ergonomic `.kcf` authoring surface** — WORK
+> choreography is authored today via `process`, and a `plan` reaches the IR only via a
+> direct-IR/merge path. Realize `plans` when present; don't expect it from an authored
+> `.kcf`. (Native `plan` authoring is tracked in the comprehensive-grammar work.)
+
 ## Knowledge & analytical constructs
 
 | IR construct | Backend | Frontend |
@@ -93,8 +100,9 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 | `concept` **INTENT** | ➰ goals/outcomes as targets for processes/metadata | ✅ goal & progress displays |
 | `concept` **REASONING** / `ai` extension | ➰ inference endpoints / model-serving hooks | ✅ recommendation & explanation panels |
 | **LOGIC** (`proposition`/`predicate`) / **MATH** (`formula`/`function`/`optimize`/`distribution`/`simulation`) | ✅ `proposition`→invariant/validator, `predicate`→boolean helper, `formula`/`function`→pure computed value, `optimize`→solver call (objective + constraints), `distribution`→sampler, `simulation`→Monte-Carlo runner (`trials`/`seed`) | ↔ show derived values; mirror simple predicates for instant feedback (server authoritative) |
-| `concept` **TEMPORAL** (validFrom/validTo, bitemporal) | ✅ validity columns + as-of queries + scheduling | ✅ date pickers, as-of view, validity display |
-| `concept` **SPATIAL** | ➰ geo types — needs **PostGIS** + geo binding (GeoAlchemy2 / GeoDjango / prisma geometry) | ✅ maps (needs a map lib) |
+| `concept` **TEMPORAL** (validFrom/validTo, bitemporal) + `calendars` | ✅ validity columns + as-of queries + scheduling; a `calendar` (timezone/working-days/holidays) → a business-day/holiday table + date arithmetic that honors it | ✅ date pickers, as-of view, validity display; calendar-aware date math |
+| `concept` **SPATIAL** + `routes` | ➰ geo types — needs **PostGIS** + geo binding (GeoAlchemy2 / GeoDjango / prisma geometry); a `route` (from/to/via/distance) → an edge/segment table or a routing call | ✅ maps + route/path overlays (needs a map lib) |
+| `concept` **capability** / **skill** + standalone `authority` | ✅ capability/skill catalogue tables + an authority registry the policy engine resolves against (who *can* do what) | ✅ capability/skill pickers; authority-scoped affordances |
 
 ## Cross-cutting extension objects
 
@@ -108,6 +116,35 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 | `design` | ⬚ **out-of-tier** | ✅ theming / design tokens / component styling |
 | `emitters`, `runtimeRequirements`, `runtimeBindings` | ✅ runtime wiring / deployment metadata | ⬚ n/a |
 | pattern arrays, `modules`, `profiles`, `moduleVersions` | ✅ inform which constructs must exist (proof context) | ✅ same (informs which views/flows must exist) |
+
+## Platform target — NetSuite (SuiteCloud SDF + SuiteScript 2.1)
+
+A **platform** stack (`tier: platform`) realizes the model as customizations *inside*
+a SaaS platform that already owns the datastore, runtime, and default UI — so there
+is **no OpenAPI/Swagger** deliverable and no persistence layer to build. The pack
+emits platform-native objects + scripts, packaged for the platform's deployment
+framework. Mapping for `netsuite-suitecloud-sdf` (see its `EXAMPLE.md`):
+
+| IR construct | NetSuite realization |
+|---|---|
+| `concept` **ENTITY** + `attribute` | `customrecordtype` (SDF XML) + one `customrecordcustomfield` per attribute. Types: String→FREEFORMTEXT (email→EMAIL), Text→TEXTAREA, Integer→INTEGER, Decimal→FLOAT (money→CURRENCY), Boolean→CHECKBOX, DateTime→DATETIMETZ, Date→DATE, UUID→FREEFORMTEXT, reference→SELECT (`selectrecordtype`=target record) |
+| `attribute` **identity** | NetSuite's internal `id` is automatic; the business identity → its own mandatory field, uniqueness enforced in a User Event `beforeSubmit` (no native unique constraint) |
+| `concept` **ACTOR** | a `role` object (and/or employee); also the coarse gate for the policy |
+| `concept` **EVENT** (immutable) | an append-only event-log `customrecordtype` (role granted CREATE only) written from a User Event `afterSubmit` |
+| `lifecycle` + `transition` | a `customlist` of states + a status SELECT field, realized twice-in-agreement: a `workflow` (SuiteFlow) object for UI transitions **and** a `beforeSubmit` guard rejecting undeclared transitions (guards RESTlet/CSV changes) |
+| `action` **record CRUD / upsert** | a RESTlet (SuiteScript 2.1): read/query→`get`, create→`post`, update/replace/patch/upsert→`put`, delete→`delete`. Optimistic concurrency via a `version` field; a command writes only its `mutate` fields; conditional idempotency = no-op on no-change; save is atomic per record |
+| `action` **set / bulk** | a RESTlet `put`/`post` that iterates honoring `atomicity` (best-effort → per-item try/catch + per-item result); large sets → a Map/Reduce script |
+| `action` **transform** + `collectionTransforms` | a `savedsearch` object (or N/query) with the predicate/summary; loaded via `search.load` where a script needs the rows |
+| `rule` (CONSTRAINT/…) | validation in a User Event `beforeSubmit` (server, authoritative); simple ones mirrored in a Client Script `saveRecord`/`fieldChanged` for instant feedback |
+| `policies` | a `role` object's record permissions (coarse) **plus** an in-script deny-overrides `evaluatePolicy()` module called before mutating (fine) |
+| `processes`/`plans` (WORK) | SuiteFlow workflow (short) or a Scheduled / Map-Reduce script (long-running) |
+| MEASURE / analytics | a `savedsearch` with summary/formula columns → KPI / reminder / dashboard portlet |
+| `experience` / `design` | delegated to NetSuite-native custom forms unless the model declares them |
+| deployment | an SDF **ACCOUNTCUSTOMIZATION** project (`manifest.xml` / `deploy.xml`) + a `scriptdeployment` per script; `suitecloud project:deploy` |
+
+Everything is packaged as an SDF project; nothing is silently dropped — the platform
+example's coverage self-audit gives every construct a `realized`/`delegated`
+disposition with `dropped: []`, the same discipline as the backend/frontend tiers.
 
 ## Completeness verdict
 

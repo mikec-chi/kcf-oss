@@ -83,22 +83,52 @@ the `assess` verdict as you go, and ask before assuming.
 3. Relationships. How are concepts connected? Choose the `rootKind` that matches the
    meaning (composition/association/participation/governance/…), not just "has a".
 4. Lifecycles. For anything with states ("open→closed", "draft→approved"), elicit the
-   states and the *allowed* transitions — this becomes a state machine.
+   states and the *allowed* transitions — this becomes a state machine. States may
+   carry `entry`/`exit`/`invariant`; a transition may carry a `trigger`/`guard`/
+   `effect` when the domain states one.
 5. Actions (verbs) + contracts. For each thing users do, model a `command`/`query`/
-   `transform`: its `operation`, `scope`, `target`, and the contract
-   (idempotency/atomicity/concurrency and — required — `authorization`). Aim for full
-   CRUD, a set/bulk op, and a data-transformation per entity where they make sense.
-6. Rules & policies. Capture constraints, permissions, obligations, and derivations
-   the user states as `rule`/`policy` — the invariants the app must enforce.
-7. Supporting dimensions (use when the domain has them). Rich `event`s can classify
-   themselves (`kind`) and **drive a lifecycle** (`affect-lifecycle`); `measure`s
-   capture metrics (`unit`/`aggregation`/`threshold`); `temporal`/`spatial` capture
-   time/geometry; `intent` captures goals; `proposition`/`formula` capture logic/math;
-   and cross-cutting concerns are authored as top-level profile blocks
-   (`integration`/`security`/`lineage`/`architecture`/`experience`/`design`/
-   `analytics`/`ai`). See the authoring reference for the syntax — model these only
-   when the user's domain actually implies them.
-8. Check & iterate. `compile` to catch syntax, `assess` for the verdict, `coverage`
+   `transform`: its `operation` (record CRUD create/read/replace/update/patch/delete/
+   upsert/exists/count; set/bulk `bulk-*`/`synchronize`; `emit`/`allocate`), `scope`,
+   `target`, and the contract (idempotency/atomicity/concurrency and — required —
+   `authorization`). A state change tied to one entity can be an entity-embedded
+   `mutation`. Aim for full CRUD, a set/bulk op, and a data-transformation
+   (`collection`: filter/project/group/aggregate/join/…) per entity where they fit.
+6. Rules & policies. Capture the invariants the app must enforce as `rule`/`policy`,
+   choosing the `kind` that matches: CONSTRAINT, PERMISSION, PROHIBITION, OBLIGATION,
+   DERIVATION, DECISION, ELIGIBILITY, CLASSIFICATION, EXCEPTION.
+7. Quantitative & analytical dimensions (model when the domain measures, schedules,
+   locates, or computes — probe for each; don't wait to be told). Rich `event`s can
+   classify themselves (`kind`) and **drive a lifecycle** (`affect-lifecycle`, plus
+   `severity`/`correlation-key`).
+   - `measure` — the KPIs/metrics users track: `unit` (declare the `unit`s),
+     `aggregation`, `scale`, `threshold`/`target`.
+   - `intent` — goals/objectives with their success/failure criteria and tradeoffs.
+   - `temporal` — validity periods, schedules, recurrences; a `calendar` for
+     working-days/holidays/timezone.
+   - `spatial` — locations/regions/`geometry` and the `route`s between them.
+   - `proposition`/`predicate` (LOGIC) — invariants and named boolean tests the
+     domain states.
+   - `formula`/`function`/`optimize`/`distribution`/`simulation` (MATH) — computed
+     values, objectives, and the models the user reasons with.
+8. Information & knowledge (model when the domain records facts or reasons over them —
+   this cluster is easy to miss, so ask).
+   - `information` — the documents/records/messages/datasets it holds (`kind`,
+     confidentiality, freshness).
+   - `resource` — capacities/assets and their `allocation`s to consumers.
+   - `organization` — org units/teams/positions, reporting lines, and `authority`.
+   - `reasoning`/`assertion` — hypotheses, claims, and asserted facts (with
+     provenance/`status`).
+   - `identity-resolution`/`knowledge-query` — entity de-duplication and the queries
+     the domain answers (world/negation/inference policy).
+   - `capability`/`skill` — what actors/agents are able to do, when it matters.
+9. Cross-cutting concerns — author as top-level **profile blocks** that land in
+   `ir[section]`: `integration` (external systems), `security` (assets/threats/
+   controls), `lineage` (provenance), `architecture` (services/topology),
+   `experience`/`design` (UX/UI), `analytics` (datasets/reports/dashboards), `ai`
+   (features/models/pipelines). Add a block only for a concern the user actually
+   raises. See the authoring reference for syntax throughout — model every dimension
+   above only when the user's facts imply it, never to fill the template.
+10. Check & iterate. `compile` to catch syntax, `assess` for the verdict, `coverage`
    for the gap to-do list. Fix required gaps; enrich or synthesize the recommended
    ones (see the gap-filling capability). Stop when the user confirms it reflects
    their domain and it is valid.
@@ -324,6 +354,7 @@ def generation_plan() -> list:
     stacks = list_stacks()["stacks"]
     backend = [s["id"] for s in stacks if s.get("tier", "backend") == "backend"]
     frontend = [s["id"] for s in stacks if s.get("tier") == "frontend"]
+    platform = [s["id"] for s in stacks if s.get("tier") == "platform"]
     steps = [{
         "step": 1, "tool": "codegen_prompt", "tier": "backend",
         "note": "Generate the backend first; it exposes an OpenAPI/Swagger document.",
@@ -334,6 +365,14 @@ def generation_plan() -> list:
             "step": 2, "tool": "codegen_prompt", "tier": "frontend",
             "note": "Generate the frontend against the backend's /openapi.json.",
             "stackChoices": frontend,
+        })
+    if platform:
+        steps.append({
+            "step": len(steps) + 1, "tool": "codegen_prompt", "tier": "platform",
+            "note": "Alternative target: realize the same model as customizations for a "
+                    "SaaS/low-code platform (owns datastore/runtime/UI; no OpenAPI). "
+                    "Standalone — does not depend on the backend/frontend steps.",
+            "stackChoices": platform,
         })
     return steps
 
@@ -431,6 +470,27 @@ def example_model() -> dict:
     return {"ok": True, "source": EXAMPLE_KCF.read_text(encoding="utf-8")}
 
 
+# Concept kinds beyond the mainstream (ENTITY/ACTOR/WORK/EVENT) and the top-level
+# arrays/blocks that the stack EXAMPLE.md files don't demonstrate. Presence of any of
+# these means the construct cookbook should ride along with the generation prompt.
+_TAIL_CONCEPT_KINDS = {"MEASURE", "INTENT", "TEMPORAL", "SPATIAL", "INFORMATION",
+                       "RESOURCE", "ORGANIZATIONAL", "REASONING", "LOGIC", "MATH"}
+_TAIL_KEYS = ("calendars", "routes", "propositions", "predicates", "math", "units",
+              "information", "reasoning", "organizations", "authorities", "capabilities",
+              "skills", "allocations", "mutations", "processes", "assertions",
+              "identityResolutions", "knowledgeQueries",
+              "integration", "security", "lineage", "architecture", "experience",
+              "design", "analytics", "ai")
+
+
+def _uses_tail_constructs(ir: dict) -> bool:
+    """True if the model uses any construct beyond the mainstream the stack examples
+    demonstrate — the signal to append COOKBOOK.md to the generation prompt."""
+    if any(c.get("kind") in _TAIL_CONCEPT_KINDS for c in ir.get("concepts", [])):
+        return True
+    return any(ir.get(k) for k in _TAIL_KEYS)
+
+
 def codegen_prompt(source: str, stack: str, instructions: str = "",
                    model_ir: dict | None = None) -> dict:
     """Assemble the ready-to-paste LLM code-generation prompt for a chosen stack:
@@ -466,6 +526,14 @@ def codegen_prompt(source: str, stack: str, instructions: str = "",
     tier = meta.get("tier", "backend")
     system_prompt = (CODEGEN_DIR / "system-prompt.md").read_text(encoding="utf-8")
     example = (stack_dir / "EXAMPLE.md").read_text(encoding="utf-8")
+    # The stack example covers the mainstream. If this model uses tail constructs
+    # (quantitative/knowledge/cross-cutting), append the construct cookbook so the LLM
+    # has a worked target for each — the example alone wouldn't show them.
+    if _uses_tail_constructs(ir):
+        cookbook = (CODEGEN_DIR / "COOKBOOK.md").read_text(encoding="utf-8")
+        example += ("\n\n---\n\n## Tail-construct cookbook\n\nThis model uses constructs "
+                    "beyond the mainstream the example above shows. Realize each per this "
+                    "cookbook (backend/frontend/platform per your tier):\n\n" + cookbook)
     ir_json = json.dumps(ir, indent=2)
 
     gaps = _coverage_report(ir, load_coverage_model())["gaps"]
@@ -485,7 +553,22 @@ def codegen_prompt(source: str, stack: str, instructions: str = "",
         "self-audit:\n\n" + house + "\n"
     ) if house else ""
 
-    if tier == "frontend":
+    if tier == "platform":
+        user_prompt = (
+            f"Tier: platform. Generate the platform customization project for the whole "
+            f"model, targeting the `{stack}` platform. The platform owns the datastore, "
+            f"runtime, and default UI — do NOT stand up persistence or a web server and do "
+            f"NOT expose OpenAPI/Swagger. Map entities to the platform's custom data objects "
+            f"+ fields (matching field types), the action contract to the platform's scripts/"
+            f"endpoints (honoring atomicity/optimistic concurrency/the mutate set/conditional "
+            f"idempotency), the lifecycle to the platform's workflow AND a script-level guard, "
+            f"rules to validations, and the policy to roles/permissions plus an in-script "
+            f"deny/permit gate; package it for the platform's deployment framework. Follow the "
+            f"single-shot example exactly and finish with the coverage self-audit.\n\n"
+            f"## The model (authoritative specification)\n\n```json\n{ir_json}\n```\n"
+            f"{guidance_block}\n## The single-shot example to imitate\n\n{example}{house_block}"
+        )
+    elif tier == "frontend":
         user_prompt = (
             f"Tier: frontend. Generate the frontend for the whole model, targeting the "
             f"`{stack}` stack. Generate a typed API client from your backend's OpenAPI "

@@ -20,6 +20,7 @@ from coverage_report import load_coverage_model, report as coverage_report
 from merge_models import merge
 from migrate_ir import migrate
 from assess import assess as assess_model
+from execution_plan import execution_plan
 from document_profile import check_document, is_conformant as document_conformant, load_document_profiles
 from import_mermaid import import_mermaid
 from ingest import ingest as ingest_model
@@ -308,6 +309,18 @@ def main():
     check(ready_assessment["ready"], f"walkthrough ready model was not ready: {ready_assessment['checks']}")
     check(ready_assessment["checks"]["coverage"]["requiredGaps"] == 0, "walkthrough ready model has required coverage gaps")
 
+    # --- Execution plan: deterministic emit vs code-gen artifact vs runtime LLM ---
+    exec_model = json.loads((FIXTURES_ROOT / "execution" / "discount-rules.json").read_text())
+    validate(exec_model, "model-ir-v1.schema.json")
+    plan = execution_plan(exec_model)
+    validate(plan, "execution-plan-v1.schema.json")
+    disposition = {entry["id"].split(".")[-1]: (entry["disposition"], entry["overridden"]) for entry in plan["elements"]}
+    check(disposition["DiscountCap"] == ("deterministic", False), "a structured condition was not classified deterministic")
+    check(disposition["ApprovalPolicy"] == ("codegen", False), "a free-text predicate was not classified for code-gen")
+    check(disposition["MarginRationale"] == ("runtime-llm", False), "a reasoning proposition was not classified runtime-llm")
+    check(disposition["ManualReviewRule"] == ("runtime-llm", True), "an explicit executionMode override was not honored")
+    check(plan["summary"] == {"deterministic": 2, "codegen": 1, "runtimeLlm": 2}, f"execution-plan summary drifted: {plan['summary']}")
+
     for profile_path in sorted((PROJECT_ROOT / "profiles" / "presets").glob("*.json")):
         validate(json.loads(profile_path.read_text(encoding="utf-8")), "profile-preset-v1.schema.json")
         resolved = resolve_profile(profile_path.stem)
@@ -336,10 +349,11 @@ def main():
     subprocess.run([sys.executable, str(TOOLS_ROOT / "validate_stack.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     subprocess.run([sys.executable, str(TOOLS_ROOT / "lint_stack.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     subprocess.run([sys.executable, str(TOOLS_ROOT / "property_tests.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
+    subprocess.run([sys.executable, str(TOOLS_ROOT / "check_codegen_coverage.py")], check=True, cwd=PROJECT_ROOT, stdout=subprocess.DEVNULL)
     print(
         f"PASS valid fixture; PASS invalid fixture ({len(invalid_diagnostics)} diagnostics); "
         f"PASS semantic delta ({len(delta)} changes); "
-        f"PASS {len(manifest['modules'])} resolved modules; PASS schemas, profiles, compiler goldens, migration, locks"
+        f"PASS {len(manifest['modules'])} resolved modules; PASS schemas, profiles, compiler goldens, migration, locks, codegen coverage"
     )
 
 

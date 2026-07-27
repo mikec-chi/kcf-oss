@@ -25,12 +25,23 @@ both derive from the same IR. What each tier realizes for **every** IR construct
 (and the completeness verdict for these stacks) is in
 [`CONSTRUCT_COVERAGE.md`](CONSTRUCT_COVERAGE.md).
 
+### A third tier: platform
+
+Some targets aren't a backend or a frontend you *build* — they're a SaaS/low-code
+**platform** you *customize*, one that already owns the datastore, runtime, and UI
+(NetSuite, Salesforce, …). A **platform** stack (`tier: platform`) maps the same IR
+onto the platform's native objects + scripts and packages them for its deployment
+framework — **no OpenAPI mandate**. It's a standalone target: realize the same
+`ready` model as, say, a NetSuite SDF project *instead of* (or alongside) the
+backend/frontend pair. See `CONSTRUCT_COVERAGE.md` → "Platform target — NetSuite".
+
 ## What's here
 
 | File | Purpose |
 |---|---|
 | `system-prompt.md` | The durable, tier-aware contract. Install as the LLM's system prompt. Defines how to read `model-ir-v1`, the non-negotiable rules (generate only what's declared, cover every construct, honor action contracts/lifecycles), the Swagger/OpenAPI mandate, and the required **coverage self-audit**. |
 | `CONSTRUCT_COVERAGE.md` | The audit: every IR construct → its backend and frontend representation, plus the completeness verdict. |
+| `COOKBOOK.md` | Worked realization of every **tail** construct (quantitative/knowledge/cross-cutting) per tier — the target the stack examples don't show. Rides along automatically when a model uses one. |
 | `generate-backend.md` / `generate-frontend.md` | The per-run user prompts. Backend: paste the IR + example. Frontend: paste the IR + the **backend's OpenAPI** + example. |
 | `stacks/<id>/` | A shipped stack: `stack.json` (`stack-target-v1`, incl. `tier`) + `EXAMPLE.md` (the same reference model realized in that stack). |
 | `stack-target.schema.json` | The `stack-target-v1` schema. Author your own `stack.json` to target a stack we don't ship. |
@@ -68,12 +79,38 @@ Start from [`overrides.example.md`](overrides.example.md): copy it to
 **Frontend** (binds to a backend's OpenAPI):
 - **`react-typescript-openapi`** — React · TypeScript · TanStack Query · openapi-typescript client
 
-Every example realizes the **same** reference model
+**Platform** (customizations inside a SaaS/low-code platform — no OpenAPI; the
+platform owns datastore/runtime/UI):
+- **`netsuite-suitecloud-sdf`** — NetSuite · SuiteCloud SDF · SuiteScript 2.1 ·
+  custom records/fields, a SuiteFlow workflow, a role, a saved search, and a
+  RESTlet, packaged as an SDF project (`suitecloud project:deploy`)
+
+Every stack example realizes the **same** reference model
 (`../tests/domains/business-application.kcf`) so backend and frontend line up and
 you can compare stacks apples-to-apples; the model is a committed golden fixture,
 so it can't rot. It deliberately exercises the mainstream constructs — full CRUD +
 `upsert` + `bulk-update`, a data-transformation, a rule, and a policy — so each
 example demonstrates all of them (see [`CONSTRUCT_COVERAGE.md`](CONSTRUCT_COVERAGE.md)).
+
+### Reference models — mainstream vs. the full grammar
+
+The stack examples cover the **mainstream**. The rest of the grammar (the
+quantitative, knowledge, and cross-cutting dimensions) is exercised by a set of
+committed, golden-locked **tail reference models**, and realized construct-by-construct
+in [`COOKBOOK.md`](COOKBOOK.md) so a codegen LLM has a worked target for every one:
+
+| Reference model | Exercises |
+|---|---|
+| `business-application.kcf` | **mainstream** — ENTITY/ACTOR/WORK/EVENT, lifecycle, relationships, the action contract (CRUD/upsert/bulk), a data-transformation, a rule, a policy (the stack examples) |
+| `entity-rich.kcf` | rich ENTITY — references/compositions/embedded collections, an inline lifecycle, an entity-embedded **`mutation`** |
+| `quantitative.kcf` | **INTENT**, **TEMPORAL**+`calendar`, **SPATIAL**+`geometry`/`route`, **LOGIC** (`proposition`/`predicate`), **MATH** (`formula`/`function`/`optimize`/`distribution`/`simulation`), **RESOURCE** |
+| `analytics-ai.kcf` | **MEASURE**+`unit`, **REASONING**, **INFORMATION** |
+| `capability-skill.kcf` | **capability**/**skill**, **ORGANIZATION**, standalone **authority** |
+| `profiles.kcf` | all 8 cross-cutting **profile blocks** (`integration`/`security`/`lineage`/`architecture`/`experience`/`design`/`analytics`/`ai`) → `ir[section]` |
+
+Each is analyzer-valid and compiles to IR (verified). `COOKBOOK.md` shows, per
+construct, the backend / frontend / platform realization — pull it in for whatever
+tail constructs a real model uses.
 
 ## Use it in four steps
 

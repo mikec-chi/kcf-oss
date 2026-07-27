@@ -1,0 +1,31 @@
+{
+  "stackTargetVersion": "1.0.0",
+  "id": "netsuite-suitecloud-sdf",
+  "title": "NetSuite customizations (SuiteCloud SDF + SuiteScript 2.1)",
+  "tier": "platform",
+  "language": "SuiteScript 2.1 (JavaScript) + SDF object XML",
+  "framework": "SuiteCloud Development Framework (SDF)",
+  "orm": "SuiteScript N modules (N/record, N/search, N/query)",
+  "database": "NetSuite records (native)",
+  "apiStyle": "rest",
+  "apiDocs": "RESTlet endpoints (SuiteScript) exposed per action; NetSuite has no native OpenAPI — a hand-written openapi.json for the RESTlets is optional.",
+  "deployment": "SuiteCloud SDF Account Customization Project deployed with `suitecloud project:deploy` (SuiteCloud CLI for Node.js).",
+  "testing": "SuiteScript unit tests with jest + a mocked N/* module layer (e.g. @hitc/netsuite-types or suitecloud-unit-testing)",
+  "conventions": [
+    "Emit an SDF Account Customization Project: `src/manifest.xml`, `src/deploy.xml`, `src/Objects/*.xml` (records, fields, lists, roles, workflows, saved searches), and `src/FileCabinet/SuiteScripts/**/*.js` (SuiteScript 2.1). Deploy with `suitecloud project:deploy`.",
+    "One ENTITY → one `customrecordtype` object (scriptid `customrecord_<ns>_<entity>`); each attribute → a `customrecordcustomfield`. Map types: String→FREEFORMTEXT (email→EMAIL), Text→TEXTAREA, Integer→INTEGER, Decimal→FLOAT (money→CURRENCY), Boolean→CHECKBOX, DateTime→DATETIMETZ, Date→DATE, UUID→FREEFORMTEXT, reference/relationship→SELECT (selectrecordtype = the target custom record).",
+    "identity: NetSuite assigns every record an internal `id`; realize the model's business identity as its own mandatory field (ismandatory=T) and enforce uniqueness in a User Event `beforeSubmit` (custom fields have no native unique constraint).",
+    "Optimistic concurrency: a `version` INTEGER field on the record; UpdateCustomer loads the record, rejects (throws `error.create({name:'CONFLICT'})`) when the caller's version != the stored version, then increments version in the same save (record save is atomic per record).",
+    "Conditional idempotency: no-op (return the record unchanged, don't bump version) when the mutated fields already equal the requested values.",
+    "A command may only write the fields in the action's `mutate` set — set exactly those and no others.",
+    "Realize each action by operation+scope on a RESTlet (SuiteScript 2.1): read/query→`get`, create→`post`, replace/update/patch/upsert→`put` (upsert = search by business id, then create-or-update), delete→`delete`; bulk-*/scope=set → a `put`/`post` that iterates honoring atomicity (best-effort → per-item try/catch + per-item result). Long-running set ops → a Map/Reduce script instead.",
+    "Lifecycle → a `customlist` of the states + a status SELECT field, realized two ways that agree: a `workflow` (SuiteFlow) object for UI-driven transitions (states + transitions + buttons) AND a `beforeSubmit` guard in the User Event script that rejects any status change not in the declared transition set (so RESTlet/CSV-driven changes are guarded too).",
+    "rule (CONSTRAINT) → a validation in the User Event `beforeSubmit` (throws on violation); mirror simple ones in a Client Script `saveRecord`/`fieldChanged` for instant UI feedback (server is source of truth).",
+    "policy → a `role` object with record permissions (the coarse gate) AND an in-script deny-overrides `evaluatePolicy()` module the RESTlet/User Event call before mutating (the fine gate).",
+    "data-transformation (filter/group/aggregate) → a `savedsearch` object (or an N/query) with the predicate/summary; load it with `search.load` where a script needs the result set.",
+    "EVENT (immutable) → an append-only event-log `customrecordtype` (no edit/delete permission in its role) written from a User Event `afterSubmit`.",
+    "experience/design are largely delegated to NetSuite-native custom forms unless the model declares them; note them delegated in the coverage self-audit.",
+    "Tests mock the N/* modules and cover: the happy-path save, an illegal lifecycle transition (rejected), a stale-version conflict (rejected), and the CONSTRAINT (missing email when Active → rejected)."
+  ],
+  "example": "EXAMPLE.md"
+}

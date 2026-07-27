@@ -68,6 +68,9 @@ coverage self-audit still must hold.*
   remains the source of truth.
 - Add a charting lib only if the model uses `MEASURE`/`analytics`, and a map lib
   only for `SPATIAL`.
+- If the model uses **tail** constructs (measures, temporal/spatial, logic/math,
+  information/resource/organization/reasoning, rich events, profile blocks), also
+  paste `COOKBOOK.md` and realize each per its frontend column.
 - Output files as labelled code blocks (one per file, with its path).
 - Finish with the **Coverage self-audit** (`tier: frontend`; every construct →
   realized / delegated / out-of-tier / unsupported; `dropped: []`).

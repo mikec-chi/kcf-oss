@@ -666,7 +666,9 @@ class Analyzer:
         for event in self.model.get("events", []):
             if event.get("mutable"):
                 self.report("error", "kcf.event.immutable", event.get("id", "<event>"), "Historical event facts must be immutable.")
-        capacities = {r.get("id"): r.get("capacity") for r in self.model.get("resources", [])}
+        # Key on qualifiedName (what allocations reference) with a bare-id fallback,
+        # so the capacity check actually matches namespace-qualified allocation refs.
+        capacities = {(r.get("qualifiedName") or r.get("id")): r.get("capacity") for r in self.model.get("resources", [])}
         used = defaultdict(float)
         for allocation in self.model.get("allocations", []):
             resource = allocation.get("resource")
@@ -749,7 +751,8 @@ class Analyzer:
                                 ("measures", "kcf.intent.measure"),
                                 ("adjacentTo", "kcf.spatial.adjacent-to"),
                                 ("jurisdictions", "kcf.spatial.jurisdiction"),
-                                ("spatialRoutes", "kcf.spatial.route")):
+                                ("spatialRoutes", "kcf.spatial.route"),
+                                ("spatialCapacities", "kcf.spatial.capacity")):
                 for ref in concept.get(field, []):
                     if not self.reference_exists(ref):
                         self.report("error", rule, name, f"Unresolved {field} reference {ref!r}.")
@@ -857,7 +860,7 @@ class Analyzer:
                 self.report("error", "kcf.measure.scale", name, f"Unknown scale {concept['scale']!r}; expected one of {sorted(self.SCALE_KINDS)}.")
             if concept.get("aggregation") is not None and concept["aggregation"] not in self.AGGREGATION_KINDS:
                 self.report("error", "kcf.measure.aggregation", name, f"Unknown aggregation {concept['aggregation']!r}; expected one of {sorted(self.AGGREGATION_KINDS)}.")
-            for field, rule in (("unitRef", "kcf.measure.unit"), ("calculationRef", "kcf.measure.calculation"), ("periodRef", "kcf.measure.period")):
+            for field, rule in (("unitRef", "kcf.measure.unit"), ("periodRef", "kcf.measure.period")):
                 if concept.get(field) and not self.reference_exists(concept[field]):
                     self.report("error", rule, name, f"Unresolved {field} reference {concept[field]!r}.")
         for unit in self.model.get("units", []):
@@ -927,8 +930,9 @@ class Analyzer:
                     if contained not in node_ids:
                         self.report("error", "kcf.process.lane", pid, f"Lane contains unknown node {contained!r}.")
 
-    CONCEPT_KIND_NAMES = {"ENTITY", "ACTOR", "WORK", "EVENT", "RESOURCE", "INTENT",
-                          "MEASURE", "TEMPORAL", "SPATIAL", "LOGIC", "MATH"}
+    # A lifecycle may govern any declared concept kind (the full metagrammar set),
+    # not just the ergonomic parse_concept kinds.
+    CONCEPT_KIND_NAMES = KINDS
 
     def check_lifecycle_refs(self):
         """LIFECYCLE dimension enrichments: governs-kind enum, state entry/exit actions,
@@ -998,6 +1002,12 @@ class Analyzer:
             for field in ("from", "to"):
                 if route.get(field) and not self.reference_exists(route[field]):
                     self.report("error", "kcf.spatial.route", rid, f"Unresolved route {field} {route[field]!r}.")
+            for waypoint in route.get("via", []):
+                if not self.reference_exists(waypoint):
+                    self.report("error", "kcf.spatial.route", rid, f"Unresolved route via {waypoint!r}.")
+            for constraint in route.get("constraints", []):
+                if not self.reference_exists(constraint):
+                    self.report("error", "kcf.spatial.route", rid, f"Unresolved route constraint {constraint!r}.")
 
     RESOURCE_KINDS = {"CONSUMABLE", "RENEWABLE", "CAPACITY", "TOOL", "FACILITY", "COMPUTE", "FINANCIAL"}
     CONSUMPTION_MODES = {"consume", "reserve", "borrow", "share"}

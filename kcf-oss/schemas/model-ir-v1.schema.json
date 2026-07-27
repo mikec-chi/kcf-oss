@@ -510,13 +510,13 @@
           "type": "string"
         },
         "severity": {
-          "type": "string"
+          "type": ["string", "number"]
         },
         "expectedness": {
           "type": "string"
         },
         "matchCondition": {
-          "type": "string"
+          "type": ["string", "number"]
         },
         "compositions": {
           "type": "array",
@@ -571,9 +571,6 @@
           }
         },
         "unitRef": {
-          "type": "string"
-        },
-        "calculationRef": {
           "type": "string"
         },
         "periodRef": {
@@ -646,9 +643,9 @@
         "startValue": {"type": "string"},
         "endValue": {"type": "string"},
         "durationValue": {"type": "object"},
-        "recurrence": {"type": "string"},
+        "recurrence": {"type": ["string", "number"]},
         "calendarRef": {"type": "string"},
-        "timezone": {"type": "string"},
+        "timezone": {"type": ["string", "number"]},
         "containedIn": {"type": "string"},
         "geometry": {"type": "object"},
         "adjacentTo": {"type": "array", "items": {"type": "string"}},

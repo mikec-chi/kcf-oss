@@ -386,7 +386,15 @@
   "propositions": [],
   "predicates": [],
   "math": [],
-  "allocations": [],
+  "allocations": [
+    {
+      "id": "CarrierTender",
+      "qualifiedName": "fulfillment.CarrierTender",
+      "resource": "fulfillment.TenderCapacity",
+      "consumer": "fulfillment.Carrier",
+      "quantity": 10
+    }
+  ],
   "organizations": [],
   "information": [
     {
@@ -472,53 +480,60 @@
       "endLine": 47,
       "endColumn": 4
     },
-    "fulfillment.TenderManifest": {
+    "fulfillment.CarrierTender": {
       "source": "tests/domains/event-driven-system.kcf",
       "line": 49,
       "column": 3,
-      "endLine": 59,
+      "endLine": 53,
+      "endColumn": 4
+    },
+    "fulfillment.TenderManifest": {
+      "source": "tests/domains/event-driven-system.kcf",
+      "line": 55,
+      "column": 3,
+      "endLine": 65,
       "endColumn": 4
     },
     "ShipmentLifecycle": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 61,
+      "line": 67,
       "column": 3,
-      "endLine": 78,
+      "endLine": 84,
       "endColumn": 4
     },
     "fulfillment.ShipmentClock": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 80,
+      "line": 86,
       "column": 3,
-      "endLine": 80,
+      "endLine": 86,
       "endColumn": 29
     },
     "carrier-participates": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 82,
+      "line": 88,
       "column": 3,
-      "endLine": 82,
+      "endLine": 88,
       "endColumn": 91
     },
     "tender-transforms-shipment": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 83,
+      "line": 89,
       "column": 3,
-      "endLine": 83,
+      "endLine": 89,
       "endColumn": 99
     },
     "fulfillment.TenderProcess": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 86,
+      "line": 92,
       "column": 3,
-      "endLine": 101,
+      "endLine": 107,
       "endColumn": 4
     },
     "Tender": {
       "source": "tests/domains/event-driven-system.kcf",
-      "line": 103,
+      "line": 109,
       "column": 3,
-      "endLine": 114,
+      "endLine": 120,
       "endColumn": 4
     }
   }

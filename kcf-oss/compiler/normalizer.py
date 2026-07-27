@@ -343,13 +343,12 @@ def normalize(model: Model) -> dict:
             for collection, items in declaration.values["collections"].items():
                 target.setdefault(collection, []).extend(items)
         elif declaration.kind == "authority":
-            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace)}
-            if declaration.values.get("mode"): item["mode"] = declaration.values["mode"]
+            # Carry everything the parser captured (incl. knowledge-metadata:
+            # evidence/confidence/classification/reviewed-by/recorded-at/...) then
+            # qualify the structural references.
+            item = {"id": declaration.name, "qualifiedName": qualify(declaration.name, namespace), **declaration.values}
             for key in ("subject", "target"):
-                if declaration.values.get(key): item[key] = qualify(declaration.values[key], namespace)
-            if declaration.values.get("when"): item["when"] = declaration.values["when"]
-            for key in ("validFrom", "validTo"):
-                if declaration.values.get(key): item[key] = declaration.values[key]
+                if item.get(key): item[key] = qualify(item[key], namespace)
             ir["authorities"].append(item)
             record_source(ir["sourceMap"], item["qualifiedName"], declaration)
         elif declaration.kind == "capability":

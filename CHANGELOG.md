@@ -160,6 +160,46 @@ First public release of the open standard. Cut this section to a dated version
   contributor/community docs, CI wired to the conformance gate, the `EXTENDING`
   guide, and the Grammar RFC process.
 
+- **Platform codegen tier + NetSuite pack.** Code generation gained a third
+  **`platform`** tier (`codegen/stack-target.schema.json`) for targets you
+  *customize* rather than *build* — a SaaS/low-code platform that already owns the
+  datastore, runtime, and UI, so there is **no OpenAPI/Swagger mandate**. The first
+  platform stack, **`netsuite-suitecloud-sdf`**, realizes the reference
+  `business-application` model as a SuiteCloud **SDF** Account Customization Project:
+  ENTITY→`customrecordtype`+fields (KCF types → NetSuite field types), lifecycle→a
+  `customlist` + SuiteFlow `workflow` **and** a `beforeSubmit` guard, the action
+  contract→a SuiteScript 2.1 **RESTlet** (optimistic concurrency via a `version`
+  field, `mutate`-set writes, conditional idempotency, best-effort bulk), the
+  data-transformation→a `savedsearch`, the CONSTRAINT→a User Event validation (+ a
+  Client Script mirror), the policy→a `role` + an in-script deny-overrides gate, and
+  the immutable EVENT→an append-only log record — packaged for
+  `suitecloud project:deploy`, with the same exhaustive coverage self-audit
+  (`dropped: []`). `system-prompt.md`, `CONSTRUCT_COVERAGE.md` (a NetSuite
+  construct-map), `generate-platform.md`, and the MCP `codegen_prompt`/`next_action`
+  generation plan all learned the platform tier; `list_stacks` surfaces it
+  automatically.
+
+- **Full-grammar codegen coverage — elicit → IR → codegen, gated.** Closed the gap
+  where the rich half of grammar-stack 1.11.0 was *authorable* but neither reliably
+  *elicited* nor *demonstrated* for code generation. (1) The MCP elicitation process
+  now probes the whole tail — a dedicated *Quantitative & analytical* step
+  (measure/intent/temporal+calendar/spatial+route/logic/math) and an *Information &
+  knowledge* step (information/resource+allocation/organization/reasoning/assertion/
+  identity-resolution/knowledge-query/capability/skill) plus richer mainstream prompts
+  (lifecycle entry/exit/guard, the full action-operation set + mutations, all rule
+  kinds). (2) `codegen/COOKBOOK.md` gives a worked backend/frontend/platform
+  realization of **every** tail construct; it rides along with `codegen_prompt`
+  automatically whenever a model uses one. (3) `CONSTRUCT_COVERAGE.md` gained the
+  previously-unmapped rows (`calendar`, `route`, `capability`/`skill`, standalone
+  `authority`) and an honest note that `plans` is the one IR construct not yet in the
+  authoring surface. (4) A new **cross-stage regression gate**
+  (`tools/check_codegen_coverage.py`, wired into `kcf check`) asserts every
+  concept-kind, profile block, and tail array is elicited **and** IR-reachable **and**
+  shown in an example — so "documented but never realizable" can't come back. (5) A new
+  `knowledge-ops` reference model exercises the constructs the other fixtures left out
+  (allocation, BPMN `process`, assertion, identity-resolution, knowledge-query); all
+  reference models are analyzer-valid and golden-locked.
+
 ### Notes
 - Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.

@@ -1,0 +1,61 @@
+// Exercises the constructs the other reference models leave out so codegen has a
+// worked input for each: a RESOURCE `allocation`, a WORK `process` (BPMN), an
+// `assertion` (with provenance), an `identity-resolution`, and a `knowledge-query`.
+kcf model KnowledgeOps profile organizational-knowledge {
+  namespace ko;
+
+  entity Account {
+    identity accountId: UUID;
+    required name: String;
+    optional email: String;
+  }
+
+  actor Analyst { kind PERSON; }
+  work TriageWork { }
+  work ResolveWork { }
+
+  resource AnalystPool { kind CAPACITY; capacity 10; }
+
+  allocation TriageAllocation {
+    resource AnalystPool;
+    consumer Analyst;
+    quantity 2;
+  }
+
+  process CaseHandling {
+    start Received triggered-by TriageWork;
+    step Triage: TriageWork;
+    gateway Decide: exclusive;
+    step Resolve: ResolveWork;
+    end Closed;
+    flow Received -> Triage;
+    flow Triage -> Decide;
+    flow Decide -> Resolve when "case is actionable" priority 1;
+    flow Resolve -> Closed;
+  }
+
+  assertion AccountBillingFact {
+    subject Account;
+    predicate "is-billed-to";
+    object-ref Account;
+    status asserted;
+    evidence Account;
+    recorded-at "2026-07-24T00:00:00Z";
+    valid-from "2026-01-01";
+  }
+
+  identity-resolution AccountDedup {
+    canonical Account;
+    alias "acct-legacy-id";
+    status active;
+  }
+
+  knowledge-query OpenAccounts {
+    select Account;
+    where "account has no closing date";
+    world open;
+    negation explicit;
+    inference declared;
+    temporal current;
+  }
+}
