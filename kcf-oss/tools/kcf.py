@@ -284,6 +284,15 @@ def main() -> int:
         return 0
     if args.command == "import-dbml":
         result = import_dbml(args.source.read_text(encoding="utf-8"), args.id, args.namespace, args.profile)
+        # Fail loudly rather than silently emitting an empty model: 0 tables almost always
+        # means the source isn't the supported dbml.org `Table { ... }` subset (e.g. a
+        # different DBML dialect). Domain-agnostic — only the table count is inspected.
+        if not result["model"]["concepts"]:
+            print(f"import-dbml: parsed {args.source} but found 0 tables - no model was "
+                  f"produced. This importer accepts the dbml.org subset (`Table name {{ ... }}` "
+                  f"with `[pk]`, `[ref: OP other.col]`); check the source is that dialect.",
+                  file=sys.stderr)
+            return 2
         write_json(result["model"], args.output)
         if args.source_doc:
             write_json(result["document"], args.source_doc)

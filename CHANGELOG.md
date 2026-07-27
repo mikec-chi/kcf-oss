@@ -22,6 +22,14 @@ bump and, for `ir`, a migration path (`tools/migrate_ir.py`).
 First public release of the open standard. Cut this section to a dated version
 (e.g. `## [1.3.0] - YYYY-MM-DD`) when publishing to GitHub/PyPI.
 
+### Fixed
+
+- **tooling** — `kcf import-dbml` no longer silently emits an empty model. When a
+  source parses to 0 tables (typically a non-dbml.org DBML dialect), it now warns to
+  stderr naming the accepted `Table { ... }` subset and exits non-zero without writing
+  output, instead of producing an empty model at exit 0. Domain-agnostic (inspects only
+  the table count). From field report `import-dbml-silent-noop-20260727-01`.
+
 ### Added
 - **Open standard** — `kcf-oss`: 29 ISO/IEC 14977 EBNF grammar modules (580
   productions) rooted in the `KCF` metagrammar, the ergonomic `AUTHORING` textual

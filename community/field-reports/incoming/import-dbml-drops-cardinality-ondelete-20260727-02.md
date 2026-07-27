@@ -39,3 +39,18 @@ workaround: >
   Hand-add `cardinality one to many` (and roles) to composition relationships after import.
 domainSanitized: true
 ```
+
+
+## Triage result — REJECTED (not a defect)
+
+The importer already captures `cardinality`, `source-role`, `target-role`, and
+`on-delete` — under `relationship.qualifiers`, which is the canonical IR location:
+`model-ir-v1` has **no** top-level `relationship.cardinality`; the relationship schema
+exposes `qualifiers`. The original observation read the top-level field and missed the
+nested `qualifiers` object. No code change.
+
+Verified: importing the dbml.org fixture yields
+`qualifiers: {cardinality: many-to-one, source-role, target-role, on-delete: cascade}`.
+
+Kept as a calibration example of a report corrected in triage by verifying against the
+IR schema — the loop is meant to reject inaccurate reports as well as accept valid ones.

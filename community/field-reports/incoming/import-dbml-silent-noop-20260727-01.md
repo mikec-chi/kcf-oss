@@ -40,3 +40,14 @@ workaround: >
   Manually verify the imported IR entity count after every import.
 domainSanitized: true
 ```
+
+
+## Triage result — ACCEPTED, fixed
+
+Reproduced. Fixed in this PR: the `kcf import-dbml` CLI handler (`tools/kcf.py`) and
+`tools/import_dbml.py` now print a stderr warning naming the accepted dbml.org subset
+and exit non-zero (2) **without** writing an empty model when 0 tables are parsed.
+Domain-agnostic — only the table count is inspected.
+
+Verified: `crm-module.dbml` (a non-dbml.org dialect) -> exit 2 + warning, no output
+file; the dbml.org fixture still imports 3 entities at exit 0.

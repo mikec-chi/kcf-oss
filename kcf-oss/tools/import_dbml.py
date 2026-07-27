@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 
 # DBML type token -> KCF type.
@@ -221,6 +222,16 @@ def main() -> int:
     parser.add_argument("--trace", type=Path)
     args = parser.parse_args()
     result = import_dbml(args.source.read_text(encoding="utf-8"), args.id, args.namespace, args.profile)
+    # Fail loudly instead of silently emitting an empty model: parsing a source that
+    # yields no tables almost always means the input is not the supported dbml.org
+    # `Table { ... }` subset (e.g. a different DBML dialect). Domain-agnostic — this
+    # only inspects the table count, nothing about the schema's meaning.
+    if not result["model"]["concepts"]:
+        print(f"import-dbml: parsed {args.source} but found 0 tables - no model was "
+              f"produced. This importer accepts the dbml.org subset (`Table name {{ ... }}` "
+              f"with `[pk]`, `[ref: OP other.col]`, etc.); check the source is that dialect.",
+              file=sys.stderr)
+        return 2
     for value, path, to_stdout in (
         (result["model"], args.output, True),
         (result["document"], args.source_doc, False),
