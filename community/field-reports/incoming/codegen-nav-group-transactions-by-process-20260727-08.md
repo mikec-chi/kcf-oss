@@ -57,3 +57,15 @@ workaround: >
   the existing flat list.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the codegen pack (docs/prompt only — no grammar/IR/analyzer change). `COOKBOOK.md`
+§F gains a **"Sub-group transactional entities by process"** convention, symmetric to the
+existing aggregate-structure nav rule: group each transactional entity by the `process`
+whose works `TRANSFORMATION`-transform it (process → works via `node.activity`/`triggered-by`
+→ transformation targets); an entity no work reaches inherits its `COMPOSITION` whole, else
+an `ASSOCIATION` target, else an "Other" group; a model with no `process` keeps the existing
+flat list (no regression). Cross-referenced from `CONSTRUCT_COVERAGE.md` (the `category`
+grouping note + the `experience` nav row) and `system-prompt.md` rule 5. Purely structural —
+derivable from the IR, no new field.

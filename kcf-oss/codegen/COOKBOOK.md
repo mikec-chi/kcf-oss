@@ -281,6 +281,18 @@ already declares — don't invent.
   the derivation and is reconciled against it by the analyzer. Example: `Order` composes
   `StatusChange`/`AuditEntry` with no other inbound refs → those render as tabs
   (Status history / Audit) on the Order page, not as nav items.
+- **Sub-group transactional entities by process.** Category and aggregate structure
+  *place* entities; `process` says *which business flow* a transactional record belongs
+  to — use it so the transactional menu isn't one flat list mixing unrelated flows.
+  Domain-agnostic derivation from the IR (no new tag): for each top-level `process`, its
+  works are the activities its nodes name (`node.activity` / `triggered-by`); the entities
+  in that group are the `TRANSFORMATION` *targets* of those works (relationships where
+  `rootKind == TRANSFORMATION` and `source ==` a work of the process); the group label is
+  the process. An entity no work transforms **inherits** its group — follow its
+  `COMPOSITION` whole (a line follows its order), else an `ASSOCIATION` target (an activity
+  follows its opportunity) — otherwise it falls to an **"Other"** group. A model with no
+  `process` keeps the existing flat transactional list (no regression). Render as
+  sub-groups under the transactional nav, symmetric to the aggregate-structure rule above.
 - **Master-detail from `cardinality`.** A `one-to-many`/`one-or-many` relationship →
   the parent detail page hosts a **related-list grid or tab** of children (labeled by
   `target-role`), with inline create/edit that calls the child's action endpoints; a
