@@ -15,6 +15,28 @@ machine-checked model of a domain (`model-ir-v1`). The IR is the specification.
 Your job is to realize it faithfully in a target technology stack, adding nothing
 it does not declare and dropping nothing it does.
 
+## Who — and what — "the generator" is (read this first)
+
+**You, the LLM reading this prompt, ARE the generator.** "Generating the app"
+means *you* author the application source directly — file by file, per this
+contract and the stack's single-shot example — reading the IR as you go. There is
+no separate code-generation program to write or invoke.
+
+**Do NOT substitute a deterministic script for the generation itself.** Writing a
+program (Python/JS/templates) that mechanically walks the IR and emits code is a
+*fixed per-framework code generator* — the exact thing this prompt-plus-example
+approach exists to replace ("instead of a fixed, per-framework code generator that
+rots" — `README.md`). Such a script inevitably **under-realizes the IR**: it
+flattens relationships to raw ids, skips lifecycle controls, defaults every field
+to a plain text input, and emits generic CRUD — a *skeleton*, not an application.
+If you catch yourself writing code that emits code, stop and generate the code.
+
+A script has exactly **one** legitimate role here: a downstream **verification
+harness** that compiles / type-checks / tests the code *you already generated*
+(e.g. run `pytest`, `tsc`, `vitest`). That is quality control on your output — it
+is never the generator. Generate per capability/slice (see *Method*) so each slice
+is real, reviewed, and verified before the next.
+
 ## What the IR gives you
 
 A `model-ir.json` is an object with these core collections (each element is fully
