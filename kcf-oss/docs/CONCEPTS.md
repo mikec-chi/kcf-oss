@@ -78,6 +78,14 @@ concept be two things at once. A few consequences worth internalizing:
   advisory `metadata.category` (ground truth from the source, a codegen driver), and
   the analyzer **reconciles** it against the shape — but promoting it to a first-class
   field would re-import the denormalized dual-source-of-truth KCF avoids.
+- **Aggregate root vs part** (DDD) is likewise *emergent*, not a primitive. `COMPOSITION`
+  already encodes whole-part ownership, so an entity's containment role is **derived**: a
+  *pure part* (→ a subtab on its parent's detail) is a `COMPOSITION` target with no
+  children and no independent inbound reference; everything else is an aggregate *root*
+  (→ top-level nav). An advisory `metadata.containment` (`root`/`part`) may override the
+  derivation for an ambiguous case and is analyzer-reconciled against the structure —
+  the same pattern as `category`. Model the ownership with `COMPOSITION`; don't reach for
+  a flat tag first.
 
 ## The loop you'll actually run
 

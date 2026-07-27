@@ -1,0 +1,345 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ContainmentDemo",
+  "module": "KCF",
+  "namespace": "shop",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Order",
+      "qualifiedName": "shop.Order",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "total",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "StatusChange",
+      "qualifiedName": "shop.StatusChange",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "changeId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "at",
+          "type": "DateTime",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "containment": "root"
+      }
+    },
+    {
+      "id": "AuditEntry",
+      "qualifiedName": "shop.AuditEntry",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "entryId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "message",
+          "type": "String",
+          "required": true
+        }
+      ],
+      "metadata": {
+        "containment": "part"
+      }
+    },
+    {
+      "id": "Clerk",
+      "qualifiedName": "shop.Clerk",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "FulfillWork",
+      "qualifiedName": "shop.FulfillWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "OrderRule",
+      "qualifiedName": "shop.OrderRule",
+      "kind": "RULE",
+      "references": [
+        "shop.Order",
+        "shop.FulfillWork",
+        "shop.Clerk"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "OrderPolicy",
+      "qualifiedName": "shop.OrderPolicy",
+      "kind": "RULE",
+      "references": [
+        "shop.Clerk",
+        "shop.OrderRule"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "order-status",
+      "rootKind": "COMPOSITION",
+      "source": "shop.Order",
+      "target": "shop.StatusChange",
+      "strength": 1.0,
+      "qualifiers": {
+        "cardinality": "one-to-many",
+        "target-role": "status history",
+        "on-delete": "cascade"
+      },
+      "definition": "order-status"
+    },
+    {
+      "id": "order-audit",
+      "rootKind": "COMPOSITION",
+      "source": "shop.Order",
+      "target": "shop.AuditEntry",
+      "strength": 1.0,
+      "qualifiers": {
+        "cardinality": "one-to-many",
+        "target-role": "audit",
+        "on-delete": "cascade"
+      },
+      "definition": "order-audit"
+    },
+    {
+      "id": "clerk-fulfills",
+      "rootKind": "PARTICIPATION",
+      "source": "shop.Clerk",
+      "target": "shop.FulfillWork",
+      "strength": 1.0,
+      "definition": "clerk-fulfills"
+    }
+  ],
+  "lifecycles": [],
+  "actions": [
+    {
+      "id": "CreateOrder",
+      "effect": "command",
+      "mutations": [],
+      "operation": "create",
+      "scope": "record",
+      "target": "shop.Order",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "shop.OrderPolicy"
+    }
+  ],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [
+    {
+      "id": "OrderRule",
+      "appliesTo": [
+        "shop.Order"
+      ],
+      "effects": [
+        "shop.FulfillWork"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "total is non-negative",
+      "authority": "shop.Clerk",
+      "qualifiedName": "shop.OrderRule"
+    }
+  ],
+  "policies": [
+    {
+      "id": "OrderPolicy",
+      "rules": [
+        "shop.OrderRule"
+      ],
+      "evidence": [],
+      "authority": "shop.Clerk",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "shop.OrderPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "shop.Order": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 10,
+      "column": 3,
+      "endLine": 13,
+      "endColumn": 4
+    },
+    "shop.StatusChange": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 19,
+      "endColumn": 4
+    },
+    "shop.AuditEntry": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 21,
+      "column": 3,
+      "endLine": 25,
+      "endColumn": 4
+    },
+    "shop.Clerk": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 27,
+      "column": 3,
+      "endLine": 27,
+      "endColumn": 18
+    },
+    "shop.FulfillWork": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 28,
+      "endColumn": 23
+    },
+    "order-status": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 30,
+      "column": 3,
+      "endLine": 31,
+      "endColumn": 76
+    },
+    "order-audit": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 32,
+      "column": 3,
+      "endLine": 33,
+      "endColumn": 67
+    },
+    "clerk-fulfills": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 34,
+      "column": 3,
+      "endLine": 34,
+      "endColumn": 80
+    },
+    "CreateOrder": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 36,
+      "column": 3,
+      "endLine": 40,
+      "endColumn": 4
+    },
+    "shop.OrderRule": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 41,
+      "column": 3,
+      "endLine": 41,
+      "endColumn": 128
+    },
+    "shop.OrderPolicy": {
+      "source": "tests/domains/entity-containment.kcf",
+      "line": 42,
+      "column": 3,
+      "endLine": 42,
+      "endColumn": 91
+    }
+  }
+}

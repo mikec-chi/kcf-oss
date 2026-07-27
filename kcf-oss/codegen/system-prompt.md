@@ -193,6 +193,10 @@ aren't implied (statuses, business rules, extra fields).
    `mutability "read-only"` → no write path; `metadata.category`
    (master/transactional/reference/config) → the UI/topology role (see
    `CONSTRUCT_COVERAGE.md` → *Entity metadata*) — it's guidance, not new meaning.
+   Derive **navigation from aggregate structure**: top-level nav = aggregate roots;
+   a **pure part** (a `COMPOSITION` target with no children and no independent inbound
+   reference) is a **subtab on its parent's detail**, not a nav entry (`metadata.containment`
+   `root`/`part` overrides the derivation). See COOKBOOK §F.
 6. **Keep the four layers distinct.** Grammar meaning → domain assertions →
    runtime instances → generated artifacts. You are producing the fourth layer;
    do not fold runtime concerns back into the model.

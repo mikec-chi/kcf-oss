@@ -364,6 +364,17 @@ def main():
     check(len(cat_shape) == 1 and cat_shape[0]["subject"] == "crm.Lead",
           f"category-shape reconciliation regressed: {cat_shape}")
 
+    # Containment (DDD aggregate root/part) is derived from COMPOSITION and reconciled
+    # against an advisory tag: the mis-tagged pure part is flagged, roots are not.
+    con = Analyzer(compile_file(DOMAINS_ROOT / "entity-containment.kcf"))
+    con_diags = con.run()
+    con_shape = [d for d in con_diags if d["rule_id"] == "kcf.entity.containment-shape"]
+    pure_parts, _ = con.derive_containment()
+    check(len(con_shape) == 1 and con_shape[0]["subject"] == "shop.StatusChange",
+          f"containment-shape reconciliation regressed: {con_shape}")
+    check(pure_parts == {"shop.StatusChange", "shop.AuditEntry"},
+          f"containment derivation regressed: {sorted(pure_parts)}")
+
     legacy = dict(valid)
     legacy.pop("$schema")
     legacy.pop("irVersion")

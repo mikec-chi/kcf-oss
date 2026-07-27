@@ -267,6 +267,20 @@ The stack `EXAMPLE.md` shows `UpdateCustomer` in depth; these are the frontend p
 that make generated UI real rather than a CRUD skeleton. Realize them from what the IR
 already declares — don't invent.
 
+- **Navigation from aggregate structure (roots vs pure parts).** Don't put every entity
+  in the top-level nav. Derive each entity's role from `COMPOSITION` edges (KCF's
+  whole-part/ownership relationship), a **domain-agnostic** rule:
+  - a **pure part** = a `COMPOSITION` *target* that is **not** itself a `COMPOSITION`
+    *source* (has no children) **and** has **no independent (non-composition) inbound
+    reference**. Its parent is the `COMPOSITION` source.
+  - every other entity is an **aggregate root**.
+  Then: **top-level nav = aggregate roots**; **pure parts = subtabs** on their parent's
+  detail view (never their own nav entry). A composed entity that *also* has its own
+  children, or is referenced independently, stays a root (e.g. an order line's parent
+  order is still top-level). An advisory `containment` tag (`root`/`part`) may override
+  the derivation and is reconciled against it by the analyzer. Example: `Order` composes
+  `StatusChange`/`AuditEntry` with no other inbound refs → those render as tabs
+  (Status history / Audit) on the Order page, not as nav items.
 - **Master-detail from `cardinality`.** A `one-to-many`/`one-or-many` relationship →
   the parent detail page hosts a **related-list grid or tab** of children (labeled by
   `target-role`), with inline create/edit that calls the child's action endpoints; a

@@ -38,9 +38,13 @@ ENTITY_CATEGORIES = {"master", "transactional", "reference", "config"}
 # captured as free metadata, a real footgun (a mistyped/misversioned field only errors
 # once a later grammar types that slot). See check_concept_metadata (advisory warning).
 KNOWN_CONCEPT_METADATA = {
-    "category", "mutability", "readOnly", "capacity", "policy",
+    "category", "mutability", "readOnly", "capacity", "policy", "containment",
     "informationKind", "organizationKind", "reasoningKind", "ruleKind",
 }
+# Advisory DDD-aggregate role: `root` (aggregate root -> top-level nav) vs `part` (pure
+# part -> subtab on its parent's detail). Derivable from COMPOSITION edges; reconciled
+# like `category`. Not a primitive.
+CONTAINMENT_ROLES = {"root", "part"}
 # Recognized relationship qualifiers (ride the relationship-decl `{ identifier scalar }`
 # catch-all). cardinality + roles + on-delete drive UI generation (grid/tab vs panel,
 # tab label, cascade/restrict). Advisory-checked, like concept metadata.
@@ -1050,6 +1054,67 @@ class Analyzer:
                 if allocation.get(field) and not self.reference_exists(allocation[field]):
                     self.report("error", "kcf.allocation.reference", aid, f"Unresolved {field} {allocation[field]!r}.")
 
+    def derive_containment(self):
+        """Return (pure_parts, parent_of) derived purely from COMPOSITION edges — no
+        domain knowledge. A **pure part** (DDD aggregate part → subtab-only UI) is a
+        COMPOSITION target that is (a) not itself a COMPOSITION parent and (b) has no
+        independent (non-composition) inbound reference. Everything else is an aggregate
+        **root** (top-level nav). `parent_of[e]` is the COMPOSITION source that owns a
+        pure part `e`."""
+        rels = self.model.get("relationships", [])
+        entities = {c.get("qualifiedName") or c.get("id")
+                    for c in self.model.get("concepts", []) if c.get("kind") == "ENTITY"}
+        comp_targets = {r.get("target") for r in rels if r.get("rootKind") == "COMPOSITION"}
+        comp_sources = {r.get("source") for r in rels if r.get("rootKind") == "COMPOSITION"}
+        indep_inbound: dict = {}
+        for rel in rels:
+            if rel.get("rootKind") != "COMPOSITION":
+                indep_inbound[rel.get("target")] = indep_inbound.get(rel.get("target"), 0) + 1
+        for concept in self.model.get("concepts", []):
+            for ref in concept.get("references", []):
+                target = ref.get("target") if isinstance(ref, dict) else ref
+                indep_inbound[target] = indep_inbound.get(target, 0) + 1
+        pure_parts, parent_of = set(), {}
+        for entity in entities:
+            if (entity in comp_targets and entity not in comp_sources
+                    and indep_inbound.get(entity, 0) == 0):
+                pure_parts.add(entity)
+                parents = [r.get("source") for r in rels
+                           if r.get("rootKind") == "COMPOSITION" and r.get("target") == entity]
+                if parents:
+                    parent_of[entity] = parents[0]
+        return pure_parts, parent_of
+
+    def check_containment_consistency(self):
+        """Advisory — warnings only. An entity's containment role (aggregate `root` →
+        top-level nav vs pure `part` → a subtab on its parent) is derivable from
+        COMPOSITION structure; reconcile an advisory `containment` tag against it."""
+        pure_parts, _ = self.derive_containment()
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "ENTITY":
+                continue
+            name = concept.get("qualifiedName") or concept.get("id", "<entity>")
+            stated = (concept.get("metadata") or {}).get("containment")
+            if stated is None:
+                continue
+            if stated not in CONTAINMENT_ROLES:
+                self.report("warning", "kcf.entity.containment-vocab", name,
+                            f"Unknown containment {stated!r}; expected 'root' or 'part'.")
+                continue
+            derived_part = name in pure_parts
+            if stated == "part" and not derived_part:
+                self.report(
+                    "warning", "kcf.entity.containment-shape", name,
+                    "Marked containment 'part' but the structure is not a pure part "
+                    "(it is a composition parent, is independently referenced, or is not "
+                    "composed) — likely an aggregate 'root'.")
+            elif stated == "root" and derived_part:
+                self.report(
+                    "warning", "kcf.entity.containment-shape", name,
+                    "Marked containment 'root' but the structure is a pure part (a "
+                    "COMPOSITION target with no children and no independent inbound "
+                    "reference) — likely a 'part' (a subtab on its parent).")
+
     def check_relationship_qualifiers(self):
         """Advisory — warnings only. Relationship qualifiers (cardinality / source-role /
         target-role / on-delete) ride the relationship-decl catch-all and drive UI
@@ -1178,6 +1243,7 @@ class Analyzer:
         self.check_organizational_knowledge()
         self.check_events_resources_plans()
         self.check_category_consistency()
+        self.check_containment_consistency()
         self.check_concept_metadata()
         self.check_relationship_qualifiers()
         self.check_profile_patterns()

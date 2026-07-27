@@ -1,0 +1,43 @@
+// Exercises the derived DDD containment role (aggregate root vs pure part) and the
+// analyzer's structural reconciliation (check_containment_consistency). Order composes
+// two pure parts (StatusChange, AuditEntry) — COMPOSITION targets with no children and
+// no independent inbound reference, so they derive as 'part' (subtab UI). StatusChange
+// is deliberately MIS-tagged `containment root`, which the analyzer flags (warning, not
+// error). Order stays an aggregate root (it has children). The model stays valid.
+kcf model ContainmentDemo profile business-application {
+  namespace shop;
+
+  entity Order {
+    identity orderId: UUID;
+    required total: Decimal;
+  }
+
+  entity StatusChange {
+    identity changeId: UUID;
+    required at: DateTime;
+    containment root;            // MIS-tagged: structurally a pure part of Order
+  }
+
+  entity AuditEntry {
+    identity entryId: UUID;
+    required message: String;
+    containment part;            // correct: derives as a pure part
+  }
+
+  actor Clerk { }
+  work FulfillWork { }
+
+  relationship order-status: COMPOSITION Order -> StatusChange strength 1.0
+    cardinality one-to-many target-role "status history" on-delete cascade;
+  relationship order-audit: COMPOSITION Order -> AuditEntry strength 1.0
+    cardinality one-to-many target-role "audit" on-delete cascade;
+  relationship clerk-fulfills: PARTICIPATION Clerk -> FulfillWork strength 1.0;
+
+  command CreateOrder {
+    operation create; scope record; target Order;
+    input one; output one; idempotency conditional; atomicity atomic;
+    authorization shop.OrderPolicy;
+  }
+  rule OrderRule { kind CONSTRAINT; condition "total is non-negative"; effect FulfillWork; applies-to Order; authority Clerk; }
+  policy OrderPolicy { authority Clerk; rule OrderRule; default-conflict deny-overrides; }
+}

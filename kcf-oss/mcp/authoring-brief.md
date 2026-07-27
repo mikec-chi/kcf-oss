@@ -171,4 +171,10 @@ as plain `command`/`lifecycle` constructs and need no provenance tag.
   shape signal. Generators use `category` for UI (master → reference pickers +
   stewardship/admin; transactional → high-volume list + workflow; config →
   settings; reference → static).
+- **Containment role** (optional, advisory; usually derived): `containment root | part;`
+  marks an entity as a DDD aggregate **root** (top-level nav) or a pure **part** (a
+  subtab on its parent's detail). It's normally **derived from `COMPOSITION` edges** — a
+  pure part is a composition target with no children and no independent inbound reference
+  — so tag it only to settle an ambiguous case; the analyzer reconciles the tag against
+  the structure. Model whole-part ownership with `COMPOSITION` and let containment follow.
 - Don't invent fields/statuses the domain didn't state; ask the user if unsure.

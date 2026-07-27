@@ -258,6 +258,21 @@ First public release of the open standard. Cut this section to a dated version
     (which goes stale). A brand-neutral **`design-system-default.md`** is applied when a
     model declares no `design` block, so every generated app has a coherent baseline.
 
+- **Aggregate structure → navigation (roots vs pure parts).** Code generation now
+  derives UI navigation from the aggregate structure the `COMPOSITION` graph already
+  encodes, so parts of an aggregate stop showing up as top-level nav. A **pure part** (a
+  `COMPOSITION` target that is not itself a composition parent and has no independent
+  inbound reference) renders as a **subtab on its parent's detail** (parent = the
+  `COMPOSITION` source); every other entity is an **aggregate root** (top-level nav). The
+  rule is fully **domain-agnostic** (pure graph structure) and documented in
+  `COOKBOOK.md` §F, `CONSTRUCT_COVERAGE.md`, and the system prompt. An optional advisory
+  `metadata.containment` (`root`/`part`) overrides the derivation for ambiguous cases and
+  is analyzer-reconciled against the structure (`kcf.entity.containment-shape` /
+  `containment-vocab`, **warnings only**) — the same reconciliation pattern as `category`.
+  New `entity-containment` reference domain + a conformance assertion lock the derivation
+  and the reconciliation; `CONCEPTS.md` documents the ontology decision (root/part is
+  emergent from `COMPOSITION`, not a primitive).
+
 ### Notes
 - Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.
