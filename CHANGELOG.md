@@ -273,6 +273,19 @@ First public release of the open standard. Cut this section to a dated version
   and the reconciliation; `CONCEPTS.md` documents the ontology decision (root/part is
   emergent from `COMPOSITION`, not a primitive).
 
+- **Field-report feedback loop (`community/field-reports/`).** A lightweight, advisory
+  "I noticed something" front door so downstream humans and LLM agents feed toolchain
+  observations (friction, bugs, gaps, doc drift, over-modeling, source-fidelity loss,
+  skeleton generations) back for triage. Each report is a fenced, machine-parseable
+  `kcf-field-report:v1` YAML envelope (`phase`/`area`/`severity`/`evidence`/…) requiring a
+  minimal reproducer and `domainSanitized: true` (toolchain feedback, never domain data).
+  A capture directive is embedded in `mcp/authoring-brief.md`, `codegen/system-prompt.md`,
+  and a new repo-root `CLAUDE.md` — advisory, never blocks modeling or generation; agents
+  write to `community/field-reports/incoming/` and emit the envelope, never fabricating a
+  submission. Wired into `CONTRIBUTING.md` and a `field-report` issue template; reports
+  that would touch the grammar/IR/analyzer contract route into the existing Grammar RFC
+  (`docs/EXTENDING.md`) + `VERSIONING.md` governance. Nothing here changes the contract.
+
 ### Notes
 - Advanced pattern authoring is a proprietary capability and is **not**
   part of this open-source stack.

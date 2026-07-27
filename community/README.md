@@ -18,6 +18,7 @@ for the ground rules and PR process.
 | 💡 **[Techniques](techniques/)** | Write-ups of *how* to elicit and generate well — patterns, playbooks, lessons | `community/techniques/` |
 | 🔤 **[Grammars](grammars/)** | New grammar modules or revisions (via RFC), and experimental grammar profiles | `community/grammars/` |
 | 🏆 **[Showcase](showcase/)** | Apps you built with KCF — "Built with KCF" gallery | `community/showcase/` |
+| 📝 **[Field reports](field-reports/)** | A sanitized, reproducible observation from *using* KCF — friction, bug, gap, doc drift | `community/field-reports/` |
 
 And these live in the core tree (contribution paths documented in
 [CONTRIBUTING](../CONTRIBUTING.md)):

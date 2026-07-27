@@ -18,6 +18,17 @@ analyzer, tooling).
 
 ---
 
+## Noticed something? File a field report (the lightweight front door)
+
+If using KCF surfaced friction, a bug, a gap, or doc drift — but you're not ready to
+open a PR — file a **[field report](community/field-reports/README.md)**: one sanitized,
+reproducible `kcf-field-report:v1` envelope, submitted as a `field-report`-labeled issue
+or a PR under `community/field-reports/incoming/`. It's advisory and never blocks your
+work. Reports that would touch the **grammar / IR / analyzer contract** get routed into a
+**[Grammar RFC](docs/EXTENDING.md)** + a **[VERSIONING](docs/VERSIONING.md)** decision.
+
+---
+
 ## Track A — build on KCF (the `community/` area)
 
 No core changes, no gate to pass beyond the area's own check. Start at
@@ -31,6 +42,7 @@ short guide.
 | 💡 **Techniques** — how-to write-ups for elicitation & codegen | [`community/techniques/`](community/techniques/) | follow the template |
 | 🏆 **Showcase** — apps you built with KCF | [`community/showcase/`](community/showcase/) | follow the template |
 | 🔤 **Experimental grammars** — grammar ideas, pre-core | [`community/grammars/experimental/`](community/grammars/experimental/) | self-describing |
+| 📝 **Field reports** — a sanitized observation from using KCF | [`community/field-reports/`](community/field-reports/) | one `kcf-field-report:v1` envelope + a minimal reproducer |
 
 These are curated for quality, not just collected — real, self-describing, honest,
 and reusable. A model of a domain you know, or a technique that worked for you, is a

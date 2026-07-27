@@ -178,3 +178,20 @@ as plain `command`/`lifecycle` constructs and need no provenance tag.
   — so tag it only to settle an ambiguous case; the analyzer reconciles the tag against
   the structure. Model whole-part ownership with `COMPOSITION` and let containment follow.
 - Don't invent fields/statuses the domain didn't state; ask the user if unsure.
+
+## Field reports — feed observations back to kcf-oss
+
+As you build models with kcf-oss, keep a running list of anything the toolchain got wrong
+or could do better — doc↔parser drift, a compiler bump that broke a valid `.kcf`, a
+coverage obligation that pushed you to over-model, a source attribute/relationship you had
+to drop, a missing authoring surface, or a rough MCP/CLI edge. **This is advisory — it must
+never block or delay the modeling work.**
+
+On completion, package each observation as a sanitized `kcf-field-report:v1` envelope and
+submit it per `community/field-reports/README.md`: **write** one report per file to
+`community/field-reports/incoming/<id>.md`; if you have repo/network access, open a
+`field-report`-labeled issue or a PR adding it and return the URL; otherwise **print the
+raw envelope(s) with the exact submit instructions** and hand off. **Never claim a
+submission you did not make.** Every report needs a minimal reproducer (`commands` +
+`snippet`) and `domainSanitized: true` — reports are about the toolchain, never anyone's
+domain data.

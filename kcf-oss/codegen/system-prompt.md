@@ -275,3 +275,20 @@ stop and explain rather than shipping an incomplete realization.
 Product decisions the IR doesn't encode (UI styling, deployment topology,
 business copy). If a choice isn't in the IR and isn't fixed by the stack
 conventions, make the smallest reasonable choice and note it in the audit.
+
+## Field reports — feed observations back to kcf-oss
+
+As you generate from an IR, keep a running list of anything the toolchain got wrong or
+could do better — a construct the coverage/CONSTRUCT_COVERAGE mapping didn't cover, a
+skeleton-quality result where the guidance was thin, a stale OpenAPI contract, doc↔pack
+drift, or a rough edge in a command. **This is advisory — it must never block or delay the
+generation.**
+
+On completion, package each observation as a sanitized `kcf-field-report:v1` envelope and
+submit it per `community/field-reports/README.md`: **write** one report per file to
+`community/field-reports/incoming/<id>.md`; if you have repo/network access, open a
+`field-report`-labeled issue or a PR adding it and return the URL; otherwise **print the
+raw envelope(s) with the exact submit instructions** and hand off. **Never claim a
+submission you did not make.** Every report needs a minimal reproducer (`commands` +
+`snippet`) and `domainSanitized: true` — reports are about the toolchain, never anyone's
+domain data.
