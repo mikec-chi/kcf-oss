@@ -26,12 +26,14 @@
             "at-least-one-transformation",
             "action-effect-has-fields",
             "at-least-one-concept-kind",
-            "at-least-one-collection"
+            "at-least-one-collection",
+            "concept-kind-targeted-by"
           ]
         },
         "level": {"enum": ["required", "recommended", "info"]},
         "profiles": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
         "conceptKind": {"type": "string"},
+        "rootKind": {"type": "string"},
         "effects": {"type": "array", "items": {"type": "string"}},
         "fields": {"type": "array", "items": {"type": "string"}},
         "exemptTraits": {"type": "array", "items": {"type": "string"}, "description": "Concept traits that exempt a concept from write obligations (CRUD/set/transform); an exempt concept needs only read/query."},

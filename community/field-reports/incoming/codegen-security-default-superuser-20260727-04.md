@@ -42,3 +42,11 @@ workaround: >
   401 on a blank/absent principal.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the codegen pack: `kcf-oss/codegen/system-prompt.md` now carries
+non-negotiable **rule 8 (fail closed)** — an absent or blank principal defaults to an
+**unprivileged** identity (or 401), **never** to the policy authority / superuser.
+"No identity" grants the minimum privilege, not the maximum. Applies to every stack
+(the durable contract read on every generation).

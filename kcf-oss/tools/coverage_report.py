@@ -264,8 +264,31 @@ def ev_at_least_one_transformation(model: dict, obligation: dict) -> list[dict]:
                 "model declares no data-transformation (a collectionTransform or a transform-effect action)")]
 
 
+def ev_concept_kind_targeted_by(model: dict, obligation: dict) -> list[dict]:
+    """Advisory reachability: every concept of ``conceptKind`` must be the target of
+    at least one relationship of ``rootKind`` — e.g. an EVENT must have a CAUSATION
+    producer, or nothing can ever emit it. Domain-agnostic (reads only kinds)."""
+    kind = obligation["conceptKind"]
+    root_kind = obligation.get("rootKind")
+    targeted = {
+        relationship.get("target")
+        for relationship in model.get("relationships", [])
+        if not root_kind or relationship.get("rootKind") == root_kind
+    }
+    gaps = []
+    for concept in model.get("concepts", []):
+        if concept.get("kind") != kind:
+            continue
+        subject = _identity(concept)
+        if subject not in targeted:
+            qualifier = f" {root_kind}" if root_kind else ""
+            gaps.append(gap(obligation, subject, f"{kind} {subject} is not the target of any{qualifier} relationship (no producer)"))
+    return gaps
+
+
 EVALUATORS = {
     "entity-has-identity": ev_entity_has_identity,
+    "concept-kind-targeted-by": ev_concept_kind_targeted_by,
     "concept-kind-has-crud": ev_concept_kind_has_crud,
     "concept-kind-has-set-operation": ev_concept_kind_has_set_operation,
     "at-least-one-transformation": ev_at_least_one_transformation,

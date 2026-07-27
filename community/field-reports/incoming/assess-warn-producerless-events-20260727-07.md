@@ -36,3 +36,12 @@ workaround: >
   Audit the IR for EVENTs absent from the CAUSATION target set after authoring.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Fixed in the analyzer/coverage layer: added the advisory coverage obligation
+`coverage.event.producer` (level **recommended**, non-blocking) backed by a new
+domain-agnostic evaluator `concept-kind-targeted-by`. An EVENT with no `CAUSATION`
+producer now surfaces in `kcf assess` / `coverage-report` as a recommendation
+("EVENT <x> ... no producer"), never an error — `ready`/`required` are unaffected.
+Verified against the transportation fixture (`transport.TenderSent` flagged).

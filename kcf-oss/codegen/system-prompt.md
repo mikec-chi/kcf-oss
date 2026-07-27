@@ -229,6 +229,30 @@ aren't implied (statuses, business rules, extra fields).
    `.kcf` → `compile --validate` → `assess`), then generate. If code was vibe-coded
    directly since the model was last synced, **reconcile the model to match before
    building further**. See `MODEL_SYNC.md`.
+8. **Fail closed on authorization.** Default an absent or blank principal to an
+   **unprivileged** identity (or reject with 401) — **never** to the policy
+   authority / superuser. Absence of identity must grant the *minimum* privilege,
+   not the maximum; the privileged role requires an explicit, verified identity.
+   ("No identity" must not mean "highest privilege.")
+9. **Reconcile a status attribute with its lifecycle.** When an entity has both a
+   `LIFECYCLE` and a free attribute whose values are that lifecycle's states (a
+   status-like field over the same concept), do **not** emit two divergent fields.
+   Drive the attribute from the single guarded `state` (or validate/sync it against
+   the lifecycle on every write), keep it **out of the Create schema** (the initial
+   state is the lifecycle's), and point measures/queries at the **guarded** state —
+   never the unguarded free string that create can set past the transition rules.
+10. **Realize `COMPOSITION` integrity.** A composition target is existentially
+    dependent on its whole: make the child's parent FK **NOT NULL and required in
+    the Create schema** (a part cannot exist without its parent), and realize the
+    relationship's `on-delete` from `relationship.qualifiers` (`cascade` → delete
+    children in the same transaction; `restrict` → block the delete; `set-null` →
+    null the FK). Never emit a bare nullable FK that lets parts orphan or outlive
+    their whole.
+11. **Emit every event a work causes.** A command that realizes a `WORK` must emit
+    **all** events that are `CAUSATION` targets of that work — iterate
+    `relationships` where `rootKind == CAUSATION` and `source ==` the work, not a
+    single "primary" event. A *do-X-and-notify* work with two event targets emits
+    both; downstream consumers of the secondary events must not be silently dropped.
 
 ## Prevent drift: refer to the model as you code
 
