@@ -65,7 +65,9 @@ both live in `concept.metadata`):
   the entity's shape (a `master` tag on a TRANSFORMATION target that emits events is
   flagged) — so treat it as guidance, and if it is absent, infer the grouping from the
   shape rather than inventing a tag. A frontend may group navigation by `category`
-  (Master data / Transactions / Configuration) instead of a flat entity list.
+  (Master data / Transactions / Configuration) instead of a flat entity list, and
+  **sub-group the Transactions by `process`** — the business flow whose works
+  `TRANSFORMATION`-transform each record (see COOKBOOK §F).
 
 ### Rich example — an event that drives a lifecycle
 
@@ -129,7 +131,7 @@ This is the pattern for every now-authorable field: the IR value is declared mea
 | `security` | ✅ authn/authz config, controls, secrets policy | ↔ enforce login; render permitted actions only |
 | `lineage` | ✅ provenance/audit columns, data-lineage records | ✅ provenance/history views |
 | `architecture` | ✅ deployment/module structure (informational) | ⬚ n/a |
-| `experience` | ⬚ **out-of-tier** (frontend owns UX) | ✅ **primary driver**: screens, flows, navigation. **Nav = aggregate roots only**; pure parts (COMPOSITION targets with no children and no independent inbound ref) render as **subtabs** on their parent's detail (parent = the COMPOSITION source), not as their own nav entry — see COOKBOOK §F. |
+| `experience` | ⬚ **out-of-tier** (frontend owns UX) | ✅ **primary driver**: screens, flows, navigation. **Nav = aggregate roots only**; pure parts (COMPOSITION targets with no children and no independent inbound ref) render as **subtabs** on their parent's detail (parent = the COMPOSITION source), not as their own nav entry; **transactional entities are sub-grouped by the `process`** whose works TRANSFORMATION-transform them — see COOKBOOK §F. |
 | `design` | ⬚ **out-of-tier** | ✅ theming / design tokens / component styling. **No `design` block declared → apply `design-system-default.md`** (brand-neutral, accessible baseline); declared tokens override it. |
 | `emitters`, `runtimeRequirements`, `runtimeBindings` | ✅ runtime wiring / deployment metadata | ⬚ n/a |
 | pattern arrays, `modules`, `profiles`, `moduleVersions` | ✅ inform which constructs must exist (proof context) | ✅ same (informs which views/flows must exist) |
