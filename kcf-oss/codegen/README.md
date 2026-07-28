@@ -1,15 +1,19 @@
-# KCF code generation — generate an app from the IR, with any LLM, for any stack
+# KCF code generation — generate an app from the IR, with the LLM you choose, for your stack
 
-KCF stops at the **semantic IR**: a complete, machine-checked model of your
-domain (`kcf assess` said `ready: true`). This pack turns that IR into working
-code using an LLM you already have — for whatever tech stack you choose — instead
-of a fixed, per-framework code generator that rots.
+KCF stops at the **semantic IR**: a validated, coverage-assessed, traceable model of
+your domain (`kcf assess` said `ready: true` — sufficient coverage for handoff, with
+`domainComplete: "not-proven"`). This pack turns that IR into working code using an LLM
+you already have — for whatever tech stack you choose — instead of a fixed,
+per-framework code generator that rots.
 
 **Why prompts + examples?**
 The IR is the durable contract, and **OSS stops there**. A tech-stack-agnostic
-**system prompt** plus a **single-shot example** per stack lets any capable LLM
-target any stack and keep up with framework changes, while the IR guarantees the
-model it builds from is complete and lossless.
+**system prompt** plus a **single-shot example** per stack lets a capable LLM target
+the stacks the pack ships (and be extended to others) and keep up with framework
+changes. The IR is the shared specification; the generation's fidelity to it is not
+assumed but **checked** — each generation emits a realization manifest you verify with
+`kcf verify-realization` (see below), which reports an evidence level rather than a
+bare promise.
 
 **Who is "the generator"?** The **LLM is the generator** — it authors the code
 directly from the IR by following `system-prompt.md` + a stack `EXAMPLE.md`. Do
@@ -136,10 +140,14 @@ kcf assess model-ir.json          # → ready: true
 #    /openapi.json + a frontend stack's EXAMPLE.md. You get a UI bound to it.
 ```
 
-Each generation returns the implementation **plus a coverage self-audit** that
-gives every IR construct a disposition (realized / delegated / out-of-tier /
-unsupported) with `dropped: []` — a lossless-handoff discipline mirroring the
-IR's own guarantee.
+Each generation returns the implementation **plus a machine-checkable realization
+manifest** that gives every IR identity a disposition (realized / delegated /
+out-of-tier / unsupported) — realized ones citing artifacts, gaps carrying a reason.
+Verify it with `kcf verify-realization model-ir.json realization-manifest.json
+[--repo ./app]`: it accounts for every identity and reports an **evidence level**
+(`accounted` when only declared → `test-present` when files, symbols, and tests are
+checked against the repo). That replaces the old prose `dropped: []` self-audit with
+evidence a tool confirms.
 
 ## Add your own stack
 

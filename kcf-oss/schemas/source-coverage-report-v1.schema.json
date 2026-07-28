@@ -16,14 +16,33 @@
         "segments": {"type": "integer", "minimum": 0},
         "constructs": {"type": "integer", "minimum": 0},
         "coveredSegments": {"type": "integer", "minimum": 0},
-        "sourcedConstructs": {"type": "integer", "minimum": 0}
+        "sourcedConstructs": {"type": "integer", "minimum": 0},
+        "confirmedConstructs": {"type": "integer", "minimum": 0}
       },
       "additionalProperties": false
     },
     "uncoveredSegments": {"type": "array", "items": {"type": "string"}, "description": "Segments that produced no construct - potential missed extraction."},
     "unsourcedConstructs": {"type": "array", "items": {"type": "string"}, "description": "Constructs citing no segment - potential ungrounded additions."},
     "danglingSegments": {"type": "array", "items": {"type": "string"}, "description": "Trace segmentIds not present in the source document."},
-    "danglingConstructs": {"type": "array", "items": {"type": "string"}, "description": "Trace construct identities not present in the model."}
+    "danglingConstructs": {"type": "array", "items": {"type": "string"}, "description": "Trace construct identities not present in the model."},
+    "sourceComplete": {"type": "boolean", "description": "Linkage is complete: nothing dropped, nothing invented, no dangling links."},
+    "sourceConfirmed": {"type": "boolean", "description": "Stronger than source-complete: every sourced construct's encoding has been reviewed (encoding-reviewed or semantically-confirmed) and none is disputed/superseded."},
+    "reviewStates": {"type": "object", "additionalProperties": {"type": "integer"}, "description": "Count of sourced constructs by their (best) encoding-review state."},
+    "unconfirmedConstructs": {"type": "array", "items": {"type": "string"}, "description": "Sourced constructs whose encoding has not been (governed-)confirmed."},
+    "disputedConstructs": {"type": "array", "items": {"type": "string"}, "description": "Sourced constructs whose encoding is disputed or superseded."},
+    "ungovernedConfirmations": {
+      "type": "array",
+      "description": "Records that CLAIM a confirmed review state but fail governance (missing reviewer/time/disposition/version, excerpt-hash mismatch, or the construct is not in the referenced link). Surfaced, never silently accepted - a fabricated confirmation is caught here.",
+      "items": {
+        "type": "object",
+        "required": ["identity", "issues"],
+        "properties": {
+          "identity": {"type": "string"},
+          "issues": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
   },
   "additionalProperties": false
 }

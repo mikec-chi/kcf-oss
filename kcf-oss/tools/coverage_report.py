@@ -286,9 +286,159 @@ def ev_concept_kind_targeted_by(model: dict, obligation: dict) -> list[dict]:
     return gaps
 
 
+# --- P1: model-level readiness anchors --------------------------------------
+# A schema-valid but empty model must NOT read as "ready". The obligations below
+# are *model-level* (not per-element), so they are not vacuously satisfied when a
+# model has no elements - they are the substance behind the assess `ready`
+# verdict. Intentionally sparse packages (a vocabulary/term library) opt out of
+# the substantive-content and profile-anchor obligations by declaring packageKind
+# "vocabulary" (or a "minimal" profile); such a package is then judged only on the
+# per-element obligations (identity, authorization, ...), which is correct for a
+# definitions-only library.
+
+_VOCABULARY_PACKAGE_KINDS = {"vocabulary"}
+_MINIMAL_PROFILES = {"minimal"}
+
+# Top-level collections that count as substantive domain content beyond `concepts`.
+_SUBSTANTIVE_COLLECTIONS = (
+    "relationships", "actions", "rules", "policies", "organizations",
+    "information", "reasoning", "assertions", "events", "resources",
+    "processes", "lifecycles", "collectionTransforms",
+)
+
+
+def _package_kind(model: dict):
+    """The declared package kind, read from an optional top-level ``packageKind``
+    or from ``extensions.package.packageKind`` (the contract-safe location, since
+    ``extensions`` is an open bag). Returns None when undeclared."""
+    kind = model.get("packageKind")
+    if kind:
+        return kind
+    return ((model.get("extensions") or {}).get("package") or {}).get("packageKind")
+
+
+def is_vocabulary_package(model: dict) -> bool:
+    """A model that intentionally captures only definitions (a vocabulary/term
+    library) rather than a whole application. It opts out of the substantive-
+    content and profile-anchor obligations so an honest, sparse library is not
+    forced to look like an application to be considered internally complete."""
+    if _package_kind(model) in _VOCABULARY_PACKAGE_KINDS:
+        return True
+    return bool(model_profiles(model) & _MINIMAL_PROFILES)
+
+
+def _domain_concepts(model: dict) -> list[dict]:
+    return [concept for concept in model.get("concepts", []) if concept.get("kind")]
+
+
+def ev_model_has_substantive_content(model: dict, obligation: dict) -> list[dict]:
+    """The model must carry at least one substantive domain construct - a concept
+    of a domain kind, or a non-empty knowledge/behavior collection. This is the
+    obligation that makes an empty-but-valid model *not* ready: readiness requires
+    captured knowledge, not merely a well-formed envelope."""
+    if _domain_concepts(model):
+        return []
+    if any(model.get(name) for name in _SUBSTANTIVE_COLLECTIONS):
+        return []
+    return [gap(obligation, model.get("id", "<model>"),
+                "model declares no substantive domain content (no concepts and no knowledge/behavior constructs)")]
+
+
+def ev_at_least_one_action_effect(model: dict, obligation: dict) -> list[dict]:
+    """The model must declare at least one action with one of the given effects -
+    e.g. a business application must have at least one state-changing (command or
+    transform) action, or it captures no behavior worth authorizing. Model-level,
+    so it fires on an application that declares entities but no behavior."""
+    effects = set(obligation.get("effects", []))
+    for action in model.get("actions", []):
+        if not effects or action.get("effect") in effects:
+            return []
+    label = "/".join(sorted(effects)) or "any"
+    return [gap(obligation, model.get("id", "<model>"),
+                f"model declares no {label}-effect action")]
+
+
+def ev_at_least_one_of(model: dict, obligation: dict) -> list[dict]:
+    """Presence anchor with alternatives: satisfied when the model has a concept of
+    ``conceptKind`` OR any of the named ``collections`` is non-empty. One evaluator
+    expresses profile anchors robustly whether a construct is realized as a concept
+    (kind EVENT) or as a top-level collection (``events``), avoiding false gaps."""
+    kind = obligation.get("conceptKind")
+    if kind and any(concept.get("kind") == kind for concept in model.get("concepts", [])):
+        return []
+    for name in obligation.get("collections", []):
+        if model.get(name):
+            return []
+    wanted = []
+    if kind:
+        wanted.append(f"a {kind} concept")
+    wanted.extend(f"a non-empty '{name}'" for name in obligation.get("collections", []))
+    return [gap(obligation, model.get("id", "<model>"), "model has none of: " + ", ".join(wanted or ["(nothing declared)"]))]
+
+
+def ev_profile_declared(model: dict, obligation: dict) -> list[dict]:
+    """A model should declare at least one profile (or an explicit ``minimal``
+    profile / vocabulary packageKind). Recommended, not required: a profile-less
+    fragment is a legitimate library, but declaring a profile is how a model
+    states which completeness obligations it means to be judged against."""
+    if model_profiles(model):
+        return []
+    return [gap(obligation, model.get("id", "<model>"),
+                "model declares no profile; declare a profile (or packageKind 'vocabulary' / profile 'minimal') to state its intended scope")]
+
+
+# --- P3: broader construct-family obligations -------------------------------
+# The coverage model reached only a handful of the grammar's dimensions. These
+# extend it to more construct families (relationships, resources, temporal,
+# reasoning, provenance) so meta-coverage (tools/meta_coverage.py) has fewer
+# policy-missing families. All are domain-agnostic - they read structure only.
+
+def ev_relationships_when_multiple_entities(model: dict, obligation: dict) -> list[dict]:
+    """A model with two or more entities but no relationships almost certainly
+    under-captures the domain: entities rarely stand alone. Model-level and only
+    fires once there is something to relate, so a single-entity model is exempt."""
+    entities = [concept for concept in model.get("concepts", []) if concept.get("kind") == "ENTITY"]
+    if len(entities) < 2 or model.get("relationships"):
+        return []
+    return [gap(obligation, model.get("id", "<model>"),
+                f"model declares {len(entities)} entities but no relationships between them")]
+
+
+def ev_reasoning_has_premises(model: dict, obligation: dict) -> list[dict]:
+    """A reasoning step that states a conclusion with no premises is an assertion in
+    disguise - its grounding is missing. Every reasoning item should cite premises."""
+    gaps = []
+    for item in model.get("reasoning", []):
+        if isinstance(item, dict) and not item.get("premises"):
+            gaps.append(gap(obligation, item.get("id"), f"reasoning {item.get('id')} states a conclusion with no premises"))
+    return gaps
+
+
+def ev_knowledge_has_provenance(model: dict, obligation: dict) -> list[dict]:
+    """Assertions and information in a knowledge model should carry provenance (a
+    source document, an extraction method, or evidence) so a claim can be traced to
+    where it came from - the difference between captured knowledge and hearsay."""
+    gaps = []
+    for collection in ("assertions", "information"):
+        for item in model.get(collection, []):
+            if not isinstance(item, dict):
+                continue
+            if not (item.get("sourceDocument") or item.get("extractionMethod") or item.get("evidence")):
+                subject = item.get("qualifiedName") or item.get("id")
+                gaps.append(gap(obligation, subject, f"{collection[:-1]} {subject} carries no provenance (sourceDocument/extractionMethod/evidence)"))
+    return gaps
+
+
 EVALUATORS = {
     "entity-has-identity": ev_entity_has_identity,
     "concept-kind-targeted-by": ev_concept_kind_targeted_by,
+    "model-has-substantive-content": ev_model_has_substantive_content,
+    "at-least-one-action-effect": ev_at_least_one_action_effect,
+    "at-least-one-of": ev_at_least_one_of,
+    "profile-declared": ev_profile_declared,
+    "relationships-when-multiple-entities": ev_relationships_when_multiple_entities,
+    "reasoning-has-premises": ev_reasoning_has_premises,
+    "knowledge-has-provenance": ev_knowledge_has_provenance,
     "concept-kind-has-crud": ev_concept_kind_has_crud,
     "concept-kind-has-set-operation": ev_concept_kind_has_set_operation,
     "at-least-one-transformation": ev_at_least_one_transformation,
@@ -317,10 +467,16 @@ def applies(profiles: set[str], obligation: dict) -> bool:
 
 def report(model: dict, coverage_model: dict) -> dict:
     profiles = model_profiles(model)
+    vocabulary = is_vocabulary_package(model)
     gaps: list[dict] = []
     considered = 0
     for obligation in coverage_model["obligations"]:
         if not applies(profiles, obligation):
+            continue
+        # A vocabulary/minimal package opts out of the substantive-content and
+        # profile-anchor obligations (see is_vocabulary_package); per-element
+        # obligations still apply.
+        if vocabulary and obligation.get("vocabularyExempt"):
             continue
         considered += 1
         gaps.extend(EVALUATORS[obligation["obligation"]](model, obligation))

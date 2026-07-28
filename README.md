@@ -8,9 +8,10 @@
 
 **KCF helps you encode and capture business knowledge — entities, relationships,
 lifecycles, rules, and actions — so that it can be made executable.** Knowledge
-Coding is the new Vibe Coding: you model your domain into a complete, machine-checked
-semantic spec, then let an LLM build the application from that spec instead of
-guessing from prose — **knowledge coding = semantic modeling + vibe coding**.
+Coding is the new Vibe Coding: you model your domain into a validated,
+coverage-assessed, traceable semantic spec — one that reports what passed rather than
+claiming your domain is complete — then let an LLM build the application from that spec
+instead of guessing from prose — **knowledge coding = semantic modeling + vibe coding**.
 
 > ### 👉 Start here: [**Knowledge Coding — get running in 3 minutes**](kcf-oss/docs/KNOWLEDGE_CODING.md)
 > Two ways in: 🌱 **no install** — point your chat LLM at the hosted connector and
@@ -69,20 +70,23 @@ the durable specification; your own LLM turns it into code for whatever stack yo
 choose, guided by a stack-agnostic system prompt and a single-shot example.
 
 ```text
-# 3. generate — with any LLM, for any stack (codegen/). Two tiers meet at OpenAPI:
+# 3. generate — with the LLM you choose, for your target stack (codegen/). Two tiers meet at OpenAPI:
 #    BACKEND  → generate-backend.md  + a backend stack  → a service with Swagger by default
 #               (fastapi-sqlmodel-postgres · typescript-express-prisma · django-drf-postgres)
 #    FRONTEND → generate-frontend.md + the backend's /openapi.json + a frontend stack
 #               (react-typescript-openapi) → a UI bound to that contract
 ```
 
-The LLM returns the implementation **plus a coverage self-audit** proving every
-IR identity was realized and nothing dropped (`dropped: []`). See
+The LLM returns the implementation **plus a machine-checkable realization manifest**
+accounting for every IR identity (realized ones citing artifacts, gaps carrying a
+reason). Verify it with `kcf verify-realization` — it reports an evidence level
+(`accounted` when declared → `test-present` when files/symbols/tests are checked). See
 [`kcf-oss/codegen/`](kcf-oss/codegen/) and, for the full requirements-to-code
 tour, [`kcf-oss/docs/WALKTHROUGH.md`](kcf-oss/docs/WALKTHROUGH.md).
 
-KCF **stops at the IR** — a complete, machine-checked model is the deliverable.
-Turning it into running code is the LLM codegen pack's job.
+KCF **stops at the IR** — a validated, coverage-assessed, traceable model is the
+deliverable (not a claim that your domain is fully captured). Turning it into running
+code is the LLM codegen pack's job.
 
 > **From source instead:** `git clone https://github.com/mikec-chi/kcf-oss.git && cd kcf-oss && pip install -e .`
 > A source checkout also gives you the contributor gate (`kcf check`) and the
@@ -90,9 +94,9 @@ Turning it into running code is the LLM codegen pack's job.
 
 ## Use it in your chat LLM (MCP)
 
-Plug KCF into the chat LLM you already use and it builds a complete, machine-checked
-model of your domain, then generates the app from it — instead of vibe-coding
-against prose.
+Plug KCF into the chat LLM you already use and it builds a validated,
+coverage-assessed, traceable model of your domain, then generates the app from it —
+instead of vibe-coding against prose.
 
 **🌱 No install — connect to the hosted server.** Point your LLM at the hosted
 connector `https://kcf-mcp.onrender.com/mcp`:
@@ -146,7 +150,7 @@ uvicorn app:app --app-dir kcf-oss/playground   # → http://127.0.0.1:8000
 
 - **[Knowledge Coding — get started](kcf-oss/docs/KNOWLEDGE_CODING.md)** — connect KCF to your LLM and build your first app (start here).
 - **[QUICKSTART](kcf-oss/QUICKSTART.md)** — the hello-world above, annotated.
-- **[codegen/](kcf-oss/codegen/)** — generate an app from the IR with your LLM, for any stack.
+- **[codegen/](kcf-oss/codegen/)** — generate an app from the IR with the LLM you choose, for your target stack (stack-extensible).
 - **[WALKTHROUGH](kcf-oss/docs/WALKTHROUGH.md)** — requirements → ready IR → generated app.
 - **[CONCEPTS](kcf-oss/docs/CONCEPTS.md)** — the mental model and the four semantic layers.
 - **[kcf-oss/README](kcf-oss/README.md)** — full architecture, IR contract, and toolchain reference.

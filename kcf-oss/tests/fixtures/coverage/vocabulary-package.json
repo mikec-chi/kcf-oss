@@ -1,0 +1,19 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "BillingTerms",
+  "module": "KCF",
+  "namespace": "vocab",
+  "packageKind": "vocabulary",
+  "concepts": [
+    {"id": "Money", "qualifiedName": "vocab.Money", "kind": "ENTITY", "metadata": {"mutability": "read-only", "category": "reference"}, "attributes": [
+      {"name": "moneyId", "type": "UUID", "identity": true},
+      {"name": "amount", "type": "Decimal", "required": true},
+      {"name": "currency", "type": "String", "required": true}
+    ]},
+    {"id": "TaxCode", "qualifiedName": "vocab.TaxCode", "kind": "ENTITY", "metadata": {"mutability": "read-only", "category": "reference"}, "attributes": [
+      {"name": "code", "type": "String", "identity": true},
+      {"name": "rate", "type": "Decimal", "required": true}
+    ]}
+  ]
+}

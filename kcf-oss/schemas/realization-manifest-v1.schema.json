@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/realization-manifest-v1.schema.json",
+  "title": "KCF Codegen Realization Manifest v1",
+  "description": "Machine-readable accounting that a code generation handled every semantic identity in the IR. Replaces the prose 'dropped: []' self-attestation with a manifest a verifier can check against the model and (with --repo) the generated repository - so lossless handoff (decision D-005) is checked, not merely asserted. The verifier reports an evidence level; without a repository the manifest is 'accounted' (declared), not proof the artifacts exist.",
+  "type": "object",
+  "required": ["realizationManifestVersion", "model", "dispositions"],
+  "properties": {
+    "realizationManifestVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "stack": {"type": "string"},
+    "tier": {"type": "string"},
+    "dispositions": {"type": "array", "items": {"$ref": "#/$defs/disposition"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "disposition": {
+      "type": "object",
+      "required": ["semanticId", "disposition"],
+      "properties": {
+        "semanticId": {"type": "string", "description": "An IR semantic identity (concept qualifiedName, action id, rule id, relationship id, ...)."},
+        "disposition": {
+          "enum": ["realized", "enriched", "delegated", "out-of-tier", "deferred", "unsupported"],
+          "description": "realized/enriched require artifact evidence; delegated/out-of-tier/deferred/unsupported require an explicit note."
+        },
+        "artifacts": {"type": "array", "items": {"$ref": "#/$defs/artifact"}, "description": "Generated files/symbols realizing this identity (required for realized/enriched)."},
+        "tests": {"type": "array", "items": {"$ref": "#/$defs/artifact"}, "description": "Tests exercising this identity."},
+        "note": {"type": "string", "description": "Explicit reason (required when the identity is delegated/out-of-tier/deferred/unsupported)."}
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": {"type": "string"},
+        "symbol": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

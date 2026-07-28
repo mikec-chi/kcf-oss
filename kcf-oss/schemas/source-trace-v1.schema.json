@@ -8,6 +8,7 @@
   "properties": {
     "sourceTraceVersion": {"const": "1.0.0"},
     "documentId": {"type": "string", "minLength": 1},
+    "documentVersion": {"type": "string", "description": "Version of the source document this trace was built against."},
     "model": {"type": "string", "minLength": 1},
     "links": {
       "type": "array",
@@ -16,11 +17,39 @@
         "required": ["segmentId", "constructs"],
         "properties": {
           "segmentId": {"type": "string", "minLength": 1},
-          "constructs": {"type": "array", "items": {"type": "string"}}
+          "constructs": {"type": "array", "items": {"type": "string"}},
+          "assertions": {
+            "type": "array",
+            "description": "Optional assertion-level trace records: how a specific proposition in this segment became a specific construct, and where it sits in the encoding-review lifecycle. Linkage (constructs) proves nothing was dropped/invented; these records carry the interpretation and its review state.",
+            "items": {"$ref": "#/$defs/assertionRecord"}
+          }
         },
         "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "assertionRecord": {
+      "type": "object",
+      "required": ["semanticIdentity"],
+      "properties": {
+        "semanticIdentity": {"type": "string", "minLength": 1, "description": "The construct identity this record is about (must appear in the link's constructs)."},
+        "sourceExcerptHash": {"type": "string", "description": "Hash of the exact source excerpt this was extracted from (tamper/version evidence)."},
+        "extractedProposition": {"type": "string", "description": "The proposition the extractor read from the excerpt, in words."},
+        "transformation": {"enum": ["verbatim", "normalized", "inferred", "summarized"], "description": "How the source text was transformed into the encoding - the interpretation applied."},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "reviewState": {
+          "enum": ["trace-linked", "encoding-reviewed", "semantically-confirmed", "disputed", "superseded"],
+          "description": "The encoding-review lifecycle: trace-linked (linked only) -> encoding-reviewed (a human checked the encoding) -> semantically-confirmed (a human confirmed it means the source); disputed/superseded are off-path."
+        },
+        "reviewerDisposition": {"enum": ["accept", "revise", "reject"]},
+        "reviewerNotes": {"type": "string"},
+        "reviewer": {"type": "string"},
+        "reviewedAt": {"type": "string", "description": "When the review happened (ISO 8601). Required for a confirmation to be governed."},
+        "sourceVersion": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
 }

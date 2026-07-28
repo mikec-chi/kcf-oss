@@ -29,6 +29,10 @@ from pattern_contracts import contract_role_errors, load_contracts as load_patte
 from review_queue import by_segment as review_by_segment, review_queue
 from scaffold import build_scaffold
 from source_coverage import is_complete as source_complete, source_coverage
+from verify_realization import ir_identities, verify as verify_realization
+from completeness import completeness
+from meta_coverage import construct_families, meta_coverage
+from automation_report import report as automation_report
 from profile_resolver import resolve_profile
 from resolve_stack import load, resolve
 from semantic_analyzer import Analyzer
@@ -77,6 +81,28 @@ def main():
     check(not coverage["unclassified"], "semantic rule coverage contains unclassified rules")
     check(coverage["totalRules"] == len(catalogue_ids), "semantic rule coverage count is stale")
     check(fixture_index["automatedRuleIds"] == coverage["automatedRuleIds"], "per-rule fixture index is stale")
+
+    # --- P4: semantic-automation triage + risk-based coverage ---
+    # Every still-manual rule is triaged by the kind of effort it needs, and automation
+    # coverage is reported by semantic RISK, not rule count - so effort targets the
+    # mechanically-automatable, high-risk rules first. A measurement layer only (it does
+    # not touch the analyzer or catalogue), so it is gate-safe.
+    automation = automation_report(catalogue)
+    validate(automation, "automation-report-v1.schema.json")
+    check(not automation["untriaged"], f"still-manual rules were not triaged: {automation['untriaged']}")
+    check(automation["totalRules"] == coverage["totalRules"], "automation report rule count disagrees with coverage")
+    check(sum(bucket["total"] for bucket in automation["byRisk"].values()) == automation["totalRules"], "risk buckets do not sum to the total rule count")
+    manual_total = coverage["counts"].get("manual-review", 0) + coverage["counts"].get("profile-dependent", 0)
+    check(sum(automation["manualByClass"].values()) == manual_total, "triage classes do not account for every manual/profile rule")
+    # The mechanically-automatable backlog has been driven to zero: every still-manual
+    # rule is either automated or reclassified (needs-ir-extension / already-enforced /
+    # enforced-elsewhere / needs-external-facts / human-judgment / advisory) with a
+    # reason in automation-triage-overrides.json. Guard that it stays honestly empty and
+    # fully triaged, and that any reclassification carries a reason.
+    check(automation["mechanicallyAutomatableBacklog"] == [], f"a mechanically-automatable rule reappeared without a handler: {automation['mechanicallyAutomatableBacklog']}")
+    check(automation["manualByClass"].get("needs-ir-extension", 0) >= 1, "needs-ir-extension class unexpectedly empty (overrides not loaded?)")
+    check(all(entry.get("reason") for entry in automation["reclassifications"]), "a reclassification is missing its reason")
+    check(0.0 <= automation["byRisk"]["high"]["automationRate"] <= 1.0, "high-risk automation rate is out of range")
     check(len(ownership["rules"]) == 550, "legacy semantic ownership audit is incomplete")
     check(all(item["owner"] in {"semantic-core", "kcf", "dbml"} for item in ownership["rules"]), "legacy rule has no valid owner")
     valid_diagnostics = Analyzer(valid).run()
@@ -122,6 +148,12 @@ def main():
         "knowledge.query.temporal", "knowledge.bitemporal.recorded",
         "kcf.profile.pattern-required", "kcf.profile.pattern-prohibited",
         "kcf.profile.pattern-exclusion",
+        "kcf.relationship.ordering", "action.record.upsert-key",
+        "action.destructive.authorization", "action.record.create-output",
+        "action.set.concurrency", "action.transform.field-lineage",
+        "action.record.replace-complete", "action.collection.sample", "action.collection.window",
+        "action.transform.classification", "action.transform.identity",
+        "action.set.query-pure", "action.record.target",
     }
     check(required <= ids, f"invalid fixture missed diagnostics: {sorted(required - ids)}")
     check(set(coverage["automatedRuleIds"]) <= ids, "an automated semantic rule lacks an invalid regression fixture")
@@ -173,6 +205,30 @@ def main():
     validate(complete, "model-ir-v1.schema.json")
     complete_report = coverage_report(complete, coverage_model)
     check(complete_report["summary"]["totalGaps"] == 0, f"complete model reported gaps: {complete_report['gaps']}")
+
+    # P1: a schema-valid but empty application is NOT ready. The substantive-content
+    # obligation is model-level, so - unlike the per-element identity/authorization
+    # obligations - it is not vacuously satisfied when the model has no elements.
+    empty_app = json.loads((coverage_root / "empty-application.json").read_text())
+    validate(empty_app, "model-ir-v1.schema.json")
+    empty_assessment = assess_model(empty_app)
+    validate(empty_assessment, "assess-report-v1.schema.json")
+    check(not empty_assessment["ready"], "an empty application was assessed ready")
+    check("coverage.model.substantive-content" in empty_assessment["checks"]["coverage"]["requiredGapIds"],
+          f"empty application did not surface the substantive-content required gap: {empty_assessment['checks']['coverage']}")
+    check(empty_assessment["coverageStatus"] == "no-substantive-content",
+          f"empty application coverageStatus should be no-substantive-content: {empty_assessment['coverageStatus']}")
+    check("codegen-handoff" not in empty_assessment["readyFor"], "an empty application was declared ready for codegen-handoff")
+
+    # P1: an intentionally-sparse vocabulary package opts out of the substantive-
+    # content and profile-anchor obligations (packageKind 'vocabulary') and is judged
+    # only on per-element obligations - so an honest term library is ready.
+    vocab = json.loads((coverage_root / "vocabulary-package.json").read_text())
+    validate(vocab, "model-ir-v1.schema.json")
+    vocab_report = coverage_report(vocab, coverage_model)
+    check(vocab_report["summary"]["required"] == 0, f"vocabulary package reported required gaps: {vocab_report['gaps']}")
+    vocab_assessment = assess_model(vocab)
+    check(vocab_assessment["ready"], f"vocabulary package was not assessed ready: {vocab_assessment}")
 
     synthetic = json.loads((coverage_root / "synthetic-model.json").read_text())
     decisions = json.loads((coverage_root / "decisions.json").read_text())
@@ -266,10 +322,167 @@ def main():
     dangling = source_coverage(source_doc, source_model, {"links": [{"segmentId": "s9", "constructs": ["shop.Ghost"]}]})
     check(dangling["danglingSegments"] == ["s9"] and dangling["danglingConstructs"] == ["shop.Ghost"], "source coverage did not flag dangling trace links")
 
+    # --- P5: source fidelity - source-complete (linkage) vs source-confirmed (encodings reviewed) ---
+    # Linkage-only traceability proves nothing was dropped/invented; it does NOT prove
+    # the encoding faithfully means the source. That is the encoding-review lifecycle.
+    check(clean_coverage["sourceComplete"] and not clean_coverage["sourceConfirmed"],
+          "a linkage-only trace must be source-complete but not yet source-confirmed")
+    trace_confirmed = json.loads((source_root / "trace-confirmed.json").read_text())
+    validate(trace_confirmed, "source-trace-v1.schema.json")
+    confirmed_report = source_coverage(source_doc, source_model, trace_confirmed)
+    validate(confirmed_report, "source-coverage-report-v1.schema.json")
+    check(confirmed_report["sourceComplete"] and confirmed_report["sourceConfirmed"],
+          f"a fully-reviewed extraction was not source-confirmed: {confirmed_report['unconfirmedConstructs']}/{confirmed_report['disputedConstructs']}")
+    check(confirmed_report["counts"]["confirmedConstructs"] == confirmed_report["counts"]["sourcedConstructs"],
+          "not every sourced construct was counted as confirmed")
+    check(not confirmed_report["ungovernedConfirmations"], f"a properly-governed trace reported governance failures: {confirmed_report['ungovernedConfirmations']}")
+
+    # R3: a confirmation is only counted when GOVERNED - a record that claims
+    # 'semantically-confirmed' but names no reviewer/time/disposition and whose excerpt
+    # hash does not match the source segment is surfaced, never silently accepted.
+    trace_ungoverned = json.loads((source_root / "trace-ungoverned.json").read_text())
+    validate(trace_ungoverned, "source-trace-v1.schema.json")
+    ungoverned_report = source_coverage(source_doc, source_model, trace_ungoverned)
+    validate(ungoverned_report, "source-coverage-report-v1.schema.json")
+    check(not ungoverned_report["sourceConfirmed"], "an ungoverned confirmation was accepted as source-confirmed")
+    check("shop.Customer" not in set(ungoverned_report["reviewStates"]) or ungoverned_report["counts"]["confirmedConstructs"] == 0,
+          "an ungoverned confirmation was counted as confirmed")
+    flagged = {entry["identity"] for entry in ungoverned_report["ungovernedConfirmations"]}
+    check("shop.Customer" in flagged, "an ungoverned confirmation claim was not surfaced")
+    issues = {issue for entry in ungoverned_report["ungovernedConfirmations"] for issue in entry["issues"]}
+    check({"excerpt-hash-mismatch", "missing-reviewer", "disposition-not-accept"} <= issues,
+          f"governance did not detect the expected failures: {sorted(issues)}")
+    trace_disputed = json.loads((source_root / "trace-disputed.json").read_text())
+    validate(trace_disputed, "source-trace-v1.schema.json")
+    disputed_report = source_coverage(source_doc, source_model, trace_disputed)
+    validate(disputed_report, "source-coverage-report-v1.schema.json")
+    check(disputed_report["sourceComplete"] and not disputed_report["sourceConfirmed"],
+          "a disputed extraction is source-complete but must NOT be source-confirmed")
+    check("shop.Product" in disputed_report["disputedConstructs"], "source fidelity did not flag the disputed construct")
+    check("order-contains-product" in disputed_report["unconfirmedConstructs"], "source fidelity did not flag the un-reviewed construct")
+
     ingest_report = ingest_model(source_model, source_doc, trace_clean)
     validate(ingest_report, "ingest-report-v1.schema.json")
     check(ingest_report["ready"] and ingest_report["sourceComplete"], f"clean ingestion was not ready+complete: {ingest_report['valid']}/{ingest_report['ready']}/{ingest_report['sourceComplete']}")
     check(not ingest_model(source_model, source_doc, trace_lossy)["sourceComplete"], "lossy ingestion was reported source-complete")
+
+    # --- P6: executable codegen evidence (realization manifest verifier) ---
+    # The prose "dropped: []" self-audit becomes machine-checkable: every IR identity
+    # must have a disposition, realized ones must carry artifact evidence, and gaps
+    # must be explicitly noted. A complete manifest verifies; an incomplete one names
+    # exactly what was dropped / unbacked / unknown.
+    realization_root = FIXTURES_ROOT / "realization"
+    realization_model = json.loads((realization_root / "model.json").read_text())
+    validate(realization_model, "model-ir-v1.schema.json")
+    check(ir_identities(realization_model) == {"shop.Order": "concepts", "CreateOrder": "actions"},
+          f"IR identity enumeration drifted: {ir_identities(realization_model)}")
+    manifest_ok = json.loads((realization_root / "manifest-complete.json").read_text())
+    validate(manifest_ok, "realization-manifest-v1.schema.json")
+    ok_report = verify_realization(realization_model, manifest_ok)
+    validate(ok_report, "realization-report-v1.schema.json")
+    check(ok_report["ok"] and ok_report["summary"]["missing"] == 0, f"complete realization manifest failed verification: {ok_report['errors']}")
+    # R5: a green report WITHOUT --repo is only 'accounted' - it must not imply the
+    # artifacts exist. With a repo whose files+symbols+tests are present it climbs the
+    # evidence ladder to 'test-present'.
+    check(ok_report["evidenceLevel"] == "accounted", f"unchecked realization should be 'accounted', got {ok_report['evidenceLevel']}")
+    repo_report = verify_realization(realization_model, manifest_ok, realization_root / "repo")
+    validate(repo_report, "realization-report-v1.schema.json")
+    check(repo_report["ok"] and repo_report["evidenceLevel"] == "test-present",
+          f"repo-checked realization did not reach test-present: {repo_report['evidenceLevel']} / {repo_report['errors']}")
+    manifest_bad = json.loads((realization_root / "manifest-incomplete.json").read_text())
+    validate(manifest_bad, "realization-manifest-v1.schema.json")
+    bad_report = verify_realization(realization_model, manifest_bad)
+    validate(bad_report, "realization-report-v1.schema.json")
+    bad_codes = {error["code"] for error in bad_report["errors"]}
+    check(not bad_report["ok"] and bad_report["evidenceLevel"] == "none", "an incomplete realization manifest passed verification")
+    check({"missing-disposition", "realized-without-evidence", "unknown-identity"} <= bad_codes,
+          f"realization verifier missed expected error classes: {sorted(bad_codes)}")
+
+    # R4: the identity inventory is EXHAUSTIVE - it reuses the one authoritative
+    # ir_identity.model_semantic_ids, so profile/tail sections cannot be silently
+    # unverified. The profiles reference model exercises all eight profile sections.
+    profiles_ir = compile_file(DOMAINS_ROOT / "profiles.kcf")
+    profile_ids = ir_identities(profiles_ir)
+    inventoried_sections = set(profile_ids.values())
+    check({"integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"} <= set(profile_ids),
+          f"authoritative identity inventory omits profile sections: {sorted(inventoried_sections)}")
+
+    # --- P2: closed-world completeness against a declared scope ---
+    # Completeness is reported along separate axes and is explicit that "complete"
+    # means complete AGAINST THE DECLARED SCOPE - every included capability maps to a
+    # construct, with no open questions - not against an unbounded open world.
+    scope_root = FIXTURES_ROOT / "scope"
+    scope_model = json.loads((FIXTURES_ROOT / "walkthrough" / "support-ticket-ready.json").read_text())
+    scope_complete = json.loads((scope_root / "scope-complete.json").read_text())
+    validate(scope_complete, "scope-v1.schema.json")
+    comp = completeness(scope_model, scope_complete)
+    validate(comp, "completeness-report-v1.schema.json")
+    check(comp["closedWorldComplete"] and not comp["blockers"], f"a model covering its declared scope was not closed-world complete: {comp['blockers']}")
+    check(comp["axes"]["source"]["status"] == "not-applicable", "a scope with no declared sources should make the source axis not-applicable")
+    check(not comp["axes"]["declaredScope"]["uncovered"], f"declared-scope axis reported spurious uncovered capabilities: {comp['axes']['declaredScope']}")
+    check(comp["axes"]["declaredScope"]["covered"] == scope_complete["includedCapabilities"], "declared-scope axis did not map every included capability to a construct")
+    scope_incomplete = json.loads((scope_root / "scope-incomplete.json").read_text())
+    validate(scope_incomplete, "scope-v1.schema.json")
+    comp_bad = completeness(scope_model, scope_incomplete)
+    validate(comp_bad, "completeness-report-v1.schema.json")
+    check(not comp_bad["closedWorldComplete"], "a model with uncovered scope + open questions was reported complete")
+    check({"scope-capabilities-uncovered", "open-questions"} <= set(comp_bad["blockers"]), f"completeness blockers missed scope/open-question reasons: {comp_bad['blockers']}")
+    check({"support.Refund", "EscalateTicket"} <= set(comp_bad["axes"]["declaredScope"]["uncovered"]),
+          f"declared-scope axis did not flag uncovered capabilities: {comp_bad['axes']['declaredScope']['uncovered']}")
+    check(comp_bad["axes"]["openQuestions"], "completeness did not surface declared open questions")
+
+    # R1: a scope that NAMES its sources must have them evaluated before it is complete.
+    scope_sourced = json.loads((scope_root / "scope-sourced.json").read_text())
+    validate(scope_sourced, "scope-v1.schema.json")
+    unevaluated = completeness(source_model, scope_sourced)
+    validate(unevaluated, "completeness-report-v1.schema.json")
+    check(not unevaluated["closedWorldComplete"] and "sources-declared-not-evaluated" in unevaluated["blockers"],
+          f"declared-but-unevaluated sources did not block completeness: {unevaluated['blockers']}")
+    check(unevaluated["axes"]["source"]["status"] == "declared-not-evaluated", "source axis status wrong for unevaluated declared sources")
+    evaluated = completeness(source_model, scope_sourced, source_doc, trace_clean)
+    validate(evaluated, "completeness-report-v1.schema.json")
+    check(evaluated["closedWorldComplete"] and evaluated["axes"]["source"]["status"] == "evaluated-complete",
+          f"a sourced scope evaluated complete was not closed-world complete: {evaluated['blockers']}")
+
+    # R2: a closed-world scope must declare at least one capability unless it declares a package/vocabulary kind.
+    empty_scope = {"scopeVersion": "1.0.0", "includedCapabilities": []}
+    validate(empty_scope, "scope-v1.schema.json")
+    empty_comp = completeness(scope_model, empty_scope)
+    check(not empty_comp["closedWorldComplete"] and "empty-scope" in empty_comp["blockers"], "an empty scope was reported closed-world complete")
+    vocab_scope = {"scopeVersion": "1.0.0", "packageKind": "vocabulary", "includedCapabilities": []}
+    validate(vocab_scope, "scope-v1.schema.json")
+    vocab_comp = completeness(scope_model, vocab_scope)
+    check("empty-scope" not in vocab_comp["blockers"], "an explicit vocabulary scope was wrongly blocked for emptiness")
+
+    # --- P3: coverage of the coverage system (meta-coverage) ---
+    # Every grammar construct family either has a coverage policy or is reported as
+    # coverage-policy-missing - a construct is never silently treated as complete for
+    # lack of a policy. Every obligation's dimension must be a real family (no orphans),
+    # and every obligation must resolve to a registered evaluator.
+    meta = meta_coverage(coverage_model, verify_fixtures=True, root=PROJECT_ROOT)
+    validate(meta, "coverage-meta-report-v1.schema.json")
+    check(not meta["orphanObligations"], f"coverage obligations reference unknown construct families: {meta['orphanObligations']}")
+    check(all(row["hasEvaluator"] for row in meta["families"]), "a coverage obligation has no registered evaluator")
+    covered_families = {row["family"] for row in meta["families"] if row["status"] == "covered"}
+    check({"ENTITY", "ACTION", "RULE", "EVENT", "ACTOR", "RELATIONSHIP"} <= covered_families,
+          f"a core construct family lost its coverage policy: {sorted(covered_families)}")
+    check(meta["withPolicy"] + len(meta["withoutPolicy"]) == meta["totalFamilies"], "meta-coverage family accounting is inconsistent")
+    # The mechanism must actually detect an uncovered family (honest blind-spot report).
+    check("LOGIC" in meta["withoutPolicy"], f"meta-coverage did not flag a known policy-missing family: {meta['withoutPolicy']}")
+    check(set(meta["withoutPolicy"]) <= set(construct_families()), "meta-coverage reported a policy-missing family that is not a construct family")
+
+    # R6: every obligation that declares fixtures must have them VERIFIED - the
+    # positive fixture produces no gap and the negative fixture produces one - so a
+    # declared fixture reference is demonstrated coverage-governance, not a dangling
+    # pointer. The core required obligations are regression-gated this run.
+    governance = meta["fixtureGovernance"]
+    check(governance["verified"] and governance["fixtureDeclared"] >= 6, f"too few obligations declare fixtures: {governance['fixtureDeclared']}")
+    check(governance["positiveVerified"] == governance["fixtureDeclared"], "a positive obligation fixture produced an unexpected gap")
+    check(governance["negativeVerified"] == governance["fixtureDeclared"], "a negative obligation fixture failed to produce a gap")
+    check({"coverage.entity.identity", "coverage.action.authorization", "coverage.model.substantive-content",
+           "coverage.business-application.entity", "coverage.business-application.actor",
+           "coverage.business-application.state-changing-action"} <= set(governance["regressionGateIncluded"]),
+          f"a core obligation is not regression-gated by fixtures: {governance['regressionGateIncluded']}")
 
     by_seg = review_by_segment(review, {"links": [
         {"segmentId": "p1", "constructs": ["fin.Invoice"]},

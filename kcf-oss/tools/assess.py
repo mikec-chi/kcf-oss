@@ -50,11 +50,41 @@ def assess(model: dict) -> dict:
         and not checks["patterns"]["requiredWithoutContract"]
         and not checks["roles"]["unknownTraits"]
     )
+
+    # Richer verdict than a lone boolean (D-roadmap P1): the single `ready` flag is
+    # lossy - it cannot distinguish "empty envelope" from "one recommended gap
+    # away". These three axes report *what kind* of readiness holds without
+    # overclaiming. `domainComplete` is always "not-proven": coverage is a
+    # necessary, never a sufficient, condition for real domain completeness - the
+    # obligations prove structure is present, not that the domain was fully
+    # captured. That remains a human judgement (see P2 scope / P5 source-confirmed).
+    required_gap_ids = set(checks["coverage"]["requiredGapIds"])
+    if not valid:
+        coverage_status = "invalid"
+    elif "coverage.model.substantive-content" in required_gap_ids:
+        coverage_status = "no-substantive-content"
+    elif checks["coverage"]["requiredGaps"] or not ready:
+        coverage_status = "anchors-missing"
+    elif checks["coverage"]["recommendedGaps"]:
+        coverage_status = "required-obligations-met"
+    else:
+        coverage_status = "profile-obligations-complete"
+
+    if ready:
+        ready_for = ["codegen-handoff", "review"]
+    elif valid:
+        ready_for = ["review"]
+    else:
+        ready_for = []
+
     return {
         "assessReportVersion": "1.0.0",
         "model": model.get("id", "<model>"),
         "valid": valid,
         "ready": ready,
+        "coverageStatus": coverage_status,
+        "readyFor": ready_for,
+        "domainComplete": "not-proven",
         "checks": checks,
     }
 

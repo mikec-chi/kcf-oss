@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/automation-report-v1.schema.json",
+  "title": "KCF Semantic-Automation Report v1",
+  "description": "Triage of still-manual semantic rules (by the kind of effort they need) and automation coverage by semantic risk rather than by rule count.",
+  "type": "object",
+  "required": ["automationReportVersion", "totalRules", "byEnforcement", "manualByClass", "byRisk", "mechanicallyAutomatableBacklog", "untriaged"],
+  "properties": {
+    "automationReportVersion": {"const": "1.0.0"},
+    "totalRules": {"type": "integer", "minimum": 0},
+    "byEnforcement": {"type": "object", "additionalProperties": {"type": "integer"}},
+    "manualByClass": {
+      "type": "object",
+      "required": ["mechanically-automatable"],
+      "description": "Count of still-manual rules by the kind of effort they need. mechanically-automatable = checkable against today's IR; needs-ir-extension = needs a new authoring/IR field (a grammar RFC); already-enforced/enforced-elsewhere = redundant with another gate; needs-external-facts/human-judgment/advisory as named.",
+      "additionalProperties": {"type": "integer"}
+    },
+    "byRisk": {
+      "type": "object",
+      "required": ["high", "medium", "low"],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["total", "automated", "automationRate"],
+        "properties": {
+          "total": {"type": "integer"},
+          "automated": {"type": "integer"},
+          "automationRate": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "mechanicallyAutomatableBacklog": {"type": "array", "items": {"type": "string"}, "description": "Manual rules classified mechanically-automatable - the prioritized backlog for automating structural checks."},
+    "reclassifications": {
+      "type": "array",
+      "description": "Rules whose class was set by per-rule review (automation-triage-overrides.json), with the reason - e.g. which IR field is missing, or which rule already enforces it.",
+      "items": {
+        "type": "object",
+        "required": ["id", "manualClass"],
+        "properties": {
+          "id": {"type": "string"},
+          "manualClass": {"type": "string"},
+          "reason": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "untriaged": {"type": "array", "items": {"type": "string"}, "description": "Manual/profile rules with no manualClass (must be empty)."}
+  },
+  "additionalProperties": false
+}

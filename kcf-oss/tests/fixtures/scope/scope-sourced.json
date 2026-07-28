@@ -1,0 +1,8 @@
+{
+  "scopeVersion": "1.0.0",
+  "model": "ShopFromProse",
+  "includedCapabilities": ["shop.Customer", "shop.Order", "shop.Product"],
+  "sourceDocuments": ["shop-process-notes"],
+  "stakeholders": ["shop-owner"],
+  "openQuestions": []
+}

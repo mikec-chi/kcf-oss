@@ -1,0 +1,10 @@
+{
+  "realizationManifestVersion": "1.0.0",
+  "model": "ShopRealization",
+  "stack": "fastapi-sqlmodel-postgres",
+  "tier": "backend",
+  "dispositions": [
+    {"semanticId": "shop.Order", "disposition": "realized"},
+    {"semanticId": "shop.Ghost", "disposition": "realized", "artifacts": [{"path": "app/ghost.py"}]}
+  ]
+}

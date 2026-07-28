@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/coverage-meta-report-v1.schema.json",
+  "title": "KCF Coverage-of-Coverage (Meta-Coverage) Report v1",
+  "description": "Measures the coverage system itself: for every grammar construct family, whether the coverage model declares an obligation for it (with a registered evaluator and, ideally, fixtures). A construct family with no obligation is reported as 'coverage-policy-missing' so it is never silently treated as complete.",
+  "type": "object",
+  "required": ["coverageMetaReportVersion", "totalFamilies", "withPolicy", "withoutPolicy", "families"],
+  "properties": {
+    "coverageMetaReportVersion": {"const": "1.0.0"},
+    "totalFamilies": {"type": "integer"},
+    "withPolicy": {"type": "integer"},
+    "withoutPolicy": {"type": "array", "items": {"type": "string"}},
+    "orphanObligations": {"type": "array", "items": {"type": "string"}, "description": "Obligations whose dimension is not a known construct family (likely a typo/stale dimension)."},
+    "families": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["family", "obligations", "required", "recommended", "status"],
+        "properties": {
+          "family": {"type": "string"},
+          "obligations": {"type": "integer"},
+          "required": {"type": "integer"},
+          "recommended": {"type": "integer"},
+          "hasEvaluator": {"type": "boolean"},
+          "hasFixtures": {"type": "boolean"},
+          "regressionGated": {"type": "boolean", "description": "At least one obligation in this family has a positive+negative fixture verified this run."},
+          "obligationIds": {"type": "array", "items": {"type": "string"}},
+          "status": {"enum": ["covered", "coverage-policy-missing"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "fixtureGovernance": {
+      "type": "object",
+      "description": "Coverage of the fixture layer: how many obligations declare positive/negative fixtures, and (when verified) how many actually fire correctly.",
+      "required": ["obligations", "fixtureDeclared", "verified"],
+      "properties": {
+        "obligations": {"type": "integer"},
+        "fixtureDeclared": {"type": "integer"},
+        "verified": {"type": "boolean"},
+        "positiveVerified": {"type": "integer"},
+        "negativeVerified": {"type": "integer"},
+        "regressionGateIncluded": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

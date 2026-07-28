@@ -11,9 +11,10 @@ must realize.*
 ---
 
 You generate application code from a **KCF semantic IR** — a normalized,
-machine-checked model of a domain (`model-ir-v1`). The IR is the specification.
-Your job is to realize it faithfully in a target technology stack, adding nothing
-it does not declare and dropping nothing it does.
+structurally validated and coverage-assessed model of a domain (`model-ir-v1`). The IR
+is the specification (it captures what was modeled; it does not assert the domain is
+complete). Your job is to realize it faithfully in a target technology stack, adding
+nothing it does not declare and dropping nothing it does.
 
 ## Who — and what — "the generator" is (read this first)
 
@@ -317,6 +318,51 @@ dropped: []        # MUST be empty
 `dropped: []` is the goal — the lossless-handoff discipline that keeps generated
 code faithful to the IR (decision D-005). If your `dropped` list is non-empty,
 stop and explain rather than shipping an incomplete realization.
+
+### Also emit a machine-readable realization manifest (verifiable evidence)
+
+The prose self-audit above is for humans; it is a *claim*. Alongside it, emit a
+`realization-manifest-v1` JSON document so the claim can be **checked**, not trusted.
+This turns `dropped: []` from prose into evidence a tool verifies against the IR and
+the generated repository.
+
+For **every** semantic identity in the IR (concept `qualifiedName`, action/rule/
+relationship/lifecycle/policy `id`, …) give exactly one disposition. `realized` and
+`enriched` MUST carry `artifacts` (the `path` — and, where meaningful, the `symbol` —
+that realizes it); `delegated` / `out-of-tier` / `deferred` / `unsupported` MUST carry
+a `note` explaining the gap. Nothing may be omitted — a missing identity is a silently
+dropped one.
+
+```json
+{
+  "realizationManifestVersion": "1.0.0",
+  "model": "<model id>",
+  "stack": "fastapi-sqlmodel-postgres",
+  "tier": "backend",
+  "dispositions": [
+    {"semanticId": "customer.Customer", "disposition": "realized",
+     "artifacts": [{"path": "app/models.py", "symbol": "Customer"}],
+     "tests": [{"path": "tests/test_customer.py", "symbol": "test_create_customer"}]},
+    {"semanticId": "customer.UpdateCustomer", "disposition": "realized",
+     "artifacts": [{"path": "app/services.py", "symbol": "update_customer"}]},
+    {"semanticId": "customer.Experience", "disposition": "out-of-tier",
+     "note": "frontend tier owns experience/design"}
+  ]
+}
+```
+
+Verify it before handing off:
+
+```
+kcf.py verify-realization model.json realization-manifest.json --repo ./generated
+```
+
+The verifier fails closed on: a missing disposition (silently dropped identity),
+`realized` without artifacts (a claim with no evidence), an `unsupported`/`deferred`
+gap with no note, an artifact/symbol that does not exist in the repo, or a disposition
+for an identity not in the IR. A green verify is the objective proof behind
+`dropped: []`. (Running the generated tests / type-checker is a per-stack CI harness
+layered on top of this structural check.)
 
 ## What you are NOT responsible for
 

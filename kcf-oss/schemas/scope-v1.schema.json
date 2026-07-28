@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/scope-v1.schema.json",
+  "title": "KCF Model Scope Declaration v1",
+  "description": "An explicit, closed-world declaration of what a model is meant to cover: the capabilities in and out of scope, the sources it was built from, its stakeholders, its declared boundaries, and the questions still open. Completeness is then measured against this declared scope, not against an unbounded open world. A side artifact - it is NOT part of the model IR contract.",
+  "type": "object",
+  "required": ["scopeVersion", "includedCapabilities"],
+  "properties": {
+    "scopeVersion": {"const": "1.0.0"},
+    "model": {"type": "string", "description": "The id of the model this scope is declared for (optional; for cross-checking)."},
+    "packageKind": {"enum": ["vocabulary", "package"], "description": "Declares an intentionally sparse scope (a vocabulary/term library or sub-package). Only such a scope may leave includedCapabilities empty and still be closed-world complete."},
+    "includedCapabilities": {"type": "array", "items": {"type": "string"}, "description": "Capabilities the model is REQUIRED to cover. Each must map to at least one model construct to be closed-world complete. Must be non-empty unless packageKind is declared."},
+    "excludedCapabilities": {"type": "array", "items": {"type": "string"}, "description": "Capabilities deliberately out of scope (documented non-goals)."},
+    "sourceDocuments": {"type": "array", "items": {"type": "string"}, "description": "The sources this model was built from (document ids/uris)."},
+    "stakeholders": {"type": "array", "items": {"type": "string"}, "description": "Who defined / owns / signs off on this scope."},
+    "declaredBoundaries": {"type": "array", "items": {"type": "string"}, "description": "Explicit statements of where this model stops (integration seams, external systems, assumptions)."},
+    "openQuestions": {"type": "array", "items": {"type": "string"}, "description": "Known unresolved questions - a model with open questions is not closed-world complete."}
+  },
+  "additionalProperties": false
+}

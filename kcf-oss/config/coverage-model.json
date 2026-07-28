@@ -8,7 +8,12 @@
       "level": "required",
       "profiles": ["*"],
       "conceptKind": "ENTITY",
-      "dimension": "ENTITY"
+      "dimension": "ENTITY",
+      "evidence": "Every ENTITY concept has an attribute with identity: true.",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]
+      }
     },
     {
       "id": "coverage.entity.lifecycle",
@@ -57,7 +62,12 @@
       "profiles": ["*"],
       "effects": ["command", "transform"],
       "fields": ["authorization"],
-      "dimension": "RULE"
+      "dimension": "RULE",
+      "evidence": "Every command/transform action declares an authorization.",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]
+      }
     },
     {
       "id": "coverage.actor.present",
@@ -86,6 +96,213 @@
       "conceptKind": "EVENT",
       "rootKind": "CAUSATION",
       "dimension": "EVENT"
+    },
+
+    {
+      "id": "coverage.model.substantive-content",
+      "title": "The model captures substantive domain content",
+      "obligation": "model-has-substantive-content",
+      "level": "required",
+      "profiles": ["*"],
+      "vocabularyExempt": true,
+      "dimension": "ENTITY",
+      "evidence": "At least one concept or knowledge/behavior construct is present.",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/empty-application.json"]
+      }
+    },
+    {
+      "id": "coverage.model.profile-declared",
+      "title": "The model declares its intended profile/scope",
+      "obligation": "profile-declared",
+      "level": "recommended",
+      "profiles": ["*"],
+      "vocabularyExempt": true,
+      "dimension": "ARCHITECTURE"
+    },
+
+    {
+      "id": "coverage.business-application.entity",
+      "title": "A business application defines at least one entity",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["business-application"],
+      "vocabularyExempt": true,
+      "conceptKind": "ENTITY",
+      "dimension": "ENTITY",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/empty-application.json"]
+      }
+    },
+    {
+      "id": "coverage.business-application.actor",
+      "title": "A business application identifies at least one actor",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["business-application"],
+      "vocabularyExempt": true,
+      "conceptKind": "ACTOR",
+      "dimension": "ACTOR",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]
+      }
+    },
+    {
+      "id": "coverage.business-application.state-changing-action",
+      "title": "A business application declares at least one state-changing action",
+      "obligation": "at-least-one-action-effect",
+      "level": "required",
+      "profiles": ["business-application"],
+      "vocabularyExempt": true,
+      "effects": ["command", "transform"],
+      "dimension": "ACTION",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/coverage-complete.json"],
+        "violated": ["tests/fixtures/coverage/empty-application.json"]
+      }
+    },
+
+    {
+      "id": "coverage.event-driven.event",
+      "title": "An event-driven system defines at least one event",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["event-driven-system"],
+      "vocabularyExempt": true,
+      "conceptKind": "EVENT",
+      "collections": ["events"],
+      "dimension": "EVENT"
+    },
+    {
+      "id": "coverage.event-driven.producer",
+      "title": "Every event in an event-driven system has a producer",
+      "obligation": "concept-kind-targeted-by",
+      "level": "required",
+      "profiles": ["event-driven-system"],
+      "vocabularyExempt": true,
+      "conceptKind": "EVENT",
+      "rootKind": "CAUSATION",
+      "dimension": "EVENT"
+    },
+
+    {
+      "id": "coverage.analytics.measure",
+      "title": "An analytics platform defines at least one measure",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["analytics-platform"],
+      "vocabularyExempt": true,
+      "conceptKind": "MEASURE",
+      "collections": ["measures"],
+      "dimension": "MEASURE"
+    },
+    {
+      "id": "coverage.analytics.source-info",
+      "title": "An analytics platform grounds measures in source information",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["analytics-platform"],
+      "vocabularyExempt": true,
+      "conceptKind": "INFORMATION",
+      "collections": ["information"],
+      "dimension": "INFORMATION"
+    },
+
+    {
+      "id": "coverage.ai-application.ai-section",
+      "title": "An AI application declares its model/pipeline (ai) content",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["ai-application"],
+      "vocabularyExempt": true,
+      "collections": ["ai"],
+      "dimension": "AI"
+    },
+
+    {
+      "id": "coverage.operational.work",
+      "title": "An operational system declares work, a process, or an action",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["operational-system"],
+      "vocabularyExempt": true,
+      "conceptKind": "WORK",
+      "collections": ["processes", "actions"],
+      "dimension": "WORK"
+    },
+    {
+      "id": "coverage.operational.actor",
+      "title": "An operational system identifies at least one actor",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["operational-system"],
+      "vocabularyExempt": true,
+      "conceptKind": "ACTOR",
+      "dimension": "ACTOR"
+    },
+
+    {
+      "id": "coverage.org-knowledge.content",
+      "title": "Organizational knowledge declares assertions, information, or organizations",
+      "obligation": "at-least-one-of",
+      "level": "required",
+      "profiles": ["organizational-knowledge"],
+      "vocabularyExempt": true,
+      "conceptKind": "ORGANIZATIONAL",
+      "collections": ["assertions", "information", "organizations"],
+      "dimension": "ORGANIZATION"
+    },
+
+    {
+      "id": "coverage.relationship.present",
+      "title": "A multi-entity model declares relationships between its entities",
+      "obligation": "relationships-when-multiple-entities",
+      "level": "recommended",
+      "profiles": ["*"],
+      "dimension": "RELATIONSHIP",
+      "evidence": "At least one relationship exists once the model has two or more entities.",
+      "exceptions": "Single-entity models and vocabulary packages."
+    },
+    {
+      "id": "coverage.resource.present",
+      "title": "An operational system declares the resources it consumes or allocates",
+      "obligation": "at-least-one-of",
+      "level": "recommended",
+      "profiles": ["operational-system"],
+      "conceptKind": "RESOURCE",
+      "collections": ["resources", "allocations"],
+      "dimension": "RESOURCE"
+    },
+    {
+      "id": "coverage.temporal.present",
+      "title": "A time-sensitive system declares temporal structure",
+      "obligation": "at-least-one-of",
+      "level": "recommended",
+      "profiles": ["operational-system", "event-driven-system"],
+      "conceptKind": "TEMPORAL",
+      "collections": ["calendars"],
+      "dimension": "TEMPORAL"
+    },
+    {
+      "id": "coverage.reasoning.grounded",
+      "title": "Reasoning cites premises rather than asserting conclusions",
+      "obligation": "reasoning-has-premises",
+      "level": "recommended",
+      "profiles": ["ai-application", "organizational-knowledge"],
+      "dimension": "REASONING",
+      "evidence": "Every reasoning item lists at least one premise."
+    },
+    {
+      "id": "coverage.knowledge.provenance",
+      "title": "Assertions and information carry provenance",
+      "obligation": "knowledge-has-provenance",
+      "level": "recommended",
+      "profiles": ["organizational-knowledge"],
+      "dimension": "INFORMATION",
+      "evidence": "Each assertion/information record cites a sourceDocument, extractionMethod, or evidence."
     }
   ]
 }

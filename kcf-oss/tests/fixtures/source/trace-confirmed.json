@@ -1,0 +1,17 @@
+{
+  "sourceTraceVersion": "1.0.0",
+  "documentId": "shop-process-notes",
+  "documentVersion": "v1",
+  "model": "ShopFromProse",
+  "links": [
+    {"segmentId": "s1", "constructs": ["shop.Customer", "customer-places-order"], "assertions": [
+      {"semanticIdentity": "shop.Customer", "sourceExcerptHash": "sha256:b100c7905ea7ced0849dc4915bc0c6734a72f1f845e47ce156e84e3eb3266e5f", "extractedProposition": "Customers place orders in the system.", "transformation": "normalized", "confidence": 0.95, "reviewState": "semantically-confirmed", "reviewerDisposition": "accept", "reviewer": "sme:dana", "reviewedAt": "2026-07-27T10:00:00Z", "sourceVersion": "v1"},
+      {"semanticIdentity": "customer-places-order", "sourceExcerptHash": "sha256:b100c7905ea7ced0849dc4915bc0c6734a72f1f845e47ce156e84e3eb3266e5f", "extractedProposition": "Customers place orders.", "transformation": "verbatim", "confidence": 0.9, "reviewState": "encoding-reviewed", "reviewerDisposition": "accept", "reviewer": "sme:dana", "reviewedAt": "2026-07-27T10:01:00Z", "sourceVersion": "v1"}
+    ]},
+    {"segmentId": "s2", "constructs": ["shop.Order", "shop.Product", "order-contains-product"], "assertions": [
+      {"semanticIdentity": "shop.Order", "sourceExcerptHash": "sha256:1c29754422a27f1a169e9454885f7b5f61652a30107ec6426ffbd8ac9a640504", "extractedProposition": "Each order contains one or more products.", "transformation": "normalized", "confidence": 0.95, "reviewState": "semantically-confirmed", "reviewerDisposition": "accept", "reviewer": "sme:dana", "reviewedAt": "2026-07-27T10:02:00Z", "sourceVersion": "v1"},
+      {"semanticIdentity": "shop.Product", "sourceExcerptHash": "sha256:1c29754422a27f1a169e9454885f7b5f61652a30107ec6426ffbd8ac9a640504", "extractedProposition": "Each order contains one or more products.", "transformation": "normalized", "confidence": 0.9, "reviewState": "encoding-reviewed", "reviewerDisposition": "accept", "reviewer": "sme:dana", "reviewedAt": "2026-07-27T10:03:00Z", "sourceVersion": "v1"},
+      {"semanticIdentity": "order-contains-product", "sourceExcerptHash": "sha256:1c29754422a27f1a169e9454885f7b5f61652a30107ec6426ffbd8ac9a640504", "extractedProposition": "An order contains products.", "transformation": "verbatim", "confidence": 0.9, "reviewState": "semantically-confirmed", "reviewerDisposition": "accept", "reviewer": "sme:dana", "reviewedAt": "2026-07-27T10:04:00Z", "sourceVersion": "v1"}
+    ]}
+  ]
+}

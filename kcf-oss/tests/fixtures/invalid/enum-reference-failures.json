@@ -1,0 +1,303 @@
+{
+  "$schema": "../../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "EnumReferenceFailures",
+  "module": "KCF",
+  "namespace": "ref",
+  "concepts": [
+    {
+      "id": "BadEvent",
+      "qualifiedName": "ref.BadEvent",
+      "kind": "EVENT",
+      "conceptKind": "BOGUS",
+      "expectedness": "BOGUS"
+    },
+    {
+      "id": "BadActor",
+      "qualifiedName": "ref.BadActor",
+      "kind": "ACTOR",
+      "conceptKind": "BOGUS",
+      "communicationRef": "ref.Missing"
+    },
+    {
+      "id": "BadWork",
+      "qualifiedName": "ref.BadWork",
+      "kind": "WORK",
+      "conceptKind": "BOGUS"
+    },
+    {
+      "id": "BadMeasure",
+      "qualifiedName": "ref.BadMeasure",
+      "kind": "MEASURE",
+      "conceptKind": "BOGUS",
+      "scale": "BOGUS",
+      "aggregation": "BOGUS"
+    },
+    {
+      "id": "BadSpatial",
+      "qualifiedName": "ref.BadSpatial",
+      "kind": "SPATIAL",
+      "geometry": {
+        "geometryKind": "BOGUS"
+      }
+    },
+    {
+      "id": "BadTemporal",
+      "qualifiedName": "ref.BadTemporal",
+      "kind": "TEMPORAL",
+      "durationValue": {
+        "unit": "BOGUS"
+      }
+    },
+    {
+      "id": "BadEntity",
+      "qualifiedName": "ref.BadEntity",
+      "kind": "ENTITY",
+      "compositions": [
+        {
+          "name": "c1",
+          "target": "ref.Missing",
+          "cardinality": "BOGUS",
+          "orphan": "BOGUS"
+        }
+      ],
+      "namedReferences": [
+        {
+          "name": "r1",
+          "target": "ref.Missing",
+          "cardinality": "one"
+        }
+      ],
+      "collections": [
+        {
+          "name": "col1",
+          "of": "ref.Missing"
+        }
+      ],
+      "lifecycleRef": "ref.Missing",
+      "constraints": [
+        "ref.Missing"
+      ]
+    },
+    {
+      "id": "Src",
+      "qualifiedName": "ref.Src",
+      "kind": "ENTITY"
+    },
+    {
+      "id": "MasterLike",
+      "qualifiedName": "ref.MasterLike",
+      "kind": "ENTITY",
+      "metadata": {
+        "category": "master"
+      }
+    },
+    {
+      "id": "BadCat",
+      "qualifiedName": "ref.BadCat",
+      "kind": "ENTITY",
+      "metadata": {
+        "category": "BOGUS"
+      }
+    },
+    {
+      "id": "BadContain",
+      "qualifiedName": "ref.BadContain",
+      "kind": "ENTITY",
+      "metadata": {
+        "containment": "BOGUS"
+      }
+    },
+    {
+      "id": "FakePart",
+      "qualifiedName": "ref.FakePart",
+      "kind": "ENTITY",
+      "metadata": {
+        "containment": "part"
+      }
+    },
+    {
+      "id": "TypoMeta",
+      "qualifiedName": "ref.TypoMeta",
+      "kind": "ENTITY",
+      "metadata": {
+        "zzztypo": "x"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "xform",
+      "rootKind": "TRANSFORMATION",
+      "source": "ref.Src",
+      "target": "ref.MasterLike"
+    },
+    {
+      "id": "reldir",
+      "rootKind": "ASSOCIATION",
+      "source": "ref.Src",
+      "target": "ref.MasterLike",
+      "qualifiers": {
+        "directionality": "BOGUS"
+      }
+    },
+    {
+      "id": "relinf",
+      "rootKind": "ASSOCIATION",
+      "source": "ref.Src",
+      "target": "ref.MasterLike",
+      "qualifiers": {
+        "inferences": [
+          "BOGUS"
+        ]
+      }
+    },
+    {
+      "id": "relod",
+      "rootKind": "COMPOSITION",
+      "source": "ref.Src",
+      "target": "ref.MasterLike",
+      "qualifiers": {
+        "on-delete": "BOGUS"
+      }
+    },
+    {
+      "id": "relq",
+      "rootKind": "ASSOCIATION",
+      "source": "ref.Src",
+      "target": "ref.MasterLike",
+      "qualifiers": {
+        "zzztypo": "x"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "BadAction",
+      "effect": "command",
+      "operation": "BOGUS",
+      "scope": "BOGUS",
+      "selection": "BOGUS",
+      "target": "ref.BadEntity",
+      "inputCardinality": "BOGUS",
+      "outputCardinality": "one",
+      "atomicity": "BOGUS",
+      "concurrency": "BOGUS",
+      "idempotency": "idempotent",
+      "authorization": "ref.P"
+    }
+  ],
+  "mutations": [
+    {
+      "id": "BadMut",
+      "subject": "ref.Missing",
+      "emits": [
+        "ref.Missing"
+      ]
+    }
+  ],
+  "units": [
+    {
+      "id": "BadUnit",
+      "base": "ref.Missing"
+    }
+  ],
+  "authorities": [
+    {
+      "id": "BadAuth",
+      "mode": "BOGUS"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "BadCap",
+      "implementedBy": "ref.Missing",
+      "requiresSkill": [
+        "ref.Missing"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "BadSkill",
+      "requires": [
+        "ref.Missing"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "BadRes",
+      "resourceKind": "BOGUS",
+      "consumption": "BOGUS",
+      "location": "ref.Missing"
+    }
+  ],
+  "allocations": [
+    {
+      "id": "BadAlloc",
+      "resource": "ref.Missing"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "BadProp",
+      "mode": "BOGUS"
+    }
+  ],
+  "math": [
+    {
+      "id": "BadMath",
+      "result": "ref.Missing"
+    }
+  ],
+  "routes": [
+    {
+      "id": "BadRoute",
+      "from": "ref.Missing"
+    }
+  ],
+  "processes": [
+    {
+      "id": "BadProc",
+      "nodes": [
+        {
+          "id": "N1",
+          "type": "gateway",
+          "gatewayKind": "BOGUS",
+          "activity": "ref.Missing"
+        }
+      ],
+      "boundaries": [
+        {
+          "on": "UnknownNode"
+        }
+      ],
+      "lanes": [
+        {
+          "performer": "ref.Missing"
+        }
+      ]
+    }
+  ],
+  "lifecycles": [
+    {
+      "id": "BadLC",
+      "subject": "ref.BadEntity",
+      "states": [
+        "A"
+      ],
+      "initial": "A",
+      "terminal": [
+        "A"
+      ],
+      "transitions": [],
+      "governsKind": [
+        "BOGUS"
+      ],
+      "temporalRefs": [
+        "ref.Missing"
+      ]
+    }
+  ]
+}

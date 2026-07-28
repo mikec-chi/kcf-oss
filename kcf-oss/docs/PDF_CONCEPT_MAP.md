@@ -48,7 +48,7 @@ governance. These map to:
 - the manifest and integrity lock; versioned JSON Schemas; textual compiler;
   profile resolver; validator, linter, analyzer, and conformance fixtures;
   semantic-delta, migration, and compatibility tools; and the LLM code-generation
-  pack (`codegen/`) that turns a `ready` IR into an application for any stack.
+  pack (`codegen/`) that turns a `ready` IR into an application for your target stack.
   (A separate commercial platform builds on the same IR.)
 
 The PDFs call the series Parts I-III of V. This implementation covers only the

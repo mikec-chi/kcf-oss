@@ -4,10 +4,10 @@
 > first (the 3-minute, per-LLM setup). This page is the detailed server reference.
 
 Plug KCF into the chat LLM you already use. Instead of vibe-coding against prose,
-you talk to Claude / ChatGPT / VS Code, and it uses KCF to build a **complete,
-machine-checked semantic model** of your domain — then generates code from that
-model, for any stack. This is **knowledge coding = semantic modeling + vibe
-coding**.
+you talk to Claude / ChatGPT / VS Code, and it uses KCF to build a **validated,
+coverage-assessed, traceable semantic model** of your domain — reporting what passed
+rather than asserting the domain is complete — then generates code from that model,
+for your target stack. This is **knowledge coding = semantic modeling + vibe coding**.
 
 **The flow:** describe your domain → the assistant **models** it (`.kcf`) →
 **checks** it (`assess`) → you **approve** anything it inferred (bulk or one by one)

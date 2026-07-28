@@ -1,0 +1,17 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ShopRealization",
+  "module": "KCF",
+  "namespace": "shop",
+  "profile": "business-application",
+  "profiles": ["business-application"],
+  "concepts": [
+    {"id": "Order", "qualifiedName": "shop.Order", "kind": "ENTITY", "attributes": [
+      {"name": "orderId", "type": "UUID", "identity": true}
+    ]}
+  ],
+  "actions": [
+    {"id": "CreateOrder", "effect": "command", "operation": "create", "scope": "record", "target": "shop.Order", "authorization": "shop.OrderPolicy"}
+  ]
+}

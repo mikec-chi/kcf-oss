@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "EmptyApplication",
+  "module": "KCF",
+  "namespace": "empty",
+  "profile": "business-application",
+  "profiles": ["business-application"],
+  "concepts": []
+}

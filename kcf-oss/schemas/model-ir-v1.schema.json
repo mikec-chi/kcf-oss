@@ -37,6 +37,10 @@
       },
       "uniqueItems": true
     },
+    "packageKind": {
+      "type": "string",
+      "description": "Optional declaration of what this package is (e.g. 'vocabulary' for a definitions-only term library). A 'vocabulary' package is exempt from the substantive-content and profile-anchor coverage obligations. Additive/optional: absence changes nothing."
+    },
     "requiredPatterns": {
       "type": "array",
       "items": {

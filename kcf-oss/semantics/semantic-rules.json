@@ -7,6 +7,16 @@
   ],
   "rules": [
     {
+      "id": "action.atomicity.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's atomicity mode MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
       "id": "action.audit.mutation",
       "source": "semantic-core",
       "section": "Transactions, concurrency, retries, and events",
@@ -14,6 +24,16 @@
       "requirement": "Record and set mutations SHOULD capture actor, target, selection or identity, time, outcome, and correlation identifier.",
       "enforcement": "profile-dependent",
       "phase": "actions"
+    },
+    {
+      "id": "action.cardinality.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's input and output cardinalities MUST be recognized values.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.collection.aggregate-grain",
@@ -192,8 +212,9 @@
       "section": "Collection queries and relational/set operations",
       "severity": "error",
       "requirement": "Sampling MUST define method, valid size/rate, seed or nondeterminism policy, and stratification keys where applicable.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
     },
     {
       "id": "action.collection.set-compatibility",
@@ -210,8 +231,9 @@
       "section": "Collection queries and relational/set operations",
       "severity": "error",
       "requirement": "Windows MUST define type, size/gap, ordering/time field, time zone, lateness/watermark policy for streams, and emission policy.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_collection_transforms"
     },
     {
       "id": "action.compose.compensation",
@@ -250,6 +272,16 @@
       "phase": "actions"
     },
     {
+      "id": "action.concurrency.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's concurrency mode MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
       "id": "action.concurrency.version",
       "source": "semantic-core",
       "section": "Transactions, concurrency, retries, and events",
@@ -274,8 +306,9 @@
       "section": "Safety and authorization for destructive actions",
       "severity": "error",
       "requirement": "Destructive actions MUST require a specific permission; generic read/write permission is insufficient under a strict profile.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.destructive.confirmation",
@@ -400,7 +433,7 @@
       "section": "Action invocation and composition",
       "severity": "error",
       "requirement": "A query-only context MUST NOT invoke a command. A pure transform MUST NOT invoke an undeclared stateful effect.",
-      "enforcement": "partially-automated",
+      "enforcement": "automated",
       "phase": "actions",
       "handler": "check_actions"
     },
@@ -486,6 +519,16 @@
       "phase": "actions"
     },
     {
+      "id": "action.operation.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's operation MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
       "id": "action.record.create-input",
       "source": "semantic-core",
       "section": "Record CRUD operations",
@@ -500,8 +543,9 @@
       "section": "Record CRUD operations",
       "severity": "error",
       "requirement": "`create` MUST return or emit the created identity unless the execution profile explicitly defines asynchronous identity delivery.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.record.create-readonly",
@@ -581,8 +625,9 @@
       "section": "Record CRUD operations",
       "severity": "error",
       "requirement": "`replace` MUST supply every required mutable field. Omitted optional fields MUST follow an explicit clear/preserve policy.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.record.target",
@@ -590,8 +635,9 @@
       "section": "Record CRUD operations",
       "severity": "error",
       "requirement": "A record CRUD action MUST target exactly one entity or record-shaped resource.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.record.update-fields",
@@ -608,8 +654,9 @@
       "section": "Record CRUD operations",
       "severity": "error",
       "requirement": "`upsert` MUST identify a stable conflict key and MUST define behavior when more than one existing record matches.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.retry.bound",
@@ -638,6 +685,26 @@
       "enforcement": "automated",
       "phase": "actions",
       "handler": "check_integration"
+    },
+    {
+      "id": "action.scope.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's scope MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
+    },
+    {
+      "id": "action.selection.unknown",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An action's selection MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.set.atomicity",
@@ -673,8 +740,9 @@
       "section": "Set-oriented CRUD and bulk operations",
       "severity": "error",
       "requirement": "Bulk mutations MUST define conflict handling when records can change between selection and mutation.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.set.explicit-scope",
@@ -755,8 +823,9 @@
       "section": "Set-oriented CRUD and bulk operations",
       "severity": "error",
       "requirement": "`query` and `count` MUST have `effect = \"query\"` and MUST NOT mutate modeled state.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.set.selection-required",
@@ -811,8 +880,9 @@
       "section": "Data-processing transformations",
       "severity": "error",
       "requirement": "Security/privacy classification MUST propagate unless a validated declassification, masking, anonymization, or aggregation rule applies.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.transform.determinism",
@@ -829,8 +899,9 @@
       "section": "Lineage, binding, and cost rules",
       "severity": "error",
       "requirement": "Every transformed target field MUST identify its contributing source fields, transformation, and execution provenance.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.transform.identity",
@@ -838,8 +909,9 @@
       "section": "Data-processing transformations",
       "severity": "error",
       "requirement": "Transformations used for synchronization/upsert MUST preserve or explicitly remap identity.",
-      "enforcement": "manual-review",
-      "phase": "actions"
+      "enforcement": "automated",
+      "phase": "actions",
+      "handler": "check_actions"
     },
     {
       "id": "action.transform.loss",
@@ -1258,6 +1330,66 @@
       ]
     },
     {
+      "id": "kcf.actor.communication",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An actor's communication reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_actors"
+    },
+    {
+      "id": "kcf.actor.kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An actor's kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_actors"
+    },
+    {
+      "id": "kcf.allocation.reference",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An allocation's references MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_resources"
+    },
+    {
+      "id": "kcf.authority.mode",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An authority's mode MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_actors"
+    },
+    {
+      "id": "kcf.capability.implemented-by",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A capability's implementation reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_capabilities_skills"
+    },
+    {
+      "id": "kcf.capability.requires-skill",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A capability's required-skill reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_capabilities_skills"
+    },
+    {
       "id": "kcf.concept.abstract",
       "source": "kcf",
       "section": "Universal concept rules",
@@ -1343,6 +1475,16 @@
       "phase": "concepts"
     },
     {
+      "id": "kcf.concept.unknown-field",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An unrecognized concept field SHOULD be verified — it is captured as free metadata and may be a typo or an unsupported field.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_concept_metadata"
+    },
+    {
       "id": "kcf.concept.version",
       "source": "kcf",
       "section": "Universal concept rules",
@@ -1362,6 +1504,126 @@
       "handler": "check_events_resources_plans"
     },
     {
+      "id": "kcf.entity.cardinality",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity attribute or relationship cardinality MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.category-shape",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An entity's declared category SHOULD match the shape derived from its structure.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_category_consistency"
+    },
+    {
+      "id": "kcf.entity.category-vocab",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An entity's data-management category SHOULD be a recognized vocabulary value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_category_consistency"
+    },
+    {
+      "id": "kcf.entity.collection",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity collection's element type MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.composition",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity composition target MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.constraint",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity constraint reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.containment-shape",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An entity's declared containment role SHOULD match its derived structure.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_containment_consistency"
+    },
+    {
+      "id": "kcf.entity.containment-vocab",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An entity's containment tag SHOULD be a recognized vocabulary value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_containment_consistency"
+    },
+    {
+      "id": "kcf.entity.lifecycle",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity's lifecycle reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.orphan",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity's orphan policy MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.entity.reference",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An entity reference target MUST resolve to a declared concept.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.event.expectedness",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An event's expectedness MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_events"
+    },
+    {
       "id": "kcf.event.immutable",
       "source": "kcf",
       "section": "Event rules",
@@ -1370,6 +1632,16 @@
       "enforcement": "automated",
       "phase": "concepts",
       "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "kcf.event.kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "An event's kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_events"
     },
     {
       "id": "kcf.extension.ownership",
@@ -1397,6 +1669,136 @@
       "requirement": "Runtime discoveries promoted into grammar semantics require evidence, review, version impact analysis, and approval.",
       "enforcement": "manual-review",
       "phase": "concepts"
+    },
+    {
+      "id": "kcf.lifecycle.governs-kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A lifecycle's governed concept kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_lifecycle_refs"
+    },
+    {
+      "id": "kcf.lifecycle.temporal",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A lifecycle's temporal reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_lifecycle_refs"
+    },
+    {
+      "id": "kcf.logic.mode",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A logic modal operator MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_quantitative"
+    },
+    {
+      "id": "kcf.math.reference",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A math reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_quantitative"
+    },
+    {
+      "id": "kcf.measure.aggregation",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A measure's aggregation MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_measures"
+    },
+    {
+      "id": "kcf.measure.kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A measure's kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_measures"
+    },
+    {
+      "id": "kcf.measure.scale",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A measure's scale MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_measures"
+    },
+    {
+      "id": "kcf.mutation.emit",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A mutation's emitted event MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.mutation.subject",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A mutation's subject MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_entities"
+    },
+    {
+      "id": "kcf.process.boundary",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A process boundary MUST attach to a known node.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_work"
+    },
+    {
+      "id": "kcf.process.gateway",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A process gateway kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_work"
+    },
+    {
+      "id": "kcf.process.lane",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A process lane performer MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_work"
+    },
+    {
+      "id": "kcf.process.node",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A process node reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_work"
     },
     {
       "id": "kcf.profile.import",
@@ -1528,12 +1930,32 @@
       "phase": "concepts"
     },
     {
+      "id": "kcf.relationship.directionality",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A relationship's directionality MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
       "id": "kcf.relationship.endpoint",
       "source": "kcf",
       "section": "Relationship algebra rules",
       "severity": "error",
       "requirement": "Source and target MUST satisfy kind, concept, trait, and runtime predicate constraints.",
       "enforcement": "partially-automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
+    },
+    {
+      "id": "kcf.relationship.infer",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A relationship's inference semantics MUST be a recognized value.",
+      "enforcement": "automated",
       "phase": "concepts",
       "handler": "check_relationships"
     },
@@ -1547,13 +1969,24 @@
       "phase": "concepts"
     },
     {
+      "id": "kcf.relationship.on-delete-vocab",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "A relationship's on-delete qualifier SHOULD be a recognized vocabulary value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationship_qualifiers"
+    },
+    {
       "id": "kcf.relationship.ordering",
       "source": "kcf",
       "section": "Relationship algebra rules",
       "severity": "error",
       "requirement": "Ordering MUST declare its dimension, such as workflow, temporal, version, or priority.",
-      "enforcement": "manual-review",
-      "phase": "concepts"
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
     },
     {
       "id": "kcf.relationship.participation",
@@ -1570,8 +2003,9 @@
       "section": "Relationship algebra rules",
       "severity": "error",
       "requirement": "Negative, prohibitive, or opposing relations MUST not be treated as positive facts.",
-      "enforcement": "manual-review",
-      "phase": "concepts"
+      "enforcement": "partially-automated",
+      "phase": "concepts",
+      "handler": "check_relationships"
     },
     {
       "id": "kcf.relationship.reification",
@@ -1631,6 +2065,16 @@
       "phase": "concepts"
     },
     {
+      "id": "kcf.relationship.unknown-qualifier",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "warning",
+      "requirement": "An unrecognized relationship qualifier SHOULD be verified.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_relationship_qualifiers"
+    },
+    {
       "id": "kcf.resource.capacity",
       "source": "kcf",
       "section": "Resource rules",
@@ -1639,6 +2083,96 @@
       "enforcement": "automated",
       "phase": "concepts",
       "handler": "check_events_resources_plans"
+    },
+    {
+      "id": "kcf.resource.consumption",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A resource's consumption mode MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_resources"
+    },
+    {
+      "id": "kcf.resource.kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A resource's kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_resources"
+    },
+    {
+      "id": "kcf.resource.reference",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A resource reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_resources"
+    },
+    {
+      "id": "kcf.skill.requires",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A skill's prerequisite reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_capabilities_skills"
+    },
+    {
+      "id": "kcf.spatial.geometry",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A spatial geometry kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_quantitative"
+    },
+    {
+      "id": "kcf.spatial.route",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A spatial route reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_quantitative"
+    },
+    {
+      "id": "kcf.temporal.duration",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A temporal duration unit MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_quantitative"
+    },
+    {
+      "id": "kcf.unit.base",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A unit's base-unit reference MUST resolve.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_measures"
+    },
+    {
+      "id": "kcf.work.kind",
+      "source": "kcf",
+      "section": "Analyzer-enforced structural and reference rules",
+      "severity": "error",
+      "requirement": "A work's kind MUST be a recognized value.",
+      "enforcement": "automated",
+      "phase": "concepts",
+      "handler": "check_work"
     },
     {
       "id": "knowledge.access.policy",

@@ -165,8 +165,8 @@ requirements ──(01b NL / 01c document / 02b pattern / author)──▶ model
       └──────────────────────────┘ (loop until required gaps = 0)
                                  │ ready:true   (= sufficient coverage)
                                  ▼
-                    hand model-ir.json to your LLM (codegen/) for any stack
-                    (coverage self-audit = proof of a lossless handoff)
+                    hand model-ir.json to the LLM you choose (codegen/), for your stack
+                    (realization manifest = accounted-for handoff, at an evidence level)
 ```
 
 ## Command reference
@@ -182,7 +182,10 @@ requirements ──(01b NL / 01c document / 02b pattern / author)──▶ model
 | `kcf.py roles-check <model>` | traits resolve to declared pattern roles? |
 | `kcf.py review-queue <model> [--by-segment <trace>]` | tier synthetic knowledge for SME review |
 | `kcf.py confirm <model> --reviewer X --as-of T --decisions d.json` | promote confirmed synthetic → fact |
-| (then) hand the `ready` IR to your LLM via `codegen/` | generate code for any stack, with a coverage self-audit |
+| `kcf.py completeness <model> <scope>` | closed-world completeness vs a declared scope (axes + blockers) |
+| `kcf.py verify-realization <model> <manifest> [--repo DIR]` | check the codegen handoff; reports an evidence level |
+| `kcf.py coverage-meta` / `kcf.py automation-report` | coverage of the coverage system; automation by risk |
+| (then) hand the `ready` IR to the LLM you choose via `codegen/` | generate code for your target stack, with a verifiable realization manifest |
 
 ## What "sufficient coverage" means, precisely
 

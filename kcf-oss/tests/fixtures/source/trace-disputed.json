@@ -1,0 +1,16 @@
+{
+  "sourceTraceVersion": "1.0.0",
+  "documentId": "shop-process-notes",
+  "documentVersion": "v1",
+  "model": "ShopFromProse",
+  "links": [
+    {"segmentId": "s1", "constructs": ["shop.Customer", "customer-places-order"], "assertions": [
+      {"semanticIdentity": "shop.Customer", "reviewState": "semantically-confirmed", "reviewerDisposition": "accept", "reviewer": "sme:dana"},
+      {"semanticIdentity": "customer-places-order", "reviewState": "encoding-reviewed", "reviewerDisposition": "accept", "reviewer": "sme:dana"}
+    ]},
+    {"segmentId": "s2", "constructs": ["shop.Order", "shop.Product", "order-contains-product"], "assertions": [
+      {"semanticIdentity": "shop.Order", "reviewState": "encoding-reviewed", "reviewerDisposition": "accept", "reviewer": "sme:dana"},
+      {"semanticIdentity": "shop.Product", "reviewState": "disputed", "reviewerDisposition": "revise", "reviewerNotes": "Source says a product may have several skus; the single-sku identity is contested.", "reviewer": "sme:lee"}
+    ]}
+  ]
+}

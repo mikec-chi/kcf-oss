@@ -17,8 +17,8 @@ forever, under [Apache-2.0](LICENSE):
   prompt, the per-run templates, the per-construct coverage audit, and the
   single-shot examples across **backend** tiers (each exposing a Swagger/OpenAPI
   interface) and **frontend** tiers (bound to that OpenAPI) that turn a KCF IR
-  into an application with any LLM, for any stack. Open, and extensible with your
-  own stack descriptors.
+  into an application with the LLM you choose, for the stacks the pack ships. Open,
+  and extensible with your own stack descriptors.
 - **The application-generation workflow** — the ordered prompt package.
 
 **OSS stops at the IR.** The open standard produces the machine-checked semantic
@@ -46,8 +46,8 @@ it.
    grammars, IR, compiler, analyzer, and the LLM codegen
    pack — stays open; new commercial features are additive on top of the IR.
    (The boundary is set deliberately at the IR: the open standard's job is to
-   produce a complete, machine-checked IR and generate code from it with an LLM;
-   turning models into running systems is the commercial concern.)
+   produce a validated, coverage-assessed, traceable IR and generate code from it with
+   an LLM; turning models into running systems is the commercial concern.)
 4. **The IR is a public contract.** Breaking changes to `model-ir-v1` are
    versioned and migrated in the open.
 
