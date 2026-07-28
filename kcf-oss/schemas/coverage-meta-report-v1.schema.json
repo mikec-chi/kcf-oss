@@ -25,7 +25,11 @@
           "hasFixtures": {"type": "boolean"},
           "regressionGated": {"type": "boolean", "description": "At least one obligation in this family has a positive+negative fixture verified this run."},
           "obligationIds": {"type": "array", "items": {"type": "string"}},
-          "status": {"enum": ["covered", "coverage-policy-missing"]}
+          "status": {
+            "enum": ["covered", "conditional", "intentionally-none", "coverage-policy-missing"],
+            "description": "covered = has obligations; conditional/intentionally-none = an explicit familyPolicies decision (deliberate); coverage-policy-missing = no obligation AND no declared decision (unfinished)."
+          },
+          "policyReason": {"type": ["string", "null"], "description": "Reason from familyPolicies when status is conditional/intentionally-none."}
         },
         "additionalProperties": false
       }

@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OpNoActor",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "operational-system",
+  "profiles": [
+    "operational-system"
+  ],
+  "concepts": [
+    {
+      "id": "FulfillOrder",
+      "qualifiedName": "cov.FulfillOrder",
+      "kind": "WORK"
+    }
+  ]
+}

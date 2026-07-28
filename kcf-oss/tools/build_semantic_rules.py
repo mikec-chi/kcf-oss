@@ -150,7 +150,14 @@ def main() -> None:
 
     output = {
         "$schema": "./semantic-rules.schema.json",
-        "version": "2.2.0",
+        # 3.0.0 (breaking): the catalogue grew 270 -> 322 rules and automated 14 new
+        # structural diagnostics (ORDERING dimension, upsert conflict key, destructive
+        # authorization, bulk concurrency, query purity, transform lineage, ...). Those
+        # are stricter validation, so some formerly-accepted models can now emit errors
+        # ("narrowing a required contract" is breaking per docs/VERSIONING.md). The 52
+        # newly-catalogued rules were already enforced (documentation, no behavior
+        # change), but the automation makes this a major, not a minor, bump.
+        "version": "3.0.0",
         "sources": [
             CORE_SOURCE.relative_to(WORKSPACE_ROOT).as_posix(),
             KCF_SOURCE.relative_to(WORKSPACE_ROOT).as_posix(),

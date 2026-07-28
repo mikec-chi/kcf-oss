@@ -414,6 +414,22 @@ def ev_reasoning_has_premises(model: dict, obligation: dict) -> list[dict]:
     return gaps
 
 
+def ev_subsection_required_when_present(model: dict, obligation: dict) -> list[dict]:
+    """Conditional completeness: if a cross-cutting section (e.g. `security`,
+    `integration`) is declared at all, a named sub-field must be non-empty - a
+    security posture with no controls, or an integration with no adapters, is
+    incomplete. Fires only when the section is present, so a model that does not use
+    the section is never nagged (distinct from the analyzer, which checks the section's
+    internal references/math, not whether it was fleshed out)."""
+    section = model.get(obligation["section"])
+    if not section or not isinstance(section, dict):
+        return []
+    if section.get(obligation["requires"]):
+        return []
+    subject = model.get("id", "<model>")
+    return [gap(obligation, subject, f"{obligation['section']} section is declared but has no {obligation['requires']}")]
+
+
 def ev_knowledge_has_provenance(model: dict, obligation: dict) -> list[dict]:
     """Assertions and information in a knowledge model should carry provenance (a
     source document, an extraction method, or evidence) so a claim can be traced to
@@ -439,6 +455,7 @@ EVALUATORS = {
     "relationships-when-multiple-entities": ev_relationships_when_multiple_entities,
     "reasoning-has-premises": ev_reasoning_has_premises,
     "knowledge-has-provenance": ev_knowledge_has_provenance,
+    "subsection-required-when-present": ev_subsection_required_when_present,
     "concept-kind-has-crud": ev_concept_kind_has_crud,
     "concept-kind-has-set-operation": ev_concept_kind_has_set_operation,
     "at-least-one-transformation": ev_at_least_one_transformation,

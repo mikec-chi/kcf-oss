@@ -73,8 +73,9 @@ Four **resources** expose the same reference material as attachable context:
 `kcf://reference/coverage-model`.
 
 **kcf-oss stops at the IR** — there is no emitter; `codegen_prompt` returns the
-LLM prompt pack, and the host LLM writes the code (finishing with a coverage
-self-audit that proves nothing was dropped).
+LLM prompt pack, and the host LLM writes the code (finishing with a realization
+manifest that accounts for every construct — verifiable at an explicit evidence
+level with `verify-realization`).
 
 ### Synthetic gap-filling — approve fast, or review rigorously
 

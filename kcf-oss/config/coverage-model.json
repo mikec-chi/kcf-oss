@@ -174,7 +174,11 @@
       "vocabularyExempt": true,
       "conceptKind": "EVENT",
       "collections": ["events"],
-      "dimension": "EVENT"
+      "dimension": "EVENT",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/event-driven-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/event-driven-no-event.json"]
+      }
     },
     {
       "id": "coverage.event-driven.producer",
@@ -185,7 +189,11 @@
       "vocabularyExempt": true,
       "conceptKind": "EVENT",
       "rootKind": "CAUSATION",
-      "dimension": "EVENT"
+      "dimension": "EVENT",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/event-driven-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/event-driven-no-producer.json"]
+      }
     },
 
     {
@@ -197,7 +205,11 @@
       "vocabularyExempt": true,
       "conceptKind": "MEASURE",
       "collections": ["measures"],
-      "dimension": "MEASURE"
+      "dimension": "MEASURE",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/analytics-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/analytics-no-measure.json"]
+      }
     },
     {
       "id": "coverage.analytics.source-info",
@@ -208,7 +220,11 @@
       "vocabularyExempt": true,
       "conceptKind": "INFORMATION",
       "collections": ["information"],
-      "dimension": "INFORMATION"
+      "dimension": "INFORMATION",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/analytics-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/analytics-no-source.json"]
+      }
     },
 
     {
@@ -219,7 +235,11 @@
       "profiles": ["ai-application"],
       "vocabularyExempt": true,
       "collections": ["ai"],
-      "dimension": "AI"
+      "dimension": "AI",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/ai-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/ai-no-section.json"]
+      }
     },
 
     {
@@ -231,7 +251,11 @@
       "vocabularyExempt": true,
       "conceptKind": "WORK",
       "collections": ["processes", "actions"],
-      "dimension": "WORK"
+      "dimension": "WORK",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/operational-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/operational-no-work.json"]
+      }
     },
     {
       "id": "coverage.operational.actor",
@@ -241,7 +265,11 @@
       "profiles": ["operational-system"],
       "vocabularyExempt": true,
       "conceptKind": "ACTOR",
-      "dimension": "ACTOR"
+      "dimension": "ACTOR",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/operational-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/operational-no-actor.json"]
+      }
     },
 
     {
@@ -253,7 +281,11 @@
       "vocabularyExempt": true,
       "conceptKind": "ORGANIZATIONAL",
       "collections": ["assertions", "information", "organizations"],
-      "dimension": "ORGANIZATION"
+      "dimension": "ORGANIZATION",
+      "fixtures": {
+        "satisfied": ["tests/fixtures/coverage/profiles/org-knowledge-full.json"],
+        "violated": ["tests/fixtures/coverage/profiles/org-knowledge-no-content.json"]
+      }
     },
 
     {
@@ -303,6 +335,42 @@
       "profiles": ["organizational-knowledge"],
       "dimension": "INFORMATION",
       "evidence": "Each assertion/information record cites a sourceDocument, extractionMethod, or evidence."
+    },
+
+    {
+      "id": "coverage.security.controls",
+      "title": "A declared security posture defines at least one control",
+      "obligation": "subsection-required-when-present",
+      "level": "recommended",
+      "profiles": ["*"],
+      "section": "security",
+      "requires": "controls",
+      "dimension": "SECURITY",
+      "evidence": "When a `security` section is present, it declares at least one control.",
+      "exceptions": "Models with no security section (the obligation does not fire)."
+    },
+    {
+      "id": "coverage.integration.adapters",
+      "title": "A declared integration surface defines at least one adapter",
+      "obligation": "subsection-required-when-present",
+      "level": "recommended",
+      "profiles": ["*"],
+      "section": "integration",
+      "requires": "adapters",
+      "dimension": "INTEGRATION",
+      "evidence": "When an `integration` section is present, it declares at least one adapter.",
+      "exceptions": "Models with no integration section (the obligation does not fire)."
     }
-  ]
+  ],
+  "familyPolicies": {
+    "_comment": "Explicit completeness-policy decision for each grammar construct family that has no obligation above. Distinguishes a DELIBERATE non-applicability from an unfinished policy, so meta-coverage (kcf coverage-meta) can tell a designed gap from a missing one. Decisions: 'conditional' (completeness is enforced elsewhere or only under a specific construct), 'intentionally-none' (an optional or emitter-tier dimension with no required completeness obligation by design).",
+    "ANALYTICS": {"decision": "conditional", "reason": "Analytics completeness is carried by the analytics-platform profile's MEASURE + source-INFORMATION obligations; the ANALYTICS emitter dimension (reports/dashboards) is presentation and has no separate required completeness obligation."},
+    "LINEAGE": {"decision": "conditional", "reason": "Lineage integrity is enforced by analyzer validity rules (lineage.cycle / lineage.binding.unique / lineage.cost.nonnegative); there is no separate required completeness obligation."},
+    "DESIGN": {"decision": "intentionally-none", "reason": "DESIGN is an emitter/presentation dimension; the generated UI is driven by ENTITY/ACTION/EXPERIENCE, not gated by a required DESIGN completeness obligation."},
+    "EXPERIENCE": {"decision": "intentionally-none", "reason": "EXPERIENCE (UI/flows) is emitter-tier; frontend generation derives from ENTITY/ACTION, so no required experience completeness obligation is imposed."},
+    "INTENT": {"decision": "intentionally-none", "reason": "INTENT (goals/objectives/preferences) is advisory context for reasoning, not a required completeness obligation on a domain model."},
+    "LOGIC": {"decision": "intentionally-none", "reason": "LOGIC (modal propositions) is an optional reasoning construct used only by domains that model formal logic; no required completeness obligation."},
+    "MATH": {"decision": "intentionally-none", "reason": "MATH (formulae/models) is an optional quantitative construct; no required completeness obligation on a general domain model."},
+    "SPATIAL": {"decision": "intentionally-none", "reason": "SPATIAL is an optional dimension used only by location-aware domains; no required completeness obligation."}
+  }
 }

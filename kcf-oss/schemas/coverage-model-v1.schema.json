@@ -7,7 +7,23 @@
   "required": ["coverageModelVersion", "obligations"],
   "properties": {
     "coverageModelVersion": {"const": "1.0.0"},
-    "obligations": {"type": "array", "items": {"$ref": "#/$defs/obligation"}}
+    "obligations": {"type": "array", "items": {"$ref": "#/$defs/obligation"}},
+    "familyPolicies": {
+      "type": "object",
+      "description": "Explicit completeness-policy decision for each grammar construct family that has no obligation, so meta-coverage can distinguish a deliberate non-applicability from an unfinished policy. Keyed by family name; `_comment` is allowed as documentation.",
+      "properties": {
+        "_comment": {"type": "string"}
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["decision", "reason"],
+        "properties": {
+          "decision": {"enum": ["conditional", "intentionally-none"]},
+          "reason": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
   },
   "additionalProperties": false,
   "$defs": {
@@ -34,7 +50,8 @@
             "profile-declared",
             "relationships-when-multiple-entities",
             "reasoning-has-premises",
-            "knowledge-has-provenance"
+            "knowledge-has-provenance",
+            "subsection-required-when-present"
           ]
         },
         "level": {"enum": ["required", "recommended", "info"]},
@@ -46,6 +63,8 @@
         "exemptTraits": {"type": "array", "items": {"type": "string"}, "description": "Concept traits that exempt a concept from write obligations (CRUD/set/transform); an exempt concept needs only read/query."},
         "collection": {"type": "string"},
         "collections": {"type": "array", "items": {"type": "string"}, "description": "For at-least-one-of: named top-level collections that satisfy the obligation when any is non-empty (alternatives to conceptKind)."},
+        "section": {"type": "string", "description": "For subsection-required-when-present: the cross-cutting section (e.g. security, integration) whose presence triggers the obligation."},
+        "requires": {"type": "string", "description": "For subsection-required-when-present: the sub-field of `section` that must be non-empty when the section is present."},
         "vocabularyExempt": {"type": "boolean", "description": "When true, a vocabulary/minimal package (see is_vocabulary_package) is exempt from this obligation - it is a substantive-content or profile-anchor obligation an intentionally-sparse library need not meet."},
         "dimension": {"type": "string"},
         "applicability": {"type": "string", "description": "When this obligation applies (human-readable predicate)."},

@@ -154,10 +154,11 @@ def capabilities() -> dict:
     return {
         "ok": True,
         "server": "kcf",
-        "summary": "Turn a domain into a complete, machine-checked semantic model, "
-                   "then generate code from it — knowledge coding = semantic modeling "
-                   "+ vibe coding. You (the assistant) hold the model text and pass it "
-                   "into each tool.",
+        "summary": "Turn a domain into a validated, coverage-assessed, source-traceable "
+                   "semantic model, then generate code from it — knowledge coding = "
+                   "semantic modeling + vibe coding. Readiness is reported separately "
+                   "from domain completeness (never claimed). You (the assistant) hold "
+                   "the model text and pass it into each tool.",
         "pipeline": [
             {"phase": "1. Orient", "does": "Learn the syntax and the process.",
              "tools": ["capabilities", "authoring_reference", "elicitation_guide",

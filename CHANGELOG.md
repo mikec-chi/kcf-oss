@@ -22,6 +22,29 @@ bump and, for `ir`, a migration path (`tools/migrate_ir.py`).
 First public release of the open standard. Cut this section to a dated version
 (e.g. `## [1.3.0] - YYYY-MM-DD`) when publishing to GitHub/PyPI.
 
+### Changed
+
+- **`[rules]` 2.2.0 → 3.0.0 (breaking).** The semantic-rule catalogue grew **270 → 322
+  rules** and automated **14 new structural diagnostics** — ORDERING relationships must
+  declare their dimension; `upsert` must declare a conflict key; destructive actions must
+  cite a real authorization policy (not a bare exemption); bulk mutations must declare
+  concurrency; `query`/`count` must be pure; transform lineage/classification/identity;
+  `create` must return the created identity; a record CRUD action must target a
+  record-shaped concept. These are **stricter validation, so some formerly-accepted
+  models can now emit errors** — hence a major bump ("narrowing a required contract" is
+  breaking per `docs/VERSIONING.md`). Separately, **52 rules the analyzer already
+  enforced were catalogued** (documentation of pre-existing behavior, no change) and the
+  automation triage was corrected with per-rule reasons in
+  `semantics/automation-triage-overrides.json`. Automated enforcement rose 86 → **152**
+  (47% of the catalogue). Downstream systems that pin the catalogue version — including
+  the proprietary Taliden vendored engine — must re-ingest via their one-way flow and
+  re-compare the contract fingerprint.
+- **docs** — README/QUICKSTART/CONCEPTS/WALKTHROUGH/codegen/MCP claims de-overclaimed:
+  KCF reports required-obligation readiness, closed-world completeness against a declared
+  scope, source-confirmation, and an accounted realization handoff at an explicit
+  evidence level — it does not claim domain completeness, "any stack", or behavioral
+  proof.
+
 ### Fixed
 
 - **tooling** — `kcf import-dbml` no longer silently emits an empty model. When a

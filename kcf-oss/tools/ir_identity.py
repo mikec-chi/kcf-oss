@@ -36,6 +36,43 @@ SINGLETON_SECTIONS = (
 # Arrays of bare strings: each string is an identity.
 STRING_ARRAY_SECTIONS = ("runtimeRequirements",)
 
+# Top-level IR properties that are intentionally NOT semantic identities: envelope
+# metadata, profile/pattern declarations, module bookkeeping, and cross-references
+# covered elsewhere. Each carries a reason so a NEW identity-bearing section cannot
+# slip in unclassified - the schema-to-inventory conformance check (see
+# unclassified_ir_sections) fails until every top-level IR property is classified as
+# a list/string-array/singleton identity source OR explicitly excluded here.
+EXCLUDED_SECTIONS = {
+    "$schema": "JSON Schema pointer (envelope).",
+    "irVersion": "IR version scalar (envelope).",
+    "id": "model id (envelope).",
+    "module": "root module name (envelope).",
+    "namespace": "namespace scalar (envelope).",
+    "profile": "profile declaration (metadata).",
+    "profiles": "profile declarations (metadata).",
+    "packageKind": "package-kind declaration (metadata).",
+    "requiredPatterns": "pattern-id declarations (references, not identities).",
+    "recommendedPatterns": "pattern-id declarations (references).",
+    "prohibitedPatterns": "pattern-id declarations (references).",
+    "implementedPatterns": "pattern-id declarations (references).",
+    "excludedPatterns": "pattern-id declarations (references).",
+    "modules": "resolved module-name list (bookkeeping).",
+    "moduleVersions": "module version map (bookkeeping).",
+    "sourceMap": "span map keyed by existing identity (provenance, not a new identity).",
+    "extensions": "open extension bag; its contents ride under their own package identity.",
+}
+
+
+def unclassified_ir_sections(schema: dict) -> list[str]:
+    """Every top-level property of the IR schema must be classified: a list-, string-,
+    or singleton-identity source, OR explicitly excluded. Returns the properties that
+    are not - so when the IR schema gains a new identity-bearing collection, the
+    conformance gate fails until someone registers it here. Keeps 'every semantic
+    identity' (model_semantic_ids) true as the IR grows, rather than silently omitting
+    a new section from realization/accounting."""
+    classified = set(LIST_ID_SECTIONS) | set(STRING_ARRAY_SECTIONS) | set(SINGLETON_SECTIONS) | set(EXCLUDED_SECTIONS)
+    return sorted(name for name in (schema.get("properties") or {}) if name not in classified)
+
 
 def _item_identity(item, section: str, index: int) -> str:
     if isinstance(item, dict):
