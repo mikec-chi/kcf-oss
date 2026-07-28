@@ -10,4 +10,5 @@ Write one field report per file here (`<id>.md`), each containing a single fence
   instructions and hand off. Never claim a submission you didn't make.
 
 Reports here are periodically triaged; accepted ones become issues/PRs and the file is
-removed or archived. Nothing in this folder changes the grammar/IR/analyzer contract.
+removed or archived to [`../resolved/`](../resolved/) (with its disposition recorded).
+Nothing in this folder changes the grammar/IR/analyzer contract.
