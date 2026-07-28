@@ -191,11 +191,17 @@ def capabilities() -> dict:
         "verdicts": {
             "valid": "Analyzer-clean (identities present, references resolve). The gate "
                      "for code generation.",
-            "ready": "Also complete — zero required coverage gaps, patterns proven, "
-                     "roles resolved. The completeness goal, not a gate.",
+            "ready": "Required-obligation ready: zero required coverage gaps, required/"
+                     "claimed patterns proven, and roles resolved. This is SUFFICIENT "
+                     "COVERAGE FOR HANDOFF, not proof of domain completeness — `assess` "
+                     "also returns `domainComplete: not-proven`.",
         },
-        "coverageDimensions": ["ENTITY", "LIFECYCLE", "ACTION", "RULE", "ACTOR",
-                                "MEASURE"],
+        "commonCoverageDimensions": ["ENTITY", "LIFECYCLE", "ACTION", "RULE", "ACTOR",
+                                     "MEASURE"],
+        "coverageFamilyPolicy": "This is a short list of common dimensions, not the whole "
+            "policy. The coverage system spans 26 grammar construct families; run "
+            "`kcf coverage-meta` for the full per-family policy (covered / conditional / "
+            "intentionally-none / coverage-policy-missing) and fixture-governance status.",
         "provenanceVocabulary": PROVENANCE_VOCABULARY,
         "syntheticGapFilling": "Coverage gaps can be filled with general domain "
             "knowledge the LLM proposes. Every such fill is tagged in the grammar's own "

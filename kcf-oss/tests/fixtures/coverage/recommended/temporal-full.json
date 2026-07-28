@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "TempFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "operational-system",
+  "profiles": [
+    "operational-system"
+  ],
+  "concepts": [
+    {
+      "id": "Dispatcher",
+      "qualifiedName": "cov.Dispatcher",
+      "kind": "ACTOR"
+    },
+    {
+      "id": "BusinessHours",
+      "qualifiedName": "cov.BusinessHours",
+      "kind": "TEMPORAL"
+    }
+  ]
+}

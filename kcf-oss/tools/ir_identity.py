@@ -36,6 +36,15 @@ SINGLETON_SECTIONS = (
 # Arrays of bare strings: each string is an identity.
 STRING_ARRAY_SECTIONS = ("runtimeRequirements",)
 
+# Sections whose KEYS are identities: `extensions` is an open object of named packages.
+# Each package becomes an identity (`extensions.<name>`) so a realization must give it a
+# disposition (realized / delegated / opaque / unsupported) rather than letting arbitrary
+# semantic content hide inside an unaccounted bag - preserving D-005 at the package level.
+# (Finer identities WITHIN an extension package are that package's own responsibility; the
+# realization manifest accounts for the package as a whole unless the package registers
+# its own enumerator.)
+EXTENSION_KEY_SECTIONS = ("extensions",)
+
 # Top-level IR properties that are intentionally NOT semantic identities: envelope
 # metadata, profile/pattern declarations, module bookkeeping, and cross-references
 # covered elsewhere. Each carries a reason so a NEW identity-bearing section cannot
@@ -59,7 +68,6 @@ EXCLUDED_SECTIONS = {
     "modules": "resolved module-name list (bookkeeping).",
     "moduleVersions": "module version map (bookkeeping).",
     "sourceMap": "span map keyed by existing identity (provenance, not a new identity).",
-    "extensions": "open extension bag; its contents ride under their own package identity.",
 }
 
 
@@ -70,16 +78,35 @@ def unclassified_ir_sections(schema: dict) -> list[str]:
     conformance gate fails until someone registers it here. Keeps 'every semantic
     identity' (model_semantic_ids) true as the IR grows, rather than silently omitting
     a new section from realization/accounting."""
-    classified = set(LIST_ID_SECTIONS) | set(STRING_ARRAY_SECTIONS) | set(SINGLETON_SECTIONS) | set(EXCLUDED_SECTIONS)
+    classified = (set(LIST_ID_SECTIONS) | set(STRING_ARRAY_SECTIONS) | set(SINGLETON_SECTIONS)
+                  | set(EXTENSION_KEY_SECTIONS) | set(EXCLUDED_SECTIONS))
     return sorted(name for name in (schema.get("properties") or {}) if name not in classified)
 
 
 def _item_identity(item, section: str, index: int) -> str:
+    # Prefer a STABLE declared identity. The `section#index` fallback keeps accounting
+    # exhaustive (nothing disappears) but is POSITION-BASED and therefore NOT stable
+    # across reordering or versions - see anonymous_identities() / the realization
+    # report's positionUnstableIdentities, and the "stable identity" item in IR-ROADMAP.
     if isinstance(item, dict):
         return item.get("qualifiedName") or item.get("id") or item.get("name") or f"{section}#{index}"
     if isinstance(item, str):
         return item
     return f"{section}#{index}"
+
+
+def anonymous_identities(model: dict) -> list[str]:
+    """Identities that fell back to a POSITION-BASED `section#index` because the item
+    declared no qualifiedName/id/name. Accounting includes them, but they are not
+    cross-version trace-stable - a durable realization manifest should give every
+    identity-bearing item a stable id. Surfaced so consumers know which identities are
+    not reorder-safe."""
+    anonymous: list[str] = []
+    for section in LIST_ID_SECTIONS:
+        for index, item in enumerate(model.get(section) or []):
+            if not (isinstance(item, dict) and (item.get("qualifiedName") or item.get("id") or item.get("name"))):
+                anonymous.append(f"{section}#{index}")
+    return anonymous
 
 
 def model_semantic_ids(model: dict) -> dict[str, str]:
@@ -97,4 +124,7 @@ def model_semantic_ids(model: dict) -> dict[str, str]:
     for section in SINGLETON_SECTIONS:
         if model.get(section):
             identities.setdefault(section, section)
+    for section in EXTENSION_KEY_SECTIONS:
+        for key in (model.get(section) or {}):
+            identities.setdefault(f"{section}.{key}", section)
     return identities

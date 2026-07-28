@@ -17,7 +17,7 @@
     "readyFor": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "The downstream steps this model is ready for (e.g. codegen-handoff, review)."
+      "description": "The downstream steps this model is ready for - currently codegen-handoff and review only. NOT a safety/deployment gate: `ready` does not imply security-review, deployment-review, or production readiness (those are a future readyFor ladder). See docs/CONCEPTS.md."
     },
     "domainComplete": {
       "enum": ["not-proven"],

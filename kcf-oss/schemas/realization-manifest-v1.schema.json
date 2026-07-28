@@ -18,7 +18,7 @@
       "type": "object",
       "required": ["semanticId", "disposition"],
       "properties": {
-        "semanticId": {"type": "string", "description": "An IR semantic identity (concept qualifiedName, action id, rule id, relationship id, ...)."},
+        "semanticId": {"type": "string", "description": "An IR semantic identity (concept qualifiedName, action id, rule id, relationship id, ...). An extension package appears as `extensions.<name>` and must be dispositioned (realized/delegated/opaque/unsupported) - the manifest accounts for it as a whole unless the extension registers finer identities."},
         "disposition": {
           "enum": ["realized", "enriched", "delegated", "out-of-tier", "deferred", "unsupported"],
           "description": "realized/enriched require artifact evidence; delegated/out-of-tier/deferred/unsupported require an explicit note."

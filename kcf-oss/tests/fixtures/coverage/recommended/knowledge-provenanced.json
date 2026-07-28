@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "KpFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "organizational-knowledge",
+  "profiles": [
+    "organizational-knowledge"
+  ],
+  "concepts": [
+    {
+      "id": "Fact",
+      "qualifiedName": "cov.Fact",
+      "kind": "ORGANIZATIONAL"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "a1",
+      "subject": "cov.Fact",
+      "predicate": "holds",
+      "object": true,
+      "status": "asserted",
+      "sourceDocument": "policy-v3"
+    }
+  ]
+}

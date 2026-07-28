@@ -25,6 +25,7 @@ from coverage_report import EVALUATORS, load_coverage_model
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 GRAMMAR_STACK = PROJECT_ROOT / "config" / "grammar-stack.json"
+SIDE_FIXTURES = PROJECT_ROOT / "config" / "coverage-fixtures.json"
 
 
 def _run_obligation(model: dict, obligation: dict) -> list:
@@ -32,16 +33,33 @@ def _run_obligation(model: dict, obligation: dict) -> list:
     return EVALUATORS[obligation["obligation"]](model, obligation)
 
 
+def load_side_fixtures(root: Path | None = None) -> dict:
+    """Fixtures-as-data: obligation-id -> {satisfied, violated}. Kept beside the policy
+    config so registering a fixture does not churn coverage-model.json. Inline
+    `fixtures` on an obligation take precedence over the side file."""
+    path = (root or PROJECT_ROOT) / "config" / "coverage-fixtures.json"
+    if not path.exists():
+        return {}
+    return {oid: spec for oid, spec in json.loads(path.read_text(encoding="utf-8")).items() if oid != "_comment"}
+
+
+def fixtures_for(obligation: dict, side: dict) -> dict | None:
+    """The fixtures governing an obligation: inline first, else the side file."""
+    return obligation.get("fixtures") or side.get(obligation["id"])
+
+
 def verify_obligation_fixtures(coverage_model: dict, root: Path | None = None) -> dict:
-    """For every obligation that declares fixtures, prove the obligation→evaluator→
-    positive→negative chain actually holds: each 'satisfied' fixture must produce NO
-    gap for the obligation, and each 'violated' fixture must produce one. This is what
-    turns a declared fixture reference into demonstrated coverage-governance - a
-    fixture that does not actually exercise the obligation is caught here."""
+    """For every obligation with fixtures (inline or in config/coverage-fixtures.json),
+    prove the obligation→evaluator→positive→negative chain actually holds: each
+    'satisfied' fixture must produce NO gap for the obligation, and each 'violated'
+    fixture must produce one. This is what turns a declared fixture reference into
+    demonstrated coverage-governance - a fixture that does not actually exercise the
+    obligation is caught here."""
     root = root or PROJECT_ROOT
+    side = load_side_fixtures(root)
     results: dict[str, dict] = {}
     for obligation in coverage_model["obligations"]:
-        fixtures = obligation.get("fixtures")
+        fixtures = fixtures_for(obligation, side)
         if not fixtures:
             continue
         satisfied = fixtures.get("satisfied", [])
@@ -77,6 +95,7 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
     family_set = set(families)
     obligations = coverage_model["obligations"]
 
+    side = load_side_fixtures(root)
     fixture_results = verify_obligation_fixtures(coverage_model, root) if verify_fixtures else {}
 
     by_family: dict[str, list[dict]] = {family: [] for family in families}
@@ -101,7 +120,7 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
         required = sum(1 for item in items if item["level"] == "required")
         recommended = sum(1 for item in items if item["level"] == "recommended")
         has_evaluator = all(item["obligation"] in EVALUATORS for item in items)
-        has_fixtures = any(item.get("fixtures") for item in items)
+        has_fixtures = any(fixtures_for(item, side) for item in items)
         gated = any(fixture_results.get(item["id"], {}).get("regressionGateIncluded") for item in items)
         policy = family_policies.get(family)
         if items:
@@ -124,7 +143,7 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
             "policyReason": reason,
         })
 
-    with_fixtures = [obligation["id"] for obligation in obligations if obligation.get("fixtures")]
+    with_fixtures = [obligation["id"] for obligation in obligations if fixtures_for(obligation, side)]
     report = {
         "coverageMetaReportVersion": "1.0.0",
         "totalFamilies": len(families),

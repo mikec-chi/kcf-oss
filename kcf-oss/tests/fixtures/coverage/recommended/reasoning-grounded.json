@@ -1,0 +1,29 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "RsnFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "ai-application",
+  "profiles": [
+    "ai-application"
+  ],
+  "concepts": [
+    {
+      "id": "Score",
+      "qualifiedName": "cov.Score",
+      "kind": "MEASURE"
+    }
+  ],
+  "reasoning": [
+    {
+      "id": "r1",
+      "reasoningKind": "INFERENCE",
+      "proposition": "model is fair",
+      "method": "DEDUCTIVE",
+      "premises": [
+        "p.audit"
+      ]
+    }
+  ]
+}

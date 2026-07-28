@@ -1,0 +1,24 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "ResFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "operational-system",
+  "profiles": [
+    "operational-system"
+  ],
+  "concepts": [
+    {
+      "id": "Dispatcher",
+      "qualifiedName": "cov.Dispatcher",
+      "kind": "ACTOR"
+    }
+  ],
+  "resources": [
+    {
+      "id": "Truck",
+      "resourceKind": "CAPACITY"
+    }
+  ]
+}

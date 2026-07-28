@@ -106,6 +106,22 @@ operational docs and drop the "MUST" framing:
 - `action.record.precondition` / `action.invoke.precondition` — preconditions are
   authorable, but "the caller must **establish** them" is a runtime obligation.
 
+## Stable identities for currently-anonymous items (RFC-9)
+
+An identity-bearing item that declares no `qualifiedName`/`id`/`name` is accounted for
+under a **position-based** fallback (`section#index`, e.g. `math#3`, `plans#1`). This
+keeps accounting exhaustive — nothing disappears — but such identities are **not stable
+across reordering or versions**, so a realization manifest that references them is not
+cross-version trace-stable. `verify-realization` surfaces them in
+`positionUnstableIdentities`.
+
+Decision: the schema/analyzer should ultimately **require a stable identity** on every
+identity-bearing item wherever practical (many tail sections are open objects with no
+required `id`). Until then, the boundary is explicit:
+
+- Accounting is exhaustive (position-based fallback guarantees nothing is dropped).
+- Cross-version trace stability is **not** guaranteed for anonymous items.
+
 ## Realization evidence levels stay separated from executed behavior
 
 Unrelated to the above, but reaffirmed here because it is a recurring claim boundary:
