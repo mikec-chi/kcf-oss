@@ -7,10 +7,12 @@ the source whitepapers (`../../docs/whitepapers/source/`); this page is the map.
 ## The one idea
 
 An LLM (or any code generator) is only as good as the **model of your domain**
-it is given. KCF makes that model a first-class, machine-checked artifact — the
-*semantic IR* — instead of leaving it implicit in prose. You reach a model that
-is *complete enough to build from*, then hand it off with a proof that nothing
-was lost.
+it is given. KCF makes that model a first-class, validated and coverage-assessed
+artifact — the *semantic IR* — instead of leaving it implicit in prose. You reach a
+model that meets its **required-obligation readiness** (sufficient coverage for
+handoff — not a claim that the domain is complete; see the claim section below), then
+hand it off with an **accounted realization manifest** you can verify at an explicit
+evidence level.
 
 ## Three questions KCF keeps separate
 

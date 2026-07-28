@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OkNoContent",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "organizational-knowledge",
+  "profiles": [
+    "organizational-knowledge"
+  ],
+  "concepts": [
+    {
+      "id": "Placeholder",
+      "qualifiedName": "cov.Placeholder",
+      "kind": "ENTITY"
+    }
+  ]
+}

@@ -46,8 +46,9 @@ cardinality, temporal validity, provenance, versions, profiles, capability
 contracts, assertions, and runtime instances are defined there once.
 
 The current manifest is grammar-stack `1.11.0`: 29 modules and 580 productions,
-with semantic IR `1.0.0`, 6 foundational profile presets, and a 270-rule KCF plus
-semantic-core catalogue. The authoring surface is comprehensive across all 16
+with semantic IR `1.0.0`, 6 foundational profile presets, and the `3.0.0` KCF plus
+semantic-core semantic-rule catalogue (322 rules; see `semantics/coverage.json` for
+the live count and automation breakdown). The authoring surface is comprehensive across all 16
 dimension grammars plus the ACTION/RELATIONSHIP algebra (see `docs/AUTHORING.md`). The
 manifest, schemas, generated catalogue, and compatibility matrix remain
 authoritative when these contracts change.

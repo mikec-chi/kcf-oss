@@ -1,0 +1,27 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OkFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "organizational-knowledge",
+  "profiles": [
+    "organizational-knowledge"
+  ],
+  "concepts": [
+    {
+      "id": "Policy",
+      "qualifiedName": "cov.Policy",
+      "kind": "ORGANIZATIONAL"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "a1",
+      "subject": "cov.Policy",
+      "predicate": "applies",
+      "object": true,
+      "status": "asserted"
+    }
+  ]
+}

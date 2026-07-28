@@ -313,7 +313,7 @@ def main() -> int:
         write_json(report, args.output)
         return 0 if report["closedWorldComplete"] else 1
     if args.command == "coverage-meta":
-        report = meta_coverage(load_coverage_model())
+        report = meta_coverage(load_coverage_model(), verify_fixtures=True, root=PROJECT_ROOT)
         write_json(report, args.output)
         return 1 if (args.strict and report["withoutPolicy"]) else 0
     if args.command == "automation-report":

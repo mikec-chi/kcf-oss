@@ -30,6 +30,7 @@ from review_queue import by_segment as review_by_segment, review_queue
 from scaffold import build_scaffold
 from source_coverage import is_complete as source_complete, source_coverage
 from verify_realization import ir_identities, verify as verify_realization
+from ir_identity import model_semantic_ids, unclassified_ir_sections
 from completeness import completeness
 from meta_coverage import construct_families, meta_coverage
 from automation_report import report as automation_report
@@ -407,6 +408,21 @@ def main():
     check({"integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"} <= set(profile_ids),
           f"authoritative identity inventory omits profile sections: {sorted(inventoried_sections)}")
 
+    # V6: schema-to-identity-inventory conformance. Every top-level property of the IR
+    # schema must be classified in ir_identity (a list/string/singleton identity source
+    # or explicitly EXCLUDED with a reason). A new identity-bearing IR section then fails
+    # this gate until registered - keeping "every semantic identity" honest as the IR
+    # grows. Also cross-check that sections the reference models actually PRODUCE are
+    # classified (not silently excluded).
+    ir_schema = json.loads((SCHEMAS_ROOT / "model-ir-v1.schema.json").read_text(encoding="utf-8"))
+    unclassified = unclassified_ir_sections(ir_schema)
+    check(not unclassified, f"IR schema has unclassified top-level section(s) - register in ir_identity.py: {unclassified}")
+    from ir_identity import EXCLUDED_SECTIONS as _EXCLUDED
+    for name in sorted((PROJECT_ROOT / "tests" / "domains").glob("*.kcf")):
+        produced = {key for key, value in compile_file(name).items() if isinstance(value, (list, dict)) and value}
+        wrongly_excluded = {k for k in produced if k in _EXCLUDED and k not in ("profiles", "modules", "moduleVersions", "requiredPatterns", "recommendedPatterns", "prohibitedPatterns", "implementedPatterns", "excludedPatterns", "sourceMap", "extensions")}
+        check(not wrongly_excluded, f"{name.name} produces section(s) marked non-identity in ir_identity: {sorted(wrongly_excluded)}")
+
     # --- P2: closed-world completeness against a declared scope ---
     # Completeness is reported along separate axes and is explicit that "complete"
     # means complete AGAINST THE DECLARED SCOPE - every included capability maps to a
@@ -467,22 +483,30 @@ def main():
     check({"ENTITY", "ACTION", "RULE", "EVENT", "ACTOR", "RELATIONSHIP"} <= covered_families,
           f"a core construct family lost its coverage policy: {sorted(covered_families)}")
     check(meta["withPolicy"] + len(meta["withoutPolicy"]) == meta["totalFamilies"], "meta-coverage family accounting is inconsistent")
-    # The mechanism must actually detect an uncovered family (honest blind-spot report).
-    check("LOGIC" in meta["withoutPolicy"], f"meta-coverage did not flag a known policy-missing family: {meta['withoutPolicy']}")
-    check(set(meta["withoutPolicy"]) <= set(construct_families()), "meta-coverage reported a policy-missing family that is not a construct family")
+    # V4: every construct family now has an EXPLICIT policy - obligations, or a
+    # familyPolicies decision (conditional / intentionally-none). No family is left as
+    # an undecided blind spot, and every declared decision carries a reason.
+    check(meta["withoutPolicy"] == [], f"a construct family has neither obligations nor a familyPolicies decision: {meta['withoutPolicy']}")
+    check(all(row.get("policyReason") for row in meta["families"] if row["status"] in ("conditional", "intentionally-none")),
+          "a declared family policy (conditional/intentionally-none) is missing its reason")
+    check({"SECURITY", "INTEGRATION"} <= covered_families, f"SECURITY/INTEGRATION must have completeness obligations: {sorted(covered_families)}")
+    # The blind-spot mechanism still works: a synthetic family with no obligation/policy is reported missing.
+    probe = meta_coverage(coverage_model, families=[*construct_families(), "ZZZ_PROBE_FAMILY"])
+    check("ZZZ_PROBE_FAMILY" in probe["withoutPolicy"], "meta-coverage no longer detects an undecided family")
 
-    # R6: every obligation that declares fixtures must have them VERIFIED - the
+    # R6/V5: every obligation that declares fixtures must have them VERIFIED - the
     # positive fixture produces no gap and the negative fixture produces one - so a
     # declared fixture reference is demonstrated coverage-governance, not a dangling
-    # pointer. The core required obligations are regression-gated this run.
+    # pointer. And EVERY REQUIRED obligation must be regression-gated: if a required
+    # coverage evaluator regresses, its negative fixture stops producing the gap and
+    # this gate fails - so no required obligation can silently lose protection.
     governance = meta["fixtureGovernance"]
     check(governance["verified"] and governance["fixtureDeclared"] >= 6, f"too few obligations declare fixtures: {governance['fixtureDeclared']}")
     check(governance["positiveVerified"] == governance["fixtureDeclared"], "a positive obligation fixture produced an unexpected gap")
     check(governance["negativeVerified"] == governance["fixtureDeclared"], "a negative obligation fixture failed to produce a gap")
-    check({"coverage.entity.identity", "coverage.action.authorization", "coverage.model.substantive-content",
-           "coverage.business-application.entity", "coverage.business-application.actor",
-           "coverage.business-application.state-changing-action"} <= set(governance["regressionGateIncluded"]),
-          f"a core obligation is not regression-gated by fixtures: {governance['regressionGateIncluded']}")
+    required_obligations = {obligation["id"] for obligation in coverage_model["obligations"] if obligation["level"] == "required"}
+    ungated_required = sorted(required_obligations - set(governance["regressionGateIncluded"]))
+    check(not ungated_required, f"required coverage obligation(s) lack verified positive+negative fixtures: {ungated_required}")
 
     by_seg = review_by_segment(review, {"links": [
         {"segmentId": "p1", "constructs": ["fin.Invoice"]},

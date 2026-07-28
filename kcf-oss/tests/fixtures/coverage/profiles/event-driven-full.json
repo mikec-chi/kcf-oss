@@ -1,0 +1,31 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "EdFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "event-driven-system",
+  "profiles": [
+    "event-driven-system"
+  ],
+  "concepts": [
+    {
+      "id": "Publisher",
+      "qualifiedName": "cov.Publisher",
+      "kind": "WORK"
+    },
+    {
+      "id": "OrderPlaced",
+      "qualifiedName": "cov.OrderPlaced",
+      "kind": "EVENT"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "pub-causes",
+      "rootKind": "CAUSATION",
+      "source": "cov.Publisher",
+      "target": "cov.OrderPlaced"
+    }
+  ]
+}

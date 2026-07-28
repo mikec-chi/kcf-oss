@@ -1,9 +1,9 @@
 """KCF MCP server — plug the open knowledge-coding toolchain into your chat LLM.
 
 Exposes the kcf-oss tools over the Model Context Protocol so an LLM host (Claude
-Desktop / Claude Code, ChatGPT, VS Code, …) can build a complete, machine-checked
-**semantic model** of a domain and then generate code from it, for any stack —
-instead of vibe-coding against prose.
+Desktop / Claude Code, ChatGPT, VS Code, …) can build a validated, coverage-assessed,
+source-traceable **semantic model** of a domain and then generate code from it, for
+shipped or user-defined target stacks — instead of vibe-coding against prose.
 
 The intended loop is conversational:
   1. draft a `.kcf` model (the LLM writes it),
@@ -49,8 +49,10 @@ except ModuleNotFoundError:  # pragma: no cover - helpful message if the extra i
 _READ_ONLY = ToolAnnotations(readOnlyHint=True, idempotentHint=True, openWorldHint=False)
 
 INSTRUCTIONS = """\
-KCF turns a domain into a complete, machine-checked semantic model (an IR) that you
-then generate code from — so the code is built from a spec, not guessed from prose.
+KCF turns a domain into a validated, coverage-assessed, source-traceable semantic
+model (an IR) that you then generate code from — so the code is built from a checked
+spec, not guessed from prose. KCF reports required-obligation readiness separately from
+domain completeness, which it never claims (`assess` returns `domainComplete: not-proven`).
 This server is that toolchain. The user holds no state: YOU (the assistant) write
 the `.kcf` model text and pass it into each tool, so the natural loop is
 draft -> compile -> assess -> edit -> assess -> codegen_prompt.
@@ -110,7 +112,8 @@ model is `readyToGenerate`. Act on it and repeat.
 5. When `next_action` reports `readyToGenerate`, follow its `generationPlan`:
    `list_stacks()` then `codegen_prompt(stack, model_ir=… or source)` for the backend,
    then again for a frontend stack against the backend's OpenAPI. Run the returned
-   prompts; each ends with a coverage self-audit proving nothing was dropped.
+   prompts; each ends with a realization manifest accounting for every construct
+   (verify it with `verify-realization` at an explicit evidence level).
 
 Guided prompts run this for you: `build_model` (prose → valid model) and
 `generate_app` (valid model → app) scope the two halves for sub-agents; `model_domain`
@@ -384,8 +387,9 @@ def codegen_prompt(
     pre-compiled `model_ir` (use the governed IR from `confirm_synthetic`). Returns
     `{ok, stack, tier, systemPrompt, userPrompt}` — a system prompt + a user prompt
     containing the IR, coverage guidance, and the stack's single-shot example. RUN
-    those two prompts yourself to generate the application; it finishes with a coverage
-    self-audit proving nothing was dropped. If the model is not `valid`, returns
+    those two prompts yourself to generate the application; it finishes with a
+    realization manifest accounting for every construct (verifiable at an explicit
+    evidence level). If the model is not `valid`, returns
     `{ok: false, valid: false, diagnostics}` — fix those first.
 
     `instructions` injects house conventions as a highest-priority section that
@@ -404,7 +408,8 @@ def model_domain(
         "rules — merged with any KCF_ELICITATION_GUIDE file.")] = "",
 ) -> str:
     """Guided end-to-end flow: turn a plain-language domain description into a
-    complete, machine-checked KCF model, then generate an application from it.
+    validated, coverage-assessed, source-traceable KCF model, then generate an
+    application from it.
     Optionally pass the domain description, and `conventions` (house elicitation
     rules — e.g. standard entities, required questions like audit/tenancy). A
     `KCF_ELICITATION_GUIDE` file (MCP host env) is merged in too."""
@@ -436,8 +441,8 @@ def model_domain(
         "4. Ask which **tech stack** to target (call **list_stacks** to show the "
         "options; backend and frontend tiers are available).\n"
         "5. Call **codegen_prompt(source, stack)** and run the returned system + "
-        "user prompts to generate the application. It finishes with a coverage "
-        "self-audit proving nothing in the model was dropped.\n\n"
+        "user prompts to generate the application. It finishes with a realization "
+        "manifest accounting for every construct (verifiable at an explicit evidence level).\n\n"
         "To drive this without guessing the order, call **next_action(source)** after "
         "every edit — it names the next tool and tells you when you are ready to "
         "generate.\n\n"

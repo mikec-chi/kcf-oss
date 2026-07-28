@@ -1,6 +1,6 @@
 {
   "$schema": "./semantic-rules.schema.json",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "sources": [
     "semantic-core/semantics/semantic-rules.json",
     "kcf-oss/semantics/SEMANTIC_VALIDATION.md"

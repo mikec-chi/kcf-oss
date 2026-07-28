@@ -1,0 +1,23 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "AnFull",
+  "module": "KCF",
+  "namespace": "cov",
+  "profile": "analytics-platform",
+  "profiles": [
+    "analytics-platform"
+  ],
+  "concepts": [
+    {
+      "id": "Revenue",
+      "qualifiedName": "cov.Revenue",
+      "kind": "MEASURE"
+    },
+    {
+      "id": "SalesRecord",
+      "qualifiedName": "cov.SalesRecord",
+      "kind": "INFORMATION"
+    }
+  ]
+}

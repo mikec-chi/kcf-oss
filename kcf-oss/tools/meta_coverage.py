@@ -88,6 +88,12 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
         else:
             orphans.append(obligation["id"])
 
+    # A family with no obligation is not necessarily a blind spot: coverage-model may
+    # declare an explicit policy decision (conditional / intentionally-none) for it.
+    # Only a family with neither obligations nor a declared decision is truly missing.
+    family_policies = {name: policy for name, policy in coverage_model.get("familyPolicies", {}).items()
+                       if name != "_comment"}
+
     rows = []
     without_policy = []
     for family in families:
@@ -97,8 +103,13 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
         has_evaluator = all(item["obligation"] in EVALUATORS for item in items)
         has_fixtures = any(item.get("fixtures") for item in items)
         gated = any(fixture_results.get(item["id"], {}).get("regressionGateIncluded") for item in items)
-        status = "covered" if items else "coverage-policy-missing"
-        if not items:
+        policy = family_policies.get(family)
+        if items:
+            status, reason = "covered", None
+        elif policy:
+            status, reason = policy["decision"], policy["reason"]
+        else:
+            status, reason = "coverage-policy-missing", None
             without_policy.append(family)
         rows.append({
             "family": family,
@@ -110,6 +121,7 @@ def meta_coverage(coverage_model: dict, families: list[str] | None = None, verif
             "regressionGated": gated,
             "obligationIds": [item["id"] for item in items],
             "status": status,
+            "policyReason": reason,
         })
 
     with_fixtures = [obligation["id"] for obligation in obligations if obligation.get("fixtures")]
