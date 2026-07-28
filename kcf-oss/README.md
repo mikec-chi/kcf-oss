@@ -1,9 +1,12 @@
 # KCF — the open knowledge-coding standard
 
 **The new vibe coding is _knowledge coding_ = semantic modeling + vibe coding.**
-KCF compiles your domain into a normalized *semantic IR* that is valid, complete,
-and traceable, then the LLM vibe-codes from that spec instead of guessing from
-prose.
+KCF compiles your domain into a normalized *semantic IR* — structurally validated,
+coverage-assessed against explicit obligations, and traceable to its source — then
+the LLM vibe-codes from that spec instead of guessing from prose. KCF does not claim
+your domain is *complete*; it reports exactly which obligations passed, which declared
+scope was covered, which source encodings were confirmed, and what realization
+evidence exists (see [docs/CONCEPTS.md](docs/CONCEPTS.md#what-kcf-does-and-does-not-claim)).
 
 **👉 New here? Start with [docs/KNOWLEDGE_CODING.md](docs/KNOWLEDGE_CODING.md)** —
 connect KCF to your chat LLM (Claude / ChatGPT / VS Code / Cursor) and build your
@@ -12,7 +15,8 @@ first app in ~3 minutes.
 Prefer the CLI? Start with **[QUICKSTART.md](QUICKSTART.md)** (a 60-second hello
 world), then **[docs/WALKTHROUGH.md](docs/WALKTHROUGH.md)** (requirements → ready
 IR → generated app) and **[docs/CONCEPTS.md](docs/CONCEPTS.md)** (the mental
-model). To turn a valid IR into an app with your LLM for any stack, see
+model). To turn a valid IR into an app with the LLM you choose, for your target
+stack (the pack is stack-extensible), see
 **[codegen/](codegen/)** — or plug KCF into your chat LLM with the
 **[MCP server](mcp/)** (`kcf-mcp`). Contributing a grammar change? See
 **[docs/EXTENDING.md](docs/EXTENDING.md)**. The rest of this file is the full
@@ -20,8 +24,8 @@ architecture and toolchain reference.
 
 ```bash
 kcf compile tests/domains/business-application.kcf --output model-ir.json --validate
-kcf assess model-ir.json            # → { "valid": true, "ready": true }
-# then hand the ready IR to your LLM for any tech stack (see codegen/)
+kcf assess model-ir.json            # → { "valid": true, "ready": true, "domainComplete": "not-proven" }
+# then hand the ready IR to the LLM you choose, for your target stack (see codegen/)
 ```
 
 > **Maintainers & coding LLMs** should first read the repository

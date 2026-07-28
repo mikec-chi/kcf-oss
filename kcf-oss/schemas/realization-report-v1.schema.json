@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/realization-report-v1.schema.json",
+  "title": "KCF Codegen Realization Report v1",
+  "description": "The verdict of checking a realization manifest against the IR (and optionally the generated repository): whether every declared semantic identity is accounted for, and to what evidence level. `ok` means accounted (every identity has a disposition, realized ones cite artifacts, gaps are noted); `evidenceLevel` says how strongly it is grounded - `accounted` without --repo does NOT mean the artifacts exist.",
+  "type": "object",
+  "required": ["realizationReportVersion", "model", "ok", "evidenceLevel", "summary", "errors"],
+  "properties": {
+    "realizationReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "stack": {"type": "string"},
+    "repoChecked": {"type": "boolean", "description": "Whether artifact/test paths and symbols were checked against a generated repository."},
+    "ok": {"type": "boolean", "description": "Accounting holds: every IR identity has a disposition, realized ones cite artifacts, gaps are noted. This is NOT proof the code exists or is correct - see evidenceLevel."},
+    "evidenceLevel": {
+      "enum": ["none", "accounted", "artifact-verified", "symbol-verified", "test-present"],
+      "description": "Strongest evidence established: none (accounting failed) < accounted (declared, not checked against a repo) < artifact-verified (files exist) < symbol-verified (named symbols found) < test-present (test files exist). Higher levels (test-executed, behavior-verified) require an execution harness this structural verifier does not run."
+    },
+    "summary": {
+      "type": "object",
+      "required": ["identityCount", "accountedFor", "missing"],
+      "properties": {
+        "identityCount": {"type": "integer"},
+        "accountedFor": {"type": "integer"},
+        "missing": {"type": "integer"},
+        "byDisposition": {"type": "object", "additionalProperties": {"type": "integer"}}
+      },
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {"enum": ["missing-disposition", "unknown-identity", "realized-without-evidence", "unsupported-without-note", "missing-artifact-file", "missing-artifact-symbol", "missing-test-file", "duplicate-disposition"]},
+          "semanticId": {"type": "string"},
+          "message": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -10,20 +10,30 @@
   "excludedPatterns": ["case.evidence", "unscoped.pattern"],
   "concepts": [
     {"id": "Thing", "qualifiedName": "demo.Thing", "kind": "UNKNOWN", "references": ["demo.Missing"]},
-    {"id": "ThingAgain", "qualifiedName": "demo.Thing", "kind": "ENTITY", "abstract": true, "instances": ["x"]}
+    {"id": "ThingAgain", "qualifiedName": "demo.Thing", "kind": "ENTITY", "abstract": true, "instances": ["x"]},
+    {"id": "Widget", "qualifiedName": "demo.Widget", "kind": "ACTOR"}
   ],
   "relationships": [
-    {"id": "bad-rel", "definition": "performs", "rootKind": "WRONG", "source": "demo.Thing", "target": "demo.Thing", "strength": 2.0, "validFrom": "2026-12-01", "validTo": "2026-01-01"}
+    {"id": "bad-rel", "definition": "performs", "rootKind": "WRONG", "source": "demo.Thing", "target": "demo.Thing", "strength": 2.0, "validFrom": "2026-12-01", "validTo": "2026-01-01"},
+    {"id": "unordered", "rootKind": "ORDERING", "source": "demo.Thing", "target": "demo.Thing", "allowSelf": true}
   ],
   "lifecycles": [
     {"id": "BadLifecycle", "states": ["A", "B"], "initial": ["A", "B"], "terminal": [], "transitions": [{"from": "A", "to": "Missing"}]}
   ],
   "actions": [
-    {"id": "DangerousBulk", "effect": "command", "operation": "bulk-delete", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "zero", "retry": 3, "idempotency": "non-idempotent"}
+    {"id": "DangerousBulk", "effect": "command", "operation": "bulk-delete", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "zero", "retry": 3, "idempotency": "non-idempotent"},
+    {"id": "KeylessUpsert", "effect": "command", "operation": "upsert", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"},
+    {"id": "SilentCreate", "effect": "command", "operation": "create", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "zero", "idempotency": "idempotent", "authorization": "demo.Policy"},
+    {"id": "TracelessTransform", "effect": "transform", "operation": "update", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "many"},
+    {"id": "BlindReplace", "effect": "command", "operation": "replace", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"},
+    {"id": "LeakyQuery", "effect": "query", "operation": "read", "scope": "record", "target": "demo.Thing", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one", "mutations": ["field"]},
+    {"id": "MutateActor", "effect": "command", "operation": "update", "scope": "record", "target": "demo.Widget", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"}
   ],
   "collectionTransforms": [
     {"id": "InfiniteSort", "operation": "sort", "inputSchema": "Input", "outputSchema": "Output", "bounded": false},
-    {"id": "UnknownJoin", "operation": "join", "inputSchema": "Input", "outputSchema": "Output", "inputs": ["only-one"]}
+    {"id": "UnknownJoin", "operation": "join", "inputSchema": "Input", "outputSchema": "Output", "inputs": ["only-one"]},
+    {"id": "UnseededSample", "operation": "sample", "inputSchema": "Input", "outputSchema": "Output"},
+    {"id": "UnboundedWindow", "operation": "window", "inputSchema": "Input", "outputSchema": "Output"}
   ],
   "processes": [
     {"id": "BrokenProcess", "nodes": [{"id": "A", "type": "step"}], "flows": [{"from": "A", "to": "Missing"}]}

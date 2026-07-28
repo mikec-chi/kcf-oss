@@ -6,8 +6,9 @@
 > the CLI version of the same loop.
 
 This is the shortest path from "I cloned the repo" to "a code generator has a
-complete, machine-checked model of my domain." Every command runs against a
-model committed in this repo, so you can reproduce it exactly.
+validated, coverage-assessed, traceable model of my domain" — one that reports what
+passed rather than asserting the domain is fully captured. Every command runs against
+a model committed in this repo, so you can reproduce it exactly.
 
 **Prerequisites:** Python 3.10+ and `jsonschema` (`pip install jsonschema`, or
 `pip install -e .` from the repo root which installs the `kcf` command).
@@ -64,12 +65,13 @@ every trait resolved to a declared role. Exit code `0`.
 > reports `ready: false` with a required identity gap (exit code `1`). Then
 > `kcf coverage-report <model> --by-concept` tells you exactly what to add.
 
-## 3. Generate an app — with your LLM, for any stack
+## 3. Generate an app — with the LLM you choose, for your target stack
 
-KCF **stops at the IR**: a complete, machine-checked model is the deliverable.
-Turning it into running code hands the IR to **your own LLM**, guided by a
-tech-stack-agnostic system prompt and a single-shot example. Code generation is
-split into two tiers that meet at the backend's OpenAPI:
+KCF **stops at the IR**: a validated, coverage-assessed, traceable model is the
+deliverable (not a claim that your domain is fully captured). Turning it into running
+code hands the IR to **your own LLM**, guided by a tech-stack-agnostic system prompt
+and a single-shot example. The pack ships several stacks and is extensible to others.
+Code generation is split into two tiers that meet at the backend's OpenAPI:
 
 1. Install [`codegen/system-prompt.md`](codegen/system-prompt.md) as the system prompt.
 2. **Backend** — send [`codegen/generate-backend.md`](codegen/generate-backend.md)
@@ -81,15 +83,19 @@ split into two tiers that meet at the backend's OpenAPI:
    stack's `EXAMPLE.md` (`react-typescript-openapi`). The UI is generated against
    that contract.
 
-Every generation returns the code **plus a coverage self-audit** giving each IR
-construct a disposition (realized / delegated / out-of-tier / unsupported) with
-`dropped: []`. What each tier realizes for every construct is in
+Every generation returns the code **plus a machine-checkable realization manifest**
+giving each IR identity a disposition (realized / delegated / out-of-tier /
+unsupported) with artifact evidence. Verify it with
+`kcf verify-realization model-ir.json realization-manifest.json [--repo ./app]`: it
+reports an **evidence level** (`accounted` without a repo → up to `test-present` when
+files, symbols, and tests are checked) — accounted-for handoff, not a bare
+`dropped: []` claim. What each tier realizes for every construct is in
 [`codegen/CONSTRUCT_COVERAGE.md`](codegen/CONSTRUCT_COVERAGE.md); the overview is
 [`codegen/README.md`](codegen/README.md).
 
 ## Where to go next
 
-- **[codegen/](codegen/)** — generate an app from the IR with any LLM, for any stack.
+- **[codegen/](codegen/)** — generate an app from the IR with the LLM you choose, for your target stack (stack-extensible).
 
 - **[docs/WALKTHROUGH.md](docs/WALKTHROUGH.md)** — the full requirements → ready
   IR → generated app loop, including how to close coverage gaps.

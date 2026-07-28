@@ -27,7 +27,14 @@
             "action-effect-has-fields",
             "at-least-one-concept-kind",
             "at-least-one-collection",
-            "concept-kind-targeted-by"
+            "concept-kind-targeted-by",
+            "model-has-substantive-content",
+            "at-least-one-action-effect",
+            "at-least-one-of",
+            "profile-declared",
+            "relationships-when-multiple-entities",
+            "reasoning-has-premises",
+            "knowledge-has-provenance"
           ]
         },
         "level": {"enum": ["required", "recommended", "info"]},
@@ -38,7 +45,21 @@
         "fields": {"type": "array", "items": {"type": "string"}},
         "exemptTraits": {"type": "array", "items": {"type": "string"}, "description": "Concept traits that exempt a concept from write obligations (CRUD/set/transform); an exempt concept needs only read/query."},
         "collection": {"type": "string"},
-        "dimension": {"type": "string"}
+        "collections": {"type": "array", "items": {"type": "string"}, "description": "For at-least-one-of: named top-level collections that satisfy the obligation when any is non-empty (alternatives to conceptKind)."},
+        "vocabularyExempt": {"type": "boolean", "description": "When true, a vocabulary/minimal package (see is_vocabulary_package) is exempt from this obligation - it is a substantive-content or profile-anchor obligation an intentionally-sparse library need not meet."},
+        "dimension": {"type": "string"},
+        "applicability": {"type": "string", "description": "When this obligation applies (human-readable predicate)."},
+        "evidence": {"type": "string", "description": "What satisfies this obligation (the positive signal a reviewer/tool looks for)."},
+        "exceptions": {"type": "string", "description": "Documented cases exempt from this obligation."},
+        "fixtures": {
+          "type": "object",
+          "description": "Positive/negative fixture references demonstrating the obligation firing and not firing.",
+          "properties": {
+            "satisfied": {"type": "array", "items": {"type": "string"}},
+            "violated": {"type": "array", "items": {"type": "string"}}
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }

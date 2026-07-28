@@ -196,6 +196,10 @@ class Analyzer:
                 self.report("error", "kcf.relationship.directionality", rid, f"Unknown directionality {quals['directionality']!r}.")
             if quals.get("polarity") is not None and quals["polarity"] not in POLARITIES:
                 self.report("error", "kcf.relationship.polarity", rid, f"Unknown polarity {quals['polarity']!r}.")
+            # An ORDERING relationship expresses a sequence but is meaningless without
+            # the dimension it orders along (workflow, temporal, version, priority, ...).
+            if root == "ORDERING" and not quals.get("dimension"):
+                self.report("error", "kcf.relationship.ordering", rid, "Ordering relationship must declare its dimension (e.g. workflow, temporal, version, priority).")
             for inference in quals.get("inferences", []):
                 if inference not in INFERENCE_SEMANTICS:
                     self.report("error", "kcf.relationship.infer", rid, f"Unknown inference semantics {inference!r}.")
@@ -296,6 +300,10 @@ class Analyzer:
                 self.report("error", "action.set.explicit-scope", aid, "Bulk operation requires collection scope.")
             if operation in SET_MUTATIONS and not action.get("selection"):
                 self.report("error", "action.set.selection-required", aid, "Set mutation requires an explicit selection.")
+            # An upsert is create-or-update keyed on a match; without a stable conflict
+            # key (the selection) its behavior on an existing record is undefined.
+            if operation == "upsert" and not action.get("selection"):
+                self.report("error", "action.record.upsert-key", aid, "Upsert must identify a stable conflict key (selection).")
             if action.get("selection") == "all" and operation in SET_MUTATIONS:
                 self.report("warning", "action.set.unbounded-warning", aid, "Destructive/mutating selection targets all records.")
             if effect == "command" and not action.get("idempotency"):
@@ -304,8 +312,48 @@ class Analyzer:
                 self.report("error", "action.retry.side-effects", aid, "Non-idempotent command cannot be retried without protection.")
             if scope in {"set", "batch", "stream", "window"} and effect == "command" and not action.get("atomicity"):
                 self.report("error", "action.set.atomicity", aid, "Set command requires atomicity semantics.")
+            # A bulk mutation can touch records that change between selection and apply;
+            # without a declared concurrency/conflict strategy its outcome is a race.
+            if operation in SET_MUTATIONS and effect == "command" and not action.get("concurrency"):
+                self.report("error", "action.set.concurrency", aid, "Bulk mutation must declare concurrency/conflict handling.")
             if effect == "command" and not (action.get("authorization") or action.get("authorizationExemption")):
                 self.report("error", "stack.security.authorization", aid, "Executable command has no authorization rule or explicit exemption.")
+            # A destructive action (delete/bulk-delete) must require a specific
+            # authorization POLICY, not merely a generic exemption - "no identity" or a
+            # blanket exemption must never authorize data loss.
+            if operation in {"delete", "bulk-delete"} and effect == "command" and not action.get("authorization"):
+                self.report("error", "action.destructive.authorization", aid, "Destructive action must require a specific authorization policy (not a bare exemption).")
+            # A create must return or emit the identity it created, or the caller cannot
+            # address the new record.
+            if operation == "create" and effect == "command" and action.get("outputCardinality") == "zero" and not action.get("emits"):
+                self.report("error", "action.record.create-output", aid, "Create must return or emit the created identity.")
+            # A read/count is pure: it must be a query and must not mutate modeled state.
+            if operation in {"query", "count", "read", "exists"} and effect == "command":
+                self.report("error", "action.set.query-pure", aid, "Query/read/count must have effect 'query', not 'command'.")
+            if effect == "query" and action.get("mutations"):
+                self.report("error", "action.set.query-pure", aid, "A query must not mutate modeled state.")
+            # A record CRUD action must target a real record-shaped concept (entity or
+            # resource), not a dangling or non-record target.
+            if operation in {"read", "create", "update", "patch", "delete", "replace", "upsert"} and action.get("scope") == "record":
+                target = self.symbols.get(action.get("target"))
+                if target is not None and target.get("kind") not in {"ENTITY", "RESOURCE"}:
+                    self.report("error", "action.record.target", aid, "A record CRUD action must target an entity or record-shaped resource.")
+            # A transformation IS a lineage edge: it must name both what it reads
+            # (inputs) and what it produces (outputs), or the lineage is unrecoverable.
+            if effect == "transform" and (not action.get("inputs") or not action.get("outputs")):
+                self.report("error", "action.transform.field-lineage", aid, "Transform must declare its input and output lineage endpoints.")
+            # Security/privacy classification must be accounted for across a transform:
+            # either it propagates, or a declassification/masking policy is declared.
+            if effect == "transform" and not (action.get("classification") or action.get("declassification")):
+                self.report("error", "action.transform.classification", aid, "Transform must propagate classification or declare a declassification/masking policy.")
+            # A transform can only preserve or remap identity if it declares which rows
+            # it operates over (a selection); otherwise identity handling is undefined.
+            if effect == "transform" and not action.get("selection"):
+                self.report("error", "action.transform.identity", aid, "Transform must declare a selection so identity can be preserved or remapped.")
+            # A replace overwrites the whole record, so it must supply the mutable fields
+            # it writes (declare its inputs); a replace with no inputs silently blanks data.
+            if operation == "replace" and effect == "command" and not action.get("inputs"):
+                self.report("error", "action.record.replace-complete", aid, "Replace must supply the mutable fields it writes (declare inputs).")
 
     def check_collection_transforms(self):
         for transform in self.model.get("collectionTransforms", []):
@@ -331,6 +379,13 @@ class Analyzer:
                 self.report("error", "action.collection.partition", tid, "Partition requires a key or explicit policy.")
             if operation == "deduplicate" and not transform.get("survivorPolicy"):
                 self.report("error", "action.collection.dedup-survivor", tid, "Deduplication requires a survivor policy.")
+            # A sample is nondeterministic unless it pins how it draws: a method and a
+            # size or rate. Otherwise the result is unreproducible.
+            if operation == "sample" and not (transform.get("method") and (transform.get("size") or transform.get("rate"))):
+                self.report("error", "action.collection.sample", tid, "Sample requires a method and a size or rate.")
+            # A window over a stream is undefined without its type and size/gap.
+            if operation == "window" and not (transform.get("windowType") and (transform.get("size") or transform.get("gap"))):
+                self.report("error", "action.collection.window", tid, "Window requires a type and a size or gap.")
 
     def check_processes(self):
         for process in self.model.get("processes", []):

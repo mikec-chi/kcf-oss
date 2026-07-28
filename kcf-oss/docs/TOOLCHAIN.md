@@ -17,7 +17,7 @@ Lexer -> parser AST -> profile closure -> normalized semantic IR
                             coverage / assess (ready?)
                                             |
                                             v
-                    ready IR ──▶ LLM code generation (codegen/), any stack
+                    ready IR ──▶ LLM code generation (codegen/), your target stack
 ```
 
 The textual model is the editable semantic source; the generated semantic IR is

@@ -1,0 +1,9 @@
+{
+  "scopeVersion": "1.0.0",
+  "model": "SupportDesk",
+  "includedCapabilities": ["support.Ticket", "support.Customer", "CreateTicket", "ResolveTicket"],
+  "excludedCapabilities": ["billing", "reporting-dashboards"],
+  "stakeholders": ["support-lead", "cx-ops"],
+  "declaredBoundaries": ["payment processing is handled by the billing system", "email delivery is an external service"],
+  "openQuestions": []
+}

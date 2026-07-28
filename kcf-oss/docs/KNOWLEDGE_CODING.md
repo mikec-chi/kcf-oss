@@ -6,8 +6,9 @@ Vibe coding is magic until the app gets real — then the LLM starts guessing at
 domain: inventing fields, dropping half a lifecycle, hallucinating relationships,
 quietly disagreeing with itself across files. The fix isn't a cleverer prompt; it's
 a better *input*. You spend the first few minutes turning your domain into a
-**complete, machine-checked model**, and the LLM builds from *that* — same speed and
-vibe, but from a spec instead of a guess.
+**validated, coverage-assessed, traceable model** — one that reports which obligations
+passed rather than pretending your domain is complete — and the LLM builds from *that*
+— same speed and vibe, but from a checked spec instead of a guess.
 
 ```
         vibe coding:   prose ─────────────────▶ LLM ─▶ app   (guesses the gaps)
@@ -96,7 +97,7 @@ model back to match (asking you when intent is ambiguous). Full protocol:
 
 **5. Go further** — [self-host the connector](../mcp/README.md#host-it-yourself-free) ·
 [tune elicitation & codegen](../mcp/README.md#tune-it-to-your-house-standards-optional) ·
-target [any stack](../codegen/) · [contribute](../../community/).
+target [your stack](../codegen/) · [contribute](../../community/).
 
 ---
 

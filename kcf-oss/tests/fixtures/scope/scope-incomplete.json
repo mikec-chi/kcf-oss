@@ -1,0 +1,10 @@
+{
+  "scopeVersion": "1.0.0",
+  "model": "SupportDesk",
+  "includedCapabilities": ["support.Ticket", "CreateTicket", "support.Refund", "EscalateTicket"],
+  "excludedCapabilities": ["billing"],
+  "sourceDocuments": ["support-runbook-v3"],
+  "stakeholders": ["support-lead"],
+  "declaredBoundaries": ["payment processing is handled by the billing system"],
+  "openQuestions": ["What is the SLA for priority-1 tickets?"]
+}

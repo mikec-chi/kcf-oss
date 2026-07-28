@@ -10,6 +10,19 @@
     "model": {"type": "string"},
     "valid": {"type": "boolean"},
     "ready": {"type": "boolean"},
+    "coverageStatus": {
+      "enum": ["invalid", "no-substantive-content", "anchors-missing", "required-obligations-met", "profile-obligations-complete"],
+      "description": "A richer coverage verdict than the lone `ready` boolean: what kind of readiness holds."
+    },
+    "readyFor": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "The downstream steps this model is ready for (e.g. codegen-handoff, review)."
+    },
+    "domainComplete": {
+      "enum": ["not-proven"],
+      "description": "Always 'not-proven': coverage obligations are necessary, never sufficient, for real domain completeness - that is a human judgement, not a machine verdict."
+    },
     "checks": {
       "type": "object",
       "required": ["validity", "coverage", "patterns", "roles"],

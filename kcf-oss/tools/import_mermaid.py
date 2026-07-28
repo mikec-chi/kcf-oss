@@ -97,9 +97,12 @@ def import_mermaid(text: str, model_id: str, namespace: str) -> dict:
         seen[base] = seen.get(base, 0) + 1
         edge_id = base if seen[base] == 1 else f"{base}-{seen[base]}"
         edge_ids.append(edge_id)
-        relationship = {"id": edge_id, "rootKind": "ORDERING", "source": f"{namespace}.{edge['from']}", "target": f"{namespace}.{edge['to']}"}
+        # A flowchart arrow is a workflow-ordering edge; declare the ordering dimension
+        # so the ORDERING relationship is meaningful (and satisfies kcf.relationship.ordering).
+        qualifiers = {"dimension": "workflow"}
         if edge["label"]:
-            relationship["qualifiers"] = {"condition": edge["label"]}
+            qualifiers["condition"] = edge["label"]
+        relationship = {"id": edge_id, "rootKind": "ORDERING", "source": f"{namespace}.{edge['from']}", "target": f"{namespace}.{edge['to']}", "qualifiers": qualifiers}
         relationships.append(relationship)
 
     model = {

@@ -4,7 +4,7 @@ argument-hint: [domain description]
 ---
 
 Use the `kcf` MCP server's tools to model the domain below and then generate an
-application from the model — so the code is built from a complete, machine-checked
+application from the model — so the code is built from a validated, coverage-assessed
 specification, not guessed from prose.
 
 Domain: $ARGUMENTS

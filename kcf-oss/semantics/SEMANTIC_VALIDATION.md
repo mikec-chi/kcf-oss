@@ -508,6 +508,65 @@ status, phase, handler when automated, and legacy aliases when applicable.
 - Generated packages should reference shared grammar modules instead of copying
   their definitions.
 
+## Analyzer-enforced structural and reference rules
+
+These rules are enforced directly by the semantic analyzer (`tools/semantic_analyzer.py`)
+as enum-membership and reference-resolution checks per dimension. They are catalogued
+here so the rule set documents the enforcement the analyzer already performs.
+
+- `action.operation.unknown`: An action's operation MUST be a recognized value.
+- `action.scope.unknown`: An action's scope MUST be a recognized value.
+- `action.selection.unknown`: An action's selection MUST be a recognized value.
+- `action.cardinality.unknown`: An action's input and output cardinalities MUST be recognized values.
+- `action.atomicity.unknown`: An action's atomicity mode MUST be a recognized value.
+- `action.concurrency.unknown`: An action's concurrency mode MUST be a recognized value.
+- `kcf.concept.unknown-field`: An unrecognized concept field SHOULD be verified — it is captured as free metadata and may be a typo or an unsupported field.
+- `kcf.entity.reference`: An entity reference target MUST resolve to a declared concept.
+- `kcf.entity.collection`: An entity collection's element type MUST resolve.
+- `kcf.entity.composition`: An entity composition target MUST resolve.
+- `kcf.entity.constraint`: An entity constraint reference MUST resolve.
+- `kcf.entity.lifecycle`: An entity's lifecycle reference MUST resolve.
+- `kcf.entity.cardinality`: An entity attribute or relationship cardinality MUST be a recognized value.
+- `kcf.entity.orphan`: An entity's orphan policy MUST be a recognized value.
+- `kcf.entity.category-vocab`: An entity's data-management category SHOULD be a recognized vocabulary value.
+- `kcf.entity.category-shape`: An entity's declared category SHOULD match the shape derived from its structure.
+- `kcf.entity.containment-vocab`: An entity's containment tag SHOULD be a recognized vocabulary value.
+- `kcf.entity.containment-shape`: An entity's declared containment role SHOULD match its derived structure.
+- `kcf.relationship.directionality`: A relationship's directionality MUST be a recognized value.
+- `kcf.relationship.infer`: A relationship's inference semantics MUST be a recognized value.
+- `kcf.relationship.on-delete-vocab`: A relationship's on-delete qualifier SHOULD be a recognized vocabulary value.
+- `kcf.relationship.unknown-qualifier`: An unrecognized relationship qualifier SHOULD be verified.
+- `kcf.actor.kind`: An actor's kind MUST be a recognized value.
+- `kcf.actor.communication`: An actor's communication reference MUST resolve.
+- `kcf.work.kind`: A work's kind MUST be a recognized value.
+- `kcf.event.kind`: An event's kind MUST be a recognized value.
+- `kcf.event.expectedness`: An event's expectedness MUST be a recognized value.
+- `kcf.lifecycle.governs-kind`: A lifecycle's governed concept kind MUST be a recognized value.
+- `kcf.lifecycle.temporal`: A lifecycle's temporal reference MUST resolve.
+- `kcf.resource.kind`: A resource's kind MUST be a recognized value.
+- `kcf.resource.consumption`: A resource's consumption mode MUST be a recognized value.
+- `kcf.resource.reference`: A resource reference MUST resolve.
+- `kcf.measure.kind`: A measure's kind MUST be a recognized value.
+- `kcf.measure.aggregation`: A measure's aggregation MUST be a recognized value.
+- `kcf.measure.scale`: A measure's scale MUST be a recognized value.
+- `kcf.unit.base`: A unit's base-unit reference MUST resolve.
+- `kcf.temporal.duration`: A temporal duration unit MUST be a recognized value.
+- `kcf.spatial.geometry`: A spatial geometry kind MUST be a recognized value.
+- `kcf.spatial.route`: A spatial route reference MUST resolve.
+- `kcf.authority.mode`: An authority's mode MUST be a recognized value.
+- `kcf.capability.implemented-by`: A capability's implementation reference MUST resolve.
+- `kcf.capability.requires-skill`: A capability's required-skill reference MUST resolve.
+- `kcf.skill.requires`: A skill's prerequisite reference MUST resolve.
+- `kcf.allocation.reference`: An allocation's references MUST resolve.
+- `kcf.mutation.subject`: A mutation's subject MUST resolve.
+- `kcf.mutation.emit`: A mutation's emitted event MUST resolve.
+- `kcf.math.reference`: A math reference MUST resolve.
+- `kcf.logic.mode`: A logic modal operator MUST be a recognized value.
+- `kcf.process.node`: A process node reference MUST resolve.
+- `kcf.process.boundary`: A process boundary MUST attach to a known node.
+- `kcf.process.gateway`: A process gateway kind MUST be a recognized value.
+- `kcf.process.lane`: A process lane performer MUST resolve.
+
 ## Minimum conformance
 
 - **Level 1 - Structural:** modules, syntax, scopes, names, kinds, references.

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/completeness-report-v1.schema.json",
+  "title": "KCF Multi-Axis Completeness Report v1",
+  "description": "Reports completeness along independent axes rather than as one boolean: structural validity, profile satisfaction, coverage obligations, declared-scope coverage, source fidelity, review completion, open questions, and unsupported areas. `closedWorldComplete` is explicit about the frame - complete AGAINST THE DECLARED SCOPE, not against an open world.",
+  "type": "object",
+  "required": ["completenessReportVersion", "model", "axes", "closedWorldComplete", "blockers"],
+  "properties": {
+    "completenessReportVersion": {"const": "1.0.0"},
+    "model": {"type": "string"},
+    "closedWorldComplete": {"type": "boolean", "description": "True only when there are no blockers: the model is valid, has no required coverage gaps, has no unproven pattern claims, declares a meaningful scope, covers every included capability, has no open questions, and any declared sources were evaluated and complete."},
+    "blockers": {"type": "array", "items": {"type": "string"}, "description": "The reasons closedWorldComplete is false (empty when complete). E.g. required-coverage-gaps, empty-scope, scope-capabilities-uncovered, open-questions, sources-declared-not-evaluated, source-incomplete."},
+    "axes": {
+      "type": "object",
+      "required": ["structural", "profile", "coverage", "declaredScope"],
+      "properties": {
+        "structural": {
+          "type": "object",
+          "required": ["valid", "errors", "warnings"],
+          "properties": {"valid": {"type": "boolean"}, "errors": {"type": "integer"}, "warnings": {"type": "integer"}},
+          "additionalProperties": false
+        },
+        "profile": {
+          "type": "object",
+          "required": ["satisfied", "requiredButAbsent", "claimedButUnproven"],
+          "properties": {
+            "satisfied": {"type": "integer"},
+            "requiredButAbsent": {"type": "array", "items": {"type": "string"}},
+            "claimedButUnproven": {"type": "array", "items": {"type": "string"}}
+          },
+          "additionalProperties": false
+        },
+        "coverage": {
+          "type": "object",
+          "required": ["requiredGaps", "recommendedGaps", "coverageStatus"],
+          "properties": {
+            "requiredGaps": {"type": "integer"},
+            "recommendedGaps": {"type": "integer"},
+            "coverageStatus": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "declaredScope": {
+          "type": "object",
+          "required": ["declared", "covered", "uncovered", "excluded"],
+          "properties": {
+            "declared": {"type": "integer"},
+            "meaningful": {"type": "boolean", "description": "The scope declares at least one capability or an explicit vocabulary/package kind."},
+            "covered": {"type": "array", "items": {"type": "string"}},
+            "uncovered": {"type": "array", "items": {"type": "string"}},
+            "excluded": {"type": "array", "items": {"type": "string"}}
+          },
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "required": ["evaluated", "status"],
+          "properties": {
+            "evaluated": {"type": "boolean"},
+            "status": {"enum": ["not-applicable", "declared-not-evaluated", "evaluated-complete", "evaluated-incomplete"]},
+            "sourceComplete": {"type": ["boolean", "null"]},
+            "sourceConfirmed": {"type": ["boolean", "null"]},
+            "sourceDocuments": {"type": "array", "items": {"type": "string"}}
+          },
+          "additionalProperties": false
+        },
+        "openQuestions": {"type": "array", "items": {"type": "string"}},
+        "unsupportedAreas": {"type": "array", "items": {"type": "string"}},
+        "boundaries": {"type": "array", "items": {"type": "string"}},
+        "stakeholders": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

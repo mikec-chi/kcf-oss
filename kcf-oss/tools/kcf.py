@@ -26,6 +26,10 @@ from pattern_contracts import load_contracts, report as pattern_report, role_rep
 from review_queue import by_segment as review_by_segment, review_queue  # noqa: E402
 from scaffold import build_scaffold  # noqa: E402
 from source_coverage import is_complete as source_complete, source_coverage  # noqa: E402
+from completeness import completeness as completeness_report  # noqa: E402
+from meta_coverage import meta_coverage  # noqa: E402
+from automation_report import report as automation_report  # noqa: E402
+from verify_realization import verify as verify_realization  # noqa: E402
 from merge_models import merge  # noqa: E402
 from migrate_ir import migrate  # noqa: E402
 from profile_resolver import resolve_profile  # noqa: E402
@@ -119,6 +123,26 @@ def main() -> int:
     ingest_command.add_argument("document", type=Path)
     ingest_command.add_argument("trace", type=Path)
     ingest_command.add_argument("--output", "-o", type=Path)
+
+    verify_command = commands.add_parser("verify-realization", help="verify a codegen realization manifest against the IR (and optionally the generated repo)")
+    verify_command.add_argument("model", type=Path)
+    verify_command.add_argument("manifest", type=Path)
+    verify_command.add_argument("--repo", type=Path)
+    verify_command.add_argument("--output", "-o", type=Path)
+
+    completeness_command = commands.add_parser("completeness", help="multi-axis, closed-world completeness against a declared scope")
+    completeness_command.add_argument("model", type=Path)
+    completeness_command.add_argument("scope", type=Path)
+    completeness_command.add_argument("--document", type=Path)
+    completeness_command.add_argument("--trace", type=Path)
+    completeness_command.add_argument("--output", "-o", type=Path)
+
+    metacov_command = commands.add_parser("coverage-meta", help="report which grammar construct families have a coverage policy (coverage of the coverage system)")
+    metacov_command.add_argument("--strict", action="store_true", help="exit non-zero if any construct family has no coverage policy")
+    metacov_command.add_argument("--output", "-o", type=Path)
+
+    autoreport_command = commands.add_parser("automation-report", help="triage still-manual semantic rules and report automation coverage by semantic risk")
+    autoreport_command.add_argument("--output", "-o", type=Path)
 
     doccheck_command = commands.add_parser("document-check")
     doccheck_command.add_argument("document", type=Path)
@@ -269,6 +293,33 @@ def main() -> int:
         )
         write_json(report, args.output)
         return 0 if (report["ready"] and report["sourceComplete"]) else 1
+    if args.command == "verify-realization":
+        report = verify_realization(
+            json.loads(args.model.read_text(encoding="utf-8")),
+            json.loads(args.manifest.read_text(encoding="utf-8")),
+            args.repo,
+        )
+        write_json(report, args.output)
+        return 0 if report["ok"] else 1
+    if args.command == "completeness":
+        document = json.loads(args.document.read_text(encoding="utf-8")) if args.document else None
+        trace = json.loads(args.trace.read_text(encoding="utf-8")) if args.trace else None
+        report = completeness_report(
+            json.loads(args.model.read_text(encoding="utf-8")),
+            json.loads(args.scope.read_text(encoding="utf-8")),
+            document,
+            trace,
+        )
+        write_json(report, args.output)
+        return 0 if report["closedWorldComplete"] else 1
+    if args.command == "coverage-meta":
+        report = meta_coverage(load_coverage_model())
+        write_json(report, args.output)
+        return 1 if (args.strict and report["withoutPolicy"]) else 0
+    if args.command == "automation-report":
+        report = automation_report(json.loads((PROJECT_ROOT / "semantics" / "semantic-rules.json").read_text(encoding="utf-8")))
+        write_json(report, args.output)
+        return 1 if report["untriaged"] else 0
     if args.command == "document-check":
         document = json.loads(args.document.read_text(encoding="utf-8"))
         report = check_document(document, load_document_profiles())
