@@ -260,8 +260,9 @@ def assess(
     """Compile and assess a `.kcf` model — your primary "is the model good enough?"
     check. Returns `{ok, valid, ready, requiredGaps, recommendedGaps, requiredGapIds,
     checks}`. Code generation only needs `valid` (analyzer-clean); `ready` (zero
-    required gaps + patterns proven + roles resolved) is the completeness goal. Fix
-    every `required` gap; treat `recommended` gaps as enrichment. Use `coverage` for
+    required gaps + required/claimed patterns proven + roles resolved) means SUFFICIENT
+    COVERAGE FOR HANDOFF, not proof of domain completeness (`domainComplete: not-proven`).
+    Fix every `required` gap; treat `recommended` gaps as enrichment. Use `coverage` for
     the itemized to-do list."""
     return t.assess_model(source)
 

@@ -1,0 +1,18 @@
+{
+  "_comment": "Positive/negative regression fixtures for coverage obligations, keyed by obligation id. Merged with any inline `fixtures` on the obligation in coverage-model.json (inline wins). Kept as a side file so fixtures-as-data do not churn the policy config; verify_obligation_fixtures runs them and the gate asserts every REQUIRED obligation is regression-gated, with the RECOMMENDED obligations below now covered too (so every executable coverage evaluator is regression-proven).",
+  "coverage.entity.lifecycle": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.entity.crud": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.entity.set-operation": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.model.transformation": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.actor.present": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.measure.present": {"satisfied": ["tests/fixtures/coverage/profiles/analytics-full.json"], "violated": ["tests/fixtures/coverage/profiles/analytics-no-measure.json"]},
+  "coverage.event.producer": {"satisfied": ["tests/fixtures/coverage/profiles/event-driven-full.json"], "violated": ["tests/fixtures/coverage/profiles/event-driven-no-producer.json"]},
+  "coverage.model.profile-declared": {"satisfied": ["tests/fixtures/coverage/coverage-complete.json"], "violated": ["tests/fixtures/patterns/pattern-satisfied.json"]},
+  "coverage.relationship.present": {"satisfied": ["tests/fixtures/walkthrough/support-ticket-ready.json"], "violated": ["tests/fixtures/coverage/coverage-incomplete.json"]},
+  "coverage.resource.present": {"satisfied": ["tests/fixtures/coverage/recommended/resource-full.json"], "violated": ["tests/fixtures/coverage/profiles/operational-full.json"]},
+  "coverage.temporal.present": {"satisfied": ["tests/fixtures/coverage/recommended/temporal-full.json"], "violated": ["tests/fixtures/coverage/profiles/operational-full.json"]},
+  "coverage.reasoning.grounded": {"satisfied": ["tests/fixtures/coverage/recommended/reasoning-grounded.json"], "violated": ["tests/fixtures/coverage/recommended/reasoning-ungrounded.json"]},
+  "coverage.knowledge.provenance": {"satisfied": ["tests/fixtures/coverage/recommended/knowledge-provenanced.json"], "violated": ["tests/fixtures/coverage/profiles/org-knowledge-full.json"]},
+  "coverage.security.controls": {"satisfied": ["tests/fixtures/coverage/recommended/security-controls.json"], "violated": ["tests/fixtures/coverage/recommended/security-no-controls.json"]},
+  "coverage.integration.adapters": {"satisfied": ["tests/fixtures/coverage/recommended/integration-adapters.json"], "violated": ["tests/fixtures/coverage/recommended/integration-no-adapters.json"]}
+}

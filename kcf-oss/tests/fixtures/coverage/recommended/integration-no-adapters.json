@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "IntEmpty",
+  "module": "KCF",
+  "namespace": "cov",
+  "concepts": [
+    {
+      "id": "Order",
+      "qualifiedName": "cov.Order",
+      "kind": "ENTITY"
+    }
+  ],
+  "integration": {
+    "endpoints": [
+      {
+        "id": "E1"
+      }
+    ]
+  }
+}

@@ -111,8 +111,15 @@ is complete. It reports, each on its own axis:
 - **Structural validity** — the model is well-formed and passes the semantic analyzer.
 - **Required-obligation readiness** (`kcf assess`) — the configured required coverage
   obligations for the declared profile(s) are met. `ready: true` means *sufficient
-  coverage for handoff*, and the report also carries `domainComplete: "not-proven"` —
-  coverage is a necessary, never a sufficient, condition for real completeness.
+  coverage for **codegen handoff***, and the report also carries `domainComplete:
+  "not-proven"` — coverage is a necessary, never a sufficient, condition for real
+  completeness. **`ready` is NOT a safety or deployment gate.** `readyFor` is currently
+  `["codegen-handoff", "review"]`; a model can be `ready` without declaring any security
+  posture (assets/threats/risks/controls/trust-boundaries/data-classification) beyond the
+  per-action authorization the analyzer already requires. A future `readyFor` ladder
+  (`codegen-handoff` → `security-review` → `deployment-review` → `production`) would
+  qualify the later stages — only the first is supported today, so *do not read `ready`
+  as "safe to deploy."*
 - **Closed-world completeness** (`kcf completeness`) — measured against an *explicitly
   declared scope*, never an open world; it names the blockers when it is not complete.
 - **Source confirmation** (`kcf source-coverage`) — *source-complete* (linkage) is

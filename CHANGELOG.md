@@ -13,9 +13,12 @@ Tag every contract-affecting entry with which one moved:
 
 (KCF stops at the IR; code generation is the LLM codegen pack.)
 
-The package version (`pyproject.toml`) moves in lockstep with the highest-impact
-contract change in a release. Breaking changes to any contract require a major
-bump and, for `ir`, a migration path (`tools/migrate_ir.py`).
+The distribution version (`pyproject.toml`) **tracks the grammar-stack release line**
+(currently `1.11.0`); the three semantic contracts version independently inside the
+manifest (grammar-stack `1.11.0`, IR `1.0.0`, rule catalogue `3.0.0`). `check_handoff.py`
+asserts the distribution version equals the grammar-stack version. Breaking changes to
+any contract require a major bump of THAT contract and, for `ir`, a migration path
+(`tools/migrate_ir.py`).
 
 ## [Unreleased]
 

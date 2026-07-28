@@ -26,7 +26,7 @@ import argparse
 import json
 from pathlib import Path
 
-from ir_identity import model_semantic_ids
+from ir_identity import anonymous_identities, model_semantic_ids
 
 
 # The realization verifier accounts for EVERY semantic identity the IR declares - it
@@ -142,6 +142,9 @@ def verify(model: dict, manifest: dict, repo: Path | None = None) -> dict:
             "missing": sum(1 for sid in identities if sid not in accounted),
             "byDisposition": by_disposition,
         },
+        # Position-based fallback identities (section#index) - accounted but NOT stable
+        # across reordering/versions. A durable manifest should give these items a stable id.
+        "positionUnstableIdentities": anonymous_identities(model),
         "errors": errors,
     }
 

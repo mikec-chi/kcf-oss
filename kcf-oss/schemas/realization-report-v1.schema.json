@@ -26,6 +26,11 @@
       },
       "additionalProperties": false
     },
+    "positionUnstableIdentities": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Identities assigned a position-based `section#index` fallback (the item declared no qualifiedName/id/name). Accounted for, but NOT stable across reordering/versions - a durable manifest should give these items a stable id."
+    },
     "errors": {
       "type": "array",
       "items": {

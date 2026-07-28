@@ -417,6 +417,10 @@ def main():
     ir_schema = json.loads((SCHEMAS_ROOT / "model-ir-v1.schema.json").read_text(encoding="utf-8"))
     unclassified = unclassified_ir_sections(ir_schema)
     check(not unclassified, f"IR schema has unclassified top-level section(s) - register in ir_identity.py: {unclassified}")
+    # W6: an extension package is a semantic identity, so a realization must account for it
+    # (D-005 at the package level) - arbitrary content cannot hide in an unaccounted bag.
+    ext_ids = model_semantic_ids({"concepts": [], "extensions": {"acme.audit": {"x": 1}}})
+    check(ext_ids.get("extensions.acme.audit") == "extensions", f"extension package was not accounted as a semantic identity: {ext_ids}")
     from ir_identity import EXCLUDED_SECTIONS as _EXCLUDED
     for name in sorted((PROJECT_ROOT / "tests" / "domains").glob("*.kcf")):
         produced = {key for key, value in compile_file(name).items() if isinstance(value, (list, dict)) and value}
@@ -505,8 +509,15 @@ def main():
     check(governance["positiveVerified"] == governance["fixtureDeclared"], "a positive obligation fixture produced an unexpected gap")
     check(governance["negativeVerified"] == governance["fixtureDeclared"], "a negative obligation fixture failed to produce a gap")
     required_obligations = {obligation["id"] for obligation in coverage_model["obligations"] if obligation["level"] == "required"}
-    ungated_required = sorted(required_obligations - set(governance["regressionGateIncluded"]))
+    gated = set(governance["regressionGateIncluded"])
+    ungated_required = sorted(required_obligations - gated)
     check(not ungated_required, f"required coverage obligation(s) lack verified positive+negative fixtures: {ungated_required}")
+    # W4: every coverage obligation (required AND recommended) is now regression-gated -
+    # every executable evaluator has verified positive+negative fixtures (inline or in
+    # config/coverage-fixtures.json), so no coverage evaluator can silently regress.
+    all_obligations = {obligation["id"] for obligation in coverage_model["obligations"]}
+    ungated_all = sorted(all_obligations - gated)
+    check(not ungated_all, f"coverage obligation(s) not regression-gated: {ungated_all}")
 
     by_seg = review_by_segment(review, {"links": [
         {"segmentId": "p1", "constructs": ["fin.Invoice"]},
