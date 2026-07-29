@@ -9,7 +9,7 @@ phase: model
 area: source-fidelity
 construct: kcf import-dbml (relationship import)
 severity: medium
-title: import-dbml preserves ref direction but discards cardinality and on_delete from [ref: ... , delete: ...]
+title: "import-dbml preserves ref direction but discards cardinality and on_delete from [ref: ... , delete: ...]"
 observation: >
   A dbml.org ref like "account_id uuid [ref: > accounts.id, delete: cascade]" carries
   a many-to-one cardinality and a cascade delete. import-dbml correctly infers
