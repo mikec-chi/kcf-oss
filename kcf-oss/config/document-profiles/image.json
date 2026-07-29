@@ -1,0 +1,29 @@
+{
+  "documentProfileVersion": "1.0.0",
+  "documentKind": "image",
+  "title": "Image / scan / screenshot",
+  "description": "A source that arrives as pixels rather than text — a photographed or scanned document, a screenshot of an existing system, a whiteboard or flip-chart photo. Extraction is two-stage: a vision model transcribes the image into segments, then those segments are extracted as usual. This profile governs the transcription, because that is where meaning is silently lost. Where the image clearly depicts a single known modality, prefer that modality's profile (`flowchart`, `form`, `org-chart`); use `image` when the content is mixed, partially legible, or not one of those.",
+  "segmentKinds": ["heading", "section", "statement", "note", "question", "field", "cell", "node", "edge", "decision"],
+  "targetDimensions": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "RELATIONSHIP", "INFORMATION"],
+  "mapping": [
+    {"segmentKind": "statement", "producesKind": "*", "notes": "transcribed body text behaves as prose — classify per statement into the construct it asserts"},
+    {"segmentKind": "heading", "producesKind": "INFORMATION", "notes": "a title, banner, or column header scopes what follows; keep it addressable but extract no construct from it alone"},
+    {"segmentKind": "section", "producesKind": "INFORMATION", "notes": "a visually delimited region (panel, boxed area, page) becomes an information record carrying sourceDocument provenance"},
+    {"segmentKind": "field", "producesKind": "ENTITY.attribute", "notes": "a labelled input, form field, or screenshot column becomes a typed attribute; a printed value next to the label is an instance, not part of the model"},
+    {"segmentKind": "cell", "producesKind": "ENTITY.attribute", "notes": "a table cell: the header row gives attributes, body rows give instances. Transcribe the header before the rows, and never infer a column that is cut off at the image edge"},
+    {"segmentKind": "node", "producesKind": "WORK", "notes": "a box in a diagrammed process becomes a WORK concept"},
+    {"segmentKind": "edge", "producesKind": "RELATIONSHIP", "notes": "a drawn arrow becomes an ORDERING relationship; arrow direction is meaning — if the arrowhead is not legible, emit a question segment instead of guessing"},
+    {"segmentKind": "decision", "producesKind": "WORK", "notes": "a diamond or branch point becomes a WORK concept, with its conditions on the outgoing edges"},
+    {"segmentKind": "note", "producesKind": "INFORMATION", "notes": "a margin annotation, stamp, or handwritten aside — often the caveat that bounds the rest of the image"},
+    {"segmentKind": "question", "producesKind": "*", "notes": "the illegibility channel: anything cropped, blurred, obscured, or ambiguous becomes a question segment and produces no construct"}
+  ],
+  "guidance": [
+    "Transcribe only what is legible. An image invites confabulation in a way text does not — a plausible-looking guess at a cropped column or a blurred arrowhead is indistinguishable from real content once it reaches the IR.",
+    "Every illegible or ambiguous region gets a `question` segment. This is what makes the loss visible: an untranscribed region that is simply omitted makes the coverage denominator shrink, so the gap disappears instead of being reported.",
+    "Record the image's own identity (file, page, figure number) in the segmentId, so a construct traces back to a specific image and not to 'the screenshots'.",
+    "Distinguish schema from data. Screenshots and filled forms show instances; the model wants the attribute, the allowed values, and the rule — not the sample row.",
+    "Set `validatedBy`/`validatedAt` on segments a human has confirmed against the original. Transcription is a lossy step and should carry sign-off before the model is built on it.",
+    "If the image depicts a flowchart, form, or org chart cleanly, re-declare the document under that modality's profile instead — those profiles give sharper extraction guidance than this one.",
+    "Spatial layout carries meaning that transcription drops: reading order, nesting, alignment into columns, and proximity grouping. State the grouping explicitly in the segment text rather than relying on segment order to imply it."
+  ]
+}

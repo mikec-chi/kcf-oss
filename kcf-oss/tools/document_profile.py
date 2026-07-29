@@ -51,6 +51,19 @@ def check_document(document: dict, profiles: dict[str, dict]) -> dict:
     profile = profiles.get(document_kind) if document_kind else None
     used = sorted({segment.get("kind") for segment in document.get("segments", []) if segment.get("kind")})
     known = set(profile["segmentKinds"]) if profile else set()
+    warnings: list[str] = []
+    if not document_kind:
+        warnings.append(
+            "no documentKind declared: extraction runs without a modality profile and the "
+            "targetDimensions steer it provides. Declare the document's modality (e.g. prose, "
+            "image, flowchart, form, org-chart)."
+        )
+    elif profile is None:
+        warnings.append(
+            f"documentKind '{document_kind}' has no profile on the search path "
+            "(config/document-profiles or KCF_DOCUMENT_PROFILE_PATH): extraction runs without "
+            "modality guidance. Add a profile for this kind, or re-declare an existing one."
+        )
     return {
         "documentCheckVersion": "1.0.0",
         "document": document.get("documentId", "<document>"),
@@ -59,12 +72,16 @@ def check_document(document: dict, profiles: dict[str, dict]) -> dict:
         "targetDimensions": profile["targetDimensions"] if profile else [],
         "usedSegmentKinds": used,
         "unknownSegmentKinds": [kind for kind in used if profile and kind not in known],
+        "warnings": warnings,
     }
 
 
 def is_conformant(report: dict) -> bool:
-    if report["documentKind"] and not report["hasProfile"]:
-        return False
+    # Conformance is about segmentation drift, not whether a profile happens to ship: a
+    # segment kind foreign to a RESOLVED profile is the only hard failure. A missing or
+    # unprofiled modality is a warning (see report["warnings"]) — declaring a modality
+    # honestly must never score worse than omitting the field, which would only teach
+    # users to strip provenance to pass the gate.
     return not report["unknownSegmentKinds"]
 
 
@@ -82,6 +99,9 @@ def main() -> int:
         args.output.write_text(text, encoding="utf-8")
     else:
         print(text, end="")
+    import sys
+    for warning in report["warnings"]:
+        print(f"warning: {warning}", file=sys.stderr)
     return 0 if is_conformant(report) else 1
 
 

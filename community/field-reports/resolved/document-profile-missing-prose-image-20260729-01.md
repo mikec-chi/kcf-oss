@@ -162,3 +162,35 @@ Context: this surfaced while ingesting a structured-DSL model family as text sou
 after confirming `kcf import-dbml` correctly declines those files — their `.dbml` is a
 different dialect, and the exit-2 warning added for
 import-dbml-silent-noop-20260727-01 fired exactly as intended.
+
+## Triage result — ACCEPTED, fixed
+
+Reproduced exactly against the reference compiler: `config/document-profiles/` shipped only
+`flowchart`/`form`/`org-chart`, and `is_conformant` (`tools/document_profile.py`) failed a
+declared-but-unprofiled `documentKind` (`if report["documentKind"] and not report["hasProfile"]:
+return False`) while an **absent** `documentKind` skipped the check and passed — so declaring the
+modality honestly scored worse than stripping it. Two fixes landed (pure data + a tooling safety
+change; no grammar / `model-ir-v1` / analyzer *contract* change):
+
+1. **Shipped `config/document-profiles/prose.json` and `image.json`** (the report's lift-and-drop
+   candidates, verbatim). Both validate clean against `schemas/document-profile-v1.schema.json`,
+   every `segmentKinds` entry is in the `source-document-v1` segment-kind enum, and each has a
+   `mapping` entry. They are picked up by `load_document_profiles()` with no engine change and are
+   schema-checked by the conformance gate (`run_conformance.py` validates every loaded profile).
+   `prose` is the default front-door modality; `image` makes the load-bearing rule explicit —
+   every illegible/cropped region must become a `question` segment so the loss is *reported*, not
+   silently dropped from the coverage denominator (the vision-path analog of
+   [`import-dbml-silent-noop-20260727-01`](import-dbml-silent-noop-20260727-01.md)).
+
+2. **Removed the perverse incentive** in `tools/document_profile.py`. Conformance now fails only on
+   genuine **segmentation drift** — a segment kind foreign to a *resolved* profile
+   (`unknownSegmentKinds`). A missing or unprofiled modality is a non-fatal **`warning`** (new
+   `report["warnings"]`, also printed to stderr), and an **absent** `documentKind` now warns too —
+   so declaring a modality is never worse than omitting it, and omitting is no longer silently
+   clean. Verified: `prose` declared → conformant + `targetDimensions` populated; kind omitted →
+   conformant **with a warning**; an `image` document using org-chart kinds (`position`,
+   `reporting-line`) → still non-conformant (drift), matching the report's workaround note.
+
+`kcf check` (conformance gate, incl. the document-profile schema + drift assertions) and
+`check_handoff.py` are green. Docs synced: `docs/DEVELOPER-MANUAL.md` modality table and
+`workflows/application-generation/01c-document-extraction.md` now list `prose`/`image`.
