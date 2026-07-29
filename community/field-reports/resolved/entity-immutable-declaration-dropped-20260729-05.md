@@ -96,3 +96,17 @@ Even with the working `mutability "read-only"` encoding, the lifecycle obligatio
 recommends a lifecycle for those entities, because its evaluator does not consult
 `_is_exempt`. The two together are why an immutable ledger cannot currently be modelled
 without leaving a coverage gap open.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed: `immutable-decl` parses inside any concept body, but the normalizer read it only in
+the `EVENT` branch (`normalizer.py`), so on an ENTITY it parsed and vanished — a silent no-op
+that exempted nothing and reached no generator. Chose the report's preferred option (project,
+don't reject): a non-EVENT concept declaring `immutable;` now projects
+`metadata.mutability = "read-only"` (an explicit authored `mutability` still wins). This is
+additive — `metadata` is an open object, no schema/contract change — and it makes the
+declaration load-bearing: `_is_exempt` and the category reconciliation read
+`metadata.mutability`, and a generator can suppress write/delete paths. Verified: an entity with
+`immutable;` compiles to `metadata.mutability: "read-only"`. Regression-pinned in
+`run_conformance.py`. Together with `lifecycle-obligation-ignores-exempt-20260729-06`, an
+append-only ledger now models with zero spurious coverage gaps.

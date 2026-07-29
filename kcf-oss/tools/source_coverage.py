@@ -26,20 +26,56 @@ import json
 from pathlib import Path
 
 
-IDENTITY_COLLECTIONS = (
-    "concepts", "relationships", "lifecycles", "actions", "collectionTransforms",
-    "organizations", "information", "rules", "policies", "reasoning",
-    "assertions", "identityResolutions", "knowledgeQueries",
+# Coverage traces the DOMAIN constructs a source grounds. We collect the identity of
+# every id-bearing item in every top-level array-of-objects EXCEPT the infrastructure /
+# proof-context collections below (emitted wiring and pattern metadata, not domain
+# assertions a source document grounds). Deriving the set this way — rather than a fixed
+# whitelist — means a new id-bearing collection in `model-ir-v1` is covered automatically
+# instead of silently falling outside the faithfulness metric (the failure this replaces:
+# math / propositions / authorities / processes / profile constructs were invisible, so a
+# faithful extraction could never reach sourceComplete). Regression-guarded in
+# run_conformance.py.
+NON_SOURCE_COLLECTIONS = frozenset({
+    "emitters", "runtimeBindings", "runtimeRequirements",
+    "modules", "moduleVersions", "profiles", "links",
+    "requiredPatterns", "recommendedPatterns", "prohibitedPatterns",
+    "implementedPatterns", "excludedPatterns",
+})
+# Extension/profile sections nest their constructs one level down (ir[section][collection]).
+PROFILE_SECTIONS = (
+    "integration", "security", "lineage", "architecture",
+    "experience", "design", "analytics", "ai",
 )
+
+
+def _identity_of(item: object) -> str | None:
+    if isinstance(item, dict):
+        return item.get("qualifiedName") or item.get("id")
+    return None
+
+
+def _collect_identities(container: dict, identities: set[str]) -> None:
+    for value in container.values():
+        if isinstance(value, list):
+            for item in value:
+                identity = _identity_of(item)
+                if identity:
+                    identities.add(identity)
 
 
 def construct_ids(model: dict) -> set[str]:
     identities: set[str] = set()
-    for collection in IDENTITY_COLLECTIONS:
-        for item in model.get(collection, []):
-            identity = item.get("qualifiedName") or item.get("id")
+    for key, value in model.items():
+        if key in NON_SOURCE_COLLECTIONS or not isinstance(value, list):
+            continue
+        for item in value:
+            identity = _identity_of(item)
             if identity:
                 identities.add(identity)
+    for section in PROFILE_SECTIONS:
+        block = model.get(section)
+        if isinstance(block, dict):
+            _collect_identities(block, identities)
     return identities
 
 

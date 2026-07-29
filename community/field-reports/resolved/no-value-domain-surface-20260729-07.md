@@ -109,3 +109,18 @@ Context: encountered while transcoding a 9-language DSL model family into KCF. O
 everything that did not survive the translation, this was the single largest fidelity
 loss — the model reaches `ready: true` with 0 required gaps and full CRUD, and still
 cannot say which values a status field may take.
+
+## Triage result — ACCEPTED — routed to a Grammar RFC (contract change)
+
+Confirmed: `KCF-AUTHORING-v1.2.ebnf` has no enum / allowed-values / value-domain / codelist
+production, and `attribute-decl`'s `{ qualifier }` is bare identifiers, so a source enumeration
+survives only as a qualifier *name* or an unparsed `proposition` string — neither
+machine-checkable. This is a real, load-bearing part of a domain model, but it changes
+`attribute-decl`, the `model-ir-v1` attribute shape, the analyzer, and codegen, so per the
+field-report routing and the one rule for core changes it goes through a Grammar RFC + a
+VERSIONING decision, never a silent change. Registered as **RFC-12** in `docs/IR-ROADMAP.md`,
+carrying the report's two open design questions (named/reusable value domain vs inline list;
+opaque tokens vs label+ordering). The companion source-coverage fix
+(`source-coverage-blind-to-five-collections-20260729-04`) independently removes the secondary
+loss the report noted — a value-domain `proposition` is now at least traceable. No grammar / IR
+change was made here.

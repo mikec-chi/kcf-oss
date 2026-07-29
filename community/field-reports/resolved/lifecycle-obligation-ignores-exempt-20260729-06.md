@@ -96,3 +96,19 @@ worked example in [`../TEMPLATE.md`](../TEMPLATE.md), whose note records that it
 triaged and that "`kcf assess` coverage is now category-aware". Worth checking whether
 that fix belonged in `_is_exempt` rather than in a category list inside the evaluator,
 since the category list is exactly what left this second hole.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed the asymmetry: `ev_concept_kind_has_crud`/`ev_concept_kind_has_set_operation` call
+`_is_exempt`, but `ev_concept_kind_has_lifecycle` skipped only on
+`_category in _NO_LIFECYCLE_CATEGORIES` — so a `transactional` entity explicitly marked
+`mutability "read-only"` was exempt from CRUD/set obligations yet still reported
+`ENTITY … has no lifecycle`, an unsatisfiable recommendation (records that are never updated
+have no state machine). Added an `_is_exempt(concept, obligation)` check to
+`ev_concept_kind_has_lifecycle`, matching the CRUD/set evaluators. Verified: a read-only
+transactional entity yields **no** lifecycle gap, while a mutable transactional entity still
+does. Regression-pinned in `run_conformance.py`. With
+`entity-immutable-declaration-dropped-20260729-05` (which makes `immutable;` project read-only),
+the exemption now also reaches entities authored with the `immutable;` dimension declaration,
+not only the `mutability "read-only"` metadata form. Coverage-evaluator change only — no
+contract change; `config/coverage-model.json` untouched.

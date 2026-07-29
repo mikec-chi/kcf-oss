@@ -150,6 +150,26 @@ is the *structural* half that a design-system preset (codegen `design-systems/`)
 does **not** cover — a preset skins field-groups but cannot invent them. Grammar/IR change →
 **Grammar RFC + VERSIONING** (additive; the object form is opt-in, the string form unchanged).
 
+### RFC-12 — attribute value domains / allowed-value sets (field report `20260729-07`)
+
+`KCF-AUTHORING-v1.2.ebnf` has no enum / allowed-values / value-domain / codelist production:
+`attribute-decl` offers a type, cardinality, optional default, and `{ qualifier }` where a
+qualifier is a bare identifier, with no way to attach a set of permitted values. So a source
+enumeration ("status is new, active, or retired" — a CHECK constraint, a lookup table) survives
+only as a free-form qualifier (the domain's *name*, not its members) or a `proposition` carrying
+the members as an unparsed, unenforceable string (and one `source-coverage` couldn't see until
+RFC-nothing — that half is fixed by report `20260729-04`). A generator therefore sees the name
+of a value domain and a sentence, and cannot emit a DB enum, a union type, or a validation.
+
+This is genuinely part of what a domain *model* should carry, so it is an IR-RFC candidate, not
+downstream guidance — but it touches `attribute-decl`, the `model-ir-v1` attribute shape, the
+analyzer, and codegen, so it lands only via a **Grammar RFC + VERSIONING** decision, never a
+silent change. Two questions the report flags for that RFC, from transcoding experience:
+whether a value domain is a **named, reusable top-level construct** (sources share one
+enumeration across many attributes) or an inline per-attribute list; and whether members are
+opaque tokens or can carry a **label and ordering** (sources commonly supply both). The report
+deliberately proposes no concrete production — it is the evidence for the decision.
+
 ## Downstream guidance (reclassify — not a model requirement)
 
 These read like enforceable requirements but are implementation/operational/packaging

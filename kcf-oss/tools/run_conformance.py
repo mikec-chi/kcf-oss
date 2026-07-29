@@ -14,7 +14,7 @@ PROJECT_ROOT = TOOLS_ROOT.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from compiler import compile_file
+from compiler import compile_file, compile_text
 from check_compatibility import check as check_compatibility
 from confirm_synthetic import confirm as confirm_synthetic
 from coverage_report import load_coverage_model, report as coverage_report
@@ -575,6 +575,45 @@ def main():
     check(document_conformant(unprofiled) and len(unprofiled["warnings"]) == 1, "a declared-but-unprofiled kind should be conformant but warn (never worse than omitting)")
     _buf = io.StringIO(); emit_warnings(no_kind, _buf)
     check(_buf.getvalue().startswith("warning: ") and "documentKind" in _buf.getvalue(), "emit_warnings did not write the warning to the given stream")
+
+    # --- 2026-07-29 field-report batch (#03-#08): authoring/analysis fidelity guards ---
+    # #03 (ordering-dimension-qualifier-catch-22): `dimension` is required on ORDERING by
+    # kcf.relationship.ordering, so it MUST be a recognized qualifier — else every valid
+    # ORDERING edge trips the "not recognized" advisory. Guard the class of bug generally.
+    from semantic_analyzer import KNOWN_RELATIONSHIP_QUALIFIERS
+    check("dimension" in KNOWN_RELATIONSHIP_QUALIFIERS, "ORDERING's required `dimension` qualifier is missing from KNOWN_RELATIONSHIP_QUALIFIERS")
+    # #04 (source-coverage-blind-to-five-collections): construct_ids must see id-bearing
+    # constructs in every domain collection incl. profile sections, and must NOT count
+    # infrastructure collections (emitters), so faithfulness is reachable and honest.
+    from source_coverage import construct_ids as _construct_ids
+    _cov_ids = _construct_ids({"propositions": [{"id": "m.P"}], "authorities": [{"id": "m.A"}],
+                               "math": [{"id": "m.F"}], "processes": [{"id": "m.Proc"}],
+                               "integration": {"adapters": [{"id": "m.Adapter"}]},
+                               "emitters": [{"id": "m.Emitter"}]})
+    check({"m.P", "m.A", "m.F", "m.Proc", "m.Adapter"} <= _cov_ids, "source-coverage construct_ids is blind to a domain/profile collection")
+    check("m.Emitter" not in _cov_ids, "source-coverage must not demand a source for infrastructure (emitters)")
+    # #05 (entity-immutable-declaration-dropped): `immutable;` on a non-EVENT concept must
+    # project as read-only mutability, not vanish.
+    _imm_ir = compile_text("kcf model M profile operational-system { namespace m; "
+                           "entity Ledger { identity id: UUID generated; required amount: Decimal; "
+                           "category transactional; immutable; } }")
+    _ledger = next(c for c in _imm_ir["concepts"] if c["id"] == "Ledger")
+    check((_ledger.get("metadata") or {}).get("mutability") == "read-only", "`immutable;` on an entity did not project to metadata.mutability read-only")
+    # #06 (lifecycle-obligation-ignores-exempt): a read-only transactional entity is exempt
+    # from the lifecycle obligation; a mutable one still attracts it.
+    from coverage_report import ev_concept_kind_has_lifecycle as _ev_lifecycle
+    _obl = {"id": "coverage.entity.lifecycle", "level": "recommended", "obligation": "has-lifecycle", "conceptKind": "ENTITY"}
+    _ro = {"concepts": [{"id": "L", "qualifiedName": "m.L", "kind": "ENTITY", "metadata": {"category": "transactional", "mutability": "read-only"}}], "lifecycles": []}
+    _mu = {"concepts": [{"id": "M", "qualifiedName": "m.M", "kind": "ENTITY", "metadata": {"category": "transactional"}}], "lifecycles": []}
+    check(_ev_lifecycle(_ro, _obl) == [], "read-only transactional entity should be exempt from the lifecycle obligation")
+    check(len(_ev_lifecycle(_mu, _obl)) == 1, "a mutable transactional entity should still attract a lifecycle recommendation")
+    # #08 (scope-capabilities-need-qualified-identifiers): a capability declared as
+    # `capability procure_to_pay;` lands qualified (cap.procure_to_pay); a scope naming
+    # either the bare or the qualified token must match.
+    from completeness import _model_capability_terms as _cap_terms, _covers as _cap_covers
+    _cterms = _cap_terms({"concepts": [{"id": "Clerk", "qualifiedName": "cap.Clerk", "kind": "ACTOR", "capabilities": ["cap.procure_to_pay"]}]})
+    _clow = {t.lower() for t in _cterms}
+    check(_cap_covers("procure_to_pay", _cterms, _clow) and _cap_covers("cap.procure_to_pay", _cterms, _clow), "scope capability must match by bare local name and by namespace-qualified form")
 
     # --- Walkthrough: the documented model -> coverage -> handoff loop (docs/WALKTHROUGH.md) ---
     walkthrough_root = FIXTURES_ROOT / "walkthrough"

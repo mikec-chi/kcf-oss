@@ -17,7 +17,9 @@ string, so it works for any domain.
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
+import sys
 from pathlib import Path
 
 from assess import assess
@@ -29,20 +31,32 @@ from source_coverage import is_complete as source_complete, source_coverage
 def _model_capability_terms(model: dict) -> set[str]:
     """Every string a declared capability could reasonably map to: concept
     identities/traits/capabilities/skills, and the identities of behavior/knowledge
-    constructs. Domain-agnostic - it reads structure, never domain vocabulary."""
+    constructs. Domain-agnostic - it reads structure, never domain vocabulary.
+
+    Both the namespace-qualified form AND the bare local name are indexed: a capability
+    authored as ``capability procure_to_pay;`` lands on the concept as
+    ``cap.procure_to_pay``, so a scope naming the identical token the author typed
+    (``procure_to_pay``) must still match. Indexing only the qualified form forced a
+    stakeholder scope to restate internal identities to be coverable."""
     terms: set[str] = set()
+
+    def add(value: object) -> None:
+        if isinstance(value, str) and value:
+            terms.add(value)
+            if "." in value:
+                terms.add(value.rsplit(".", 1)[-1])  # also the bare local name
+
     for concept in model.get("concepts", []):
         for field in ("qualifiedName", "id"):
-            if concept.get(field):
-                terms.add(concept[field])
+            add(concept.get(field))
         for listed in ("traits", "capabilities", "skills"):
-            terms.update(concept.get(listed) or [])
+            for value in concept.get(listed) or []:
+                add(value)
     for collection in ("actions", "processes", "capabilities", "skills", "rules", "policies", "events", "organizations"):
         for item in model.get(collection, []):
             if isinstance(item, dict):
                 for field in ("qualifiedName", "id", "name"):
-                    if item.get(field):
-                        terms.add(item[field])
+                    add(item.get(field))
     return terms
 
 
@@ -185,6 +199,17 @@ def main() -> int:
         args.output.write_text(text, encoding="utf-8")
     else:
         print(text, end="")
+    # Make an uncovered capability actionable: name the nearest available term so the
+    # operator sees WHY it did not match (usually a qualified/local-name or phrasing
+    # mismatch) instead of guessing. Advisory only — it does not change the report or the
+    # exit code.
+    uncovered = report["axes"]["declaredScope"]["uncovered"]
+    if uncovered:
+        terms = sorted(_model_capability_terms(model))
+        for capability in uncovered:
+            near = difflib.get_close_matches(capability, terms, n=1, cutoff=0.6)
+            hint = f" (nearest model term: {near[0]!r})" if near else " (no close model term; includedCapabilities must be construct identities — a bare or namespace-qualified name)"
+            print(f"warning: scope capability {capability!r} matches no model construct{hint}", file=sys.stderr)
     return 0 if report["closedWorldComplete"] else 1
 
 

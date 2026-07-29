@@ -51,6 +51,11 @@ CONTAINMENT_ROLES = {"root", "part"}
 KNOWN_RELATIONSHIP_QUALIFIERS = {
     "cardinality", "source-role", "target-role", "on-delete", "inverse",
     "validations", "inferences", "min", "max",
+    # `dimension` is REQUIRED on an ORDERING relationship by kcf.relationship.ordering
+    # below (a sequence is meaningless without the axis it orders along). It must be a
+    # recognized qualifier, else every valid ORDERING edge trips the "not recognized"
+    # advisory warning — a qualifier a check requires can never be unrecognized.
+    "dimension",
 }
 ON_DELETE_POLICIES = {"cascade", "restrict", "detach", "archive", "set-null", "no-action"}
 ACTION_OPERATIONS = {

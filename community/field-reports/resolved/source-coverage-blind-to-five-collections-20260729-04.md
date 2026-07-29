@@ -97,3 +97,19 @@ triaged by `area`/`severity` on its own.
 Also worth noting the interaction with `completeness`: the source axis reports
 `evaluated-incomplete` purely because of this, so the model's `closedWorldComplete` flag
 is held false by a tool limitation rather than by anything about the model.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed: `construct_ids` iterated a fixed 13-collection whitelist, so identity-bearing
+constructs in `math`, `propositions`, `predicates`, `processes`, `authorities`, and the
+profile sections were invisible — citing them read as `danglingConstructs` and their segments
+as `uncoveredSegments`, so `sourceComplete` was unreachable for any model beyond
+entities/actions/rules. Rewrote `construct_ids` to collect the identity of every id-bearing
+item in **every** top-level array-of-objects plus the extension/profile sections
+(`integration`/`security`/`lineage`/`architecture`/`experience`/`design`/`analytics`/`ai`),
+**except** an explicit `NON_SOURCE_COLLECTIONS` set (emitters, runtimeBindings/Requirements,
+modules, profiles, links, pattern arrays) that is emitted wiring / proof-context, not domain
+assertions a source grounds. This is the report's recommended derive-don't-hardcode shape: a
+new id-bearing collection in `model-ir-v1` is now covered automatically instead of silently
+falling outside the metric. Regression-pinned in `run_conformance.py` (a domain/profile
+construct is seen; an `emitters` entry is not). Tooling change only — no contract change.

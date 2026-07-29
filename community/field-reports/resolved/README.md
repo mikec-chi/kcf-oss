@@ -57,8 +57,17 @@ re-verifying `01`'s fix (arrived as PRs #12, #14).
 |---|--------|------|-----|-------------|
 | 01 | no `prose`/`image` document profile ships → declaring the default modality fails document-check while omitting it passes | source-fidelity | medium | **ACCEPTED** — shipped `config/document-profiles/prose.json` + `image.json` (pure data, schema-valid); and fixed the incentive in `tools/document_profile.py` so only segmentation *drift* fails — a missing/unprofiled/omitted modality now `warns`, so declaring is never worse than omitting |
 | 02 | `document-check` `warnings` never reach stderr via the `kcf` CLI (only `document_profile.py`'s own `main()`) | tooling | low | **ACCEPTED** — shared `emit_warnings()` helper called by both entry points; CLI now emits; behavior regression-pinned in `run_conformance.py`; CHANGELOG corrected |
+| 03 | `ORDERING` needs a `dimension` qualifier that's absent from the whitelist → every ordering edge is an error or a warning | analyzer | medium | **ACCEPTED** — added `dimension` to `KNOWN_RELATIONSHIP_QUALIFIERS`; the catch-22 is gone (no error, no spurious warning) |
+| 04 | `source-coverage` reads only 13 collections → math/propositions/authorities/processes/profile constructs untraceable, `sourceComplete` unreachable | source-fidelity | medium | **ACCEPTED** — `construct_ids` now walks every id-bearing collection + profile sections, minus an explicit infrastructure exclusion list |
+| 05 | `immutable;` on an entity parses then is discarded (EVENT-gated projection) → silent no-op | analyzer | medium | **ACCEPTED** — normalizer projects `immutable` on any non-EVENT concept as `metadata.mutability="read-only"` (additive) |
+| 06 | lifecycle obligation exempts by category only → a read-only/immutable transactional entity still recommended a lifecycle | coverage-model | medium | **ACCEPTED** — `ev_concept_kind_has_lifecycle` now calls `_is_exempt`, matching the CRUD/set evaluators (chains with #05) |
+| 07 | no value-domain / allowed-values authoring surface → source enumerations survive only as unenforceable prose | grammar-gap | medium | **ACCEPTED → Grammar RFC** — **RFC-12** in `docs/IR-ROADMAP.md`; #04's fix independently makes the interim `proposition` traceable |
+| 08 | scope `includedCapabilities` match only the namespace-qualified form → the same token in `.kcf` and scope doesn't match | tooling | medium | **ACCEPTED** — `completeness` matches by local **and** qualified name; CLI hints the nearest term; `scope-v1` schema documents the rule |
 
-Two accepted. No grammar / `model-ir-v1` / analyzer *contract* change: two new shipped profiles
-(pure data on the existing `document-profile-v1` schema) plus tooling/DX safety changes
-(warn-not-fail conformance and consistent warning emission), in the same spirit as
-`import-dbml-silent-noop-20260727-01`.
+Eight accepted — seven landed as analyzer/tooling/coverage fixes (all regression-pinned in
+`run_conformance.py`, green under `kcf check`), one (#07) routed to **Grammar RFC-12** because it
+changes the grammar / `model-ir-v1` contract and must land through a Grammar RFC + VERSIONING
+decision. No grammar / `model-ir-v1` / analyzer *contract* changed in this batch: the profiles are
+pure data, the analyzer/coverage changes are advisory-warning/exemption behaviour and recognized-
+qualifier membership, #05 is an additive `metadata` projection, and the rest are CLI/matching
+safety changes in the spirit of `import-dbml-silent-noop-20260727-01`.
