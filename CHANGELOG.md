@@ -68,6 +68,26 @@ First public release of the open standard. Cut this section to a dated version
 
 ### Fixed
 
+- **analyzer / assess / verifier — 2026-07-29 behavioural-gap batch (#10, #12, #13, #15).**
+  Four fixes so the toolchain can no longer silently pass a model whose behavioural half won't
+  generate, none changing the grammar / `model-ir-v1` / analyzer *contract*: (#10) the analyzer now
+  resolves MATH expression `ref` operands against the result measure's subject attributes (+params/
+  measures/units) and warns (`kcf.math.reference`) on an operand that resolves to nothing — a
+  formula over phantom fields no longer assesses clean; (#12) `assess` gains a **`behaviourallyComplete`**
+  axis, reported *separately* from `ready` (the mirror of `domainComplete: not-proven`), so a model
+  that will only scaffold is visible on day one; (#13) `verify-realization` adds a per-construct-class
+  **`byClass`** realized/total ratio (`action.invoke` split from CRUD) and a 0%-realized **`notices`**
+  list — "accounted for" is no longer mistaken for "realized"; (#15) `ir_identity.model_semantic_ids`
+  makes each **profile-section member** (view/control/threat/adapter/…) an accountable identity, so a
+  manifest that builds none of the declared screens fails and an honest per-item `delegated` entry is
+  accepted (fixing the same inverted incentive as `document-profile-missing-prose-image-20260729-01`).
+  `assess-report-v1` and `realization-report-v1` schemas updated (additive); each fix regression-pinned
+  in `run_conformance.py`.
+- **`docs/IR-ROADMAP.md`** — two behavioural-grammar reports routed to Grammar RFCs rather than
+  changed silently: **RFC-13** (parse rule `condition` into an AST like a formula expression; report
+  `20260729-11`) and **RFC-14** (an ACTION `procedure` surface for `invoke` actions; report
+  `20260729-14`). No `grammar-stack` / `ir` change until an RFC is accepted; the *visibility* of both
+  gaps ships now via #10/#12/#13.
 - **analyzer / tooling — 2026-07-29 field-report batch (#03–#06, #08), authoring & analysis fidelity.**
   Five fixes from transcoding a large external model family, none changing the grammar /
   `model-ir-v1` / analyzer *contract*: (#03 `ordering-dimension-qualifier-catch-22`) added the

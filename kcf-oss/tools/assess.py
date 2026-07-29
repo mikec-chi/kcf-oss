@@ -17,6 +17,39 @@ from pattern_contracts import load_contracts, report as pattern_report, role_rep
 from semantic_analyzer import Analyzer
 
 
+def _behavioural_completeness(model: dict, diagnostics: list) -> dict:
+    """An honest, SEPARATE axis: is the behavioural half of the model machine-realizable,
+    or will it only scaffold? Reported ALONGSIDE `ready` (which means structurally
+    buildable), never folded into it - the mirror of `domainComplete: not-proven`. A
+    structural gate cannot distinguish a model that generates an application from one that
+    generates a skeleton; this makes the difference visible. (Report
+    no-behavioural-coverage-obligations-20260729-12.)"""
+    rules = model.get("rules", [])
+    parsed = sum(1 for rule in rules if isinstance(rule.get("condition"), dict))
+    invoke = [a for a in model.get("actions", []) if a.get("operation") == "invoke"]
+    with_procedure = sum(1 for a in invoke if a.get("procedure"))
+    formulas = model.get("math", [])
+    measures = [c for c in model.get("concepts", []) if c.get("kind") == "MEASURE"]
+    unresolved_operands = sum(1 for d in diagnostics
+                              if d.get("rule_id") == "kcf.math.reference" and d.get("severity") == "warning")
+    present = bool(rules or invoke or formulas)
+    realizable = present and parsed == len(rules) and with_procedure == len(invoke) and unresolved_operands == 0
+    status = "not-applicable" if not present else "realizable" if realizable else "not-proven"
+    return {
+        "status": status,
+        "rules": {"withParsedCondition": parsed, "total": len(rules)},
+        "invokeActions": {"withProcedure": with_procedure, "total": len(invoke)},
+        "formulas": len(formulas),
+        "measures": len(measures),
+        "expressionOperandsUnresolved": unresolved_operands,
+        "note": ("Reported separately from `ready` (structurally buildable). `not-proven` "
+                 "means the behavioural half is present but not machine-realizable as "
+                 "declared, so code generation will scaffold it: rule conditions are opaque "
+                 "strings (IR-ROADMAP RFC-13) and invoke actions carry no procedure "
+                 "(RFC-14). Not folded into `ready`."),
+    }
+
+
 def assess(model: dict) -> dict:
     diagnostics = Analyzer(model).run()
     error_ids = sorted({item["rule_id"] for item in diagnostics if item["severity"] == "error"})
@@ -85,6 +118,7 @@ def assess(model: dict) -> dict:
         "coverageStatus": coverage_status,
         "readyFor": ready_for,
         "domainComplete": "not-proven",
+        "behaviourallyComplete": _behavioural_completeness(model, diagnostics),
         "checks": checks,
     }
 

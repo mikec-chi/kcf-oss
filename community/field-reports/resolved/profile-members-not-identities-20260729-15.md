@@ -144,3 +144,20 @@ Related: `source-coverage-blind-to-five-collections-20260729-04` (in
 [#17](https://github.com/mikec-chi/kcf-oss/pull/17), merged) noted that profile sections
 are unreadable by `source_coverage`. That was about *traceability*; this is about
 *accountability* — the same structural cause with a different and sharper consequence.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed the inverted incentive: a profile section (experience/design/security/…) was one opaque
+identity, so a manifest building **none** of the declared views verified clean (disposition the
+section with one note) while an honest per-view `delegated` entry was rejected as an
+`unknown-identity`. Fixed in `tools/ir_identity.py` (`model_semantic_ids`): a profile section's
+declared **members** (views, apps, tokens, controls, threats, adapters, …) are now each a semantic
+identity, keyed by the member's own id/name under a `<section>.<key>` section label; a section with
+no enumerable members stays one opaque identity (back-compatible). So a specific declared screen
+(`ApprovalQueue`) can now be individually dispositioned, and omitting the declared members fails
+verification. Applies to all eight profile sections — a declared **security** control is now
+individually accountable too. This is the same anti-pattern as the resolved
+`document-profile-missing-prose-image-20260729-01`. The identity-inventory conformance check in
+`run_conformance.py` was updated to assert every profile section is represented by member
+identities (and pins that members are individually inventoried). Tooling/accounting change — no
+grammar / `model-ir-v1` change (it re-reads existing IR structure).

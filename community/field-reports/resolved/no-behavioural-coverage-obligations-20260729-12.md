@@ -109,3 +109,20 @@ obligations plus a report field — so it is deliverable independently, and it i
 cheapest way to stop the mistake this batch documents from recurring. Even with the
 obligations at `recommended`, the gap would have been visible on day one instead of after
 a full build.
+
+## Triage result — ACCEPTED, fixed (honest axis; no coverage-contract change)
+
+Confirmed: every coverage obligation is structural, so `ready: true` was reachable with every
+rule condition an unparsed string, every MATH operand phantom, and every `invoke` action without
+a procedure — the gate could not tell an application from a scaffold. Rather than add gated
+coverage obligations that would always fail until RFC-13/RFC-14 land (and would force a
+coverage-contract change + fixtures), the fix adds an honest, **separate** readiness axis to
+`assess`: **`behaviourallyComplete`** — the mirror of `domainComplete: not-proven`. It reports,
+per model, how many rules have a parsed condition, how many `invoke` actions carry a procedure,
+how many expression operands are unresolved (reusing report `-10`), and an overall status
+(`realizable` / `not-proven` / `not-applicable`). It is reported **beside** `ready` (which keeps
+meaning "structurally buildable"), never folded into it — so the behavioural gap is visible on
+day one instead of after a full build. `assess-report-v1` schema updated (additive). Verified +
+regression-pinned. The two follow-on obligations the report proposes depend on RFC-13
+(condition-evaluable) and RFC-14 (procedure) and are noted there; `operands-resolved` shipped now
+as report `-10`.

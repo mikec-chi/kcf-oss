@@ -135,3 +135,18 @@ a full OpenAPI contract and a typed client, all generated, reproducible and veri
 721/721. Whether the behavioural side belongs inside that boundary is a project decision,
 not a defect. What is a defect is that nothing tells you which side of the line your model
 falls on, and that is what the other four reports address.
+
+## Triage result — ACCEPTED — routed to a Grammar RFC (contract change)
+
+Confirmed: `action-decl` carries a full operation *contract* but no *procedure*, so a source that
+specifies an algorithm as ordered steps has no construct to compile it into (`process` is BPMN
+choreography, `math` an expression, not a sequence with side effects). CRUD is unaffected (procedure
+implied by operation+target), but `invoke` domain actions become contract-checked endpoints with an
+empty body — the measured behavioural gap between a generated app and a working one. Adding a
+procedure surface changes `action-decl` and `model-ir-v1`, so it routes to a **Grammar RFC +
+VERSIONING** decision. Registered as **RFC-14** in `docs/IR-ROADMAP.md` (largest of the batch and
+explicitly flagged as possibly out-of-scope — whether procedural behaviour belongs inside KCF's
+boundary is a project decision, not a defect; the report proposes no production). The *visibility*
+of the gap is fixed independently: `assess.behaviourallyComplete` reports
+`invokeActions.withProcedure: 0/N` (report `-12`) and `verify-realization` byClass shows
+`action.invoke` 0% realized (report `-13`). No grammar/IR change was made here.

@@ -1047,6 +1047,58 @@ class Analyzer:
     GEOMETRY_KINDS = {"point", "line", "polygon", "volume"}
     MODAL_OPERATORS = {"necessary", "possible", "permitted", "obligatory", "known", "believed"}
 
+    def _concept_by_ref(self, ref):
+        for concept in self.model.get("concepts", []):
+            if ref in (concept.get("qualifiedName"), concept.get("id")):
+                return concept
+        return None
+
+    def _expression_refs(self, node) -> set:
+        """Every `ref` operand leaf in a MATH expression AST."""
+        refs: set = set()
+        def walk(n):
+            if isinstance(n, dict):
+                value = n.get("ref")
+                if isinstance(value, str):
+                    refs.add(value)
+                for child in n.values():
+                    walk(child)
+            elif isinstance(n, list):
+                for child in n:
+                    walk(child)
+        walk(node)
+        return refs
+
+    def _expression_scope(self, formula):
+        """The operand names a formula may legitimately reference: the attribute names of
+        its result measure's subject entities, plus locally-bound parameters and the local
+        names of declared measures and units. Returns None when scope can't be determined
+        (no result measure / no subject), so such formulas are skipped rather than
+        false-flagged."""
+        result = formula.get("result")
+        if not result:
+            return None
+        measure = self._concept_by_ref(result)
+        if measure is None:
+            return None
+        subjects = measure.get("subjects") or ([measure["subject"]] if measure.get("subject") else [])
+        if not subjects:
+            return None
+        scope: set = set()
+        for subject in subjects:
+            concept = self._concept_by_ref(subject)
+            if concept:
+                scope.update(attr.get("name") for attr in (concept.get("attributes") or []) if attr.get("name"))
+        for param in (formula.get("parameters") or formula.get("params") or []):
+            scope.add(param.get("name") if isinstance(param, dict) else param)
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") == "MEASURE":
+                scope.add((concept.get("qualifiedName") or concept.get("id") or "").split(".")[-1])
+        for unit in self.model.get("units", []):
+            scope.add((unit.get("qualifiedName") or unit.get("id") or "").split(".")[-1])
+        scope.discard("")
+        return scope
+
     def check_quantitative(self):
         """INTENT/TEMPORAL/SPATIAL/LOGIC/MATH enums + single-reference resolution."""
         kind_rules = {"INTENT": ("kcf.intent.kind", self.INTENT_KINDS),
@@ -1081,6 +1133,21 @@ class Analyzer:
             for field in ("result", "model"):
                 if formula.get(field) and not self.reference_exists(formula[field]):
                     self.report("error", "kcf.math.reference", mid, f"Unresolved {field} {formula[field]!r}.")
+            # Resolve the expression's `ref` operand leaves against the attributes in
+            # scope (the subjects of the formula's result measure) plus locally-bound
+            # parameters and declared measure/unit names. An operand that resolves to
+            # nothing means the AST is arithmetic over phantom fields - decoration, not a
+            # contract a generator can realize. Advisory (warning), mirroring how an
+            # unresolved trait is surfaced; the IR already carries the AST, so no schema
+            # change. Scope is skipped (no false positives) when it can't be determined.
+            # (Report math-operands-not-resolved-20260729-10.)
+            scope = self._expression_scope(formula)
+            if scope is not None:
+                unresolved = sorted(r for r in self._expression_refs(formula.get("expression")) if r not in scope)
+                if unresolved:
+                    self.report("warning", "kcf.math.reference", mid,
+                                f"Expression operand(s) resolve to no attribute/measure/parameter in scope: {unresolved}. "
+                                f"The formula's AST is arithmetic over undeclared fields and cannot be generated as written.")
         for route in self.model.get("routes", []):
             rid = route.get("qualifiedName") or route.get("id", "<route>")
             for field in ("from", "to"):

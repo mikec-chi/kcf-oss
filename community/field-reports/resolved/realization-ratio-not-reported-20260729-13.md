@@ -100,3 +100,16 @@ Fourth of five related reports, and the cheapest of the set — pure reporting o
 tool already has, no contract change and no new check. It pairs with
 `no-behavioural-coverage-obligations-20260729-12`: that one would have warned before
 generation, this one would have warned immediately after.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed: `verify-realization` checked that every identity was *accounted for* and every
+non-realized disposition carried a note, but never *how much* was realized — so a manifest
+delegating 721/721 with a note on each reported `ok: true` at the highest evidence level. Fixed
+in `tools/verify_realization.py`: the report summary now carries a **`byClass`** ratio
+(realized/total per construct class, with `actions` split by `operation` so `action.invoke` is
+visible separately from CRUD), and a top-level **`notices`** list raises a non-fatal note for
+every class that is 0% realized. No new input — the manifest already carries every disposition
+and the IR every construct's kind; deliberately non-fatal (a frontend-only tier legitimately
+delegates persistence — the number is the intervention, not a hard gate). Schema updated
+(`realization-report-v1`, additive). Verified + regression-pinned in `run_conformance.py`.
