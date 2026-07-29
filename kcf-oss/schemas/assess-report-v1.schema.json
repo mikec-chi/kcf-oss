@@ -23,6 +23,21 @@
       "enum": ["not-proven"],
       "description": "Always 'not-proven': coverage obligations are necessary, never sufficient, for real domain completeness - that is a human judgement, not a machine verdict."
     },
+    "behaviourallyComplete": {
+      "type": "object",
+      "description": "A SEPARATE axis (never folded into `ready`): whether the behavioural half of the model is machine-realizable or will only scaffold. `not-proven` means present but not realizable as declared (opaque rule conditions / no action procedure / unresolved expression operands).",
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["not-applicable", "not-proven", "realizable"]},
+        "rules": {"type": "object", "properties": {"withParsedCondition": {"type": "integer"}, "total": {"type": "integer"}}, "additionalProperties": false},
+        "invokeActions": {"type": "object", "properties": {"withProcedure": {"type": "integer"}, "total": {"type": "integer"}}, "additionalProperties": false},
+        "formulas": {"type": "integer"},
+        "measures": {"type": "integer"},
+        "expressionOperandsUnresolved": {"type": "integer"},
+        "note": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
     "checks": {
       "type": "object",
       "required": ["validity", "coverage", "patterns", "roles"],

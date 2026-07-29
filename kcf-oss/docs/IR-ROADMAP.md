@@ -170,6 +170,47 @@ enumeration across many attributes) or an inline per-attribute list; and whether
 opaque tokens or can carry a **label and ordering** (sources commonly supply both). The report
 deliberately proposes no concrete production — it is the evidence for the decision.
 
+### RFC-13 — parsed rule conditions (RULE dimension) (field report `20260729-11`)
+
+A `formula` expression compiles to an AST (`{"op":">", "left":{"ref":…}, …}`); a `rule`'s
+`condition` compiles to a bare **string** (`rule-decl` types it as a `scalar`). So the dimension
+that carries a system's business rules is unreachable by code generation — in a real 51-rule
+model, **0 of 51** conditions were a tree, every rule was dispositioned `delegated`, and the
+generated app enforced no approval threshold / SoD / balance guard while `assess` reported
+`ready: true`. The machinery already exists: the MATH parser produces exactly the tree shape a
+condition needs, and `ruleKind` already names the intended semantics (`CONSTRAINT`→invariant,
+`DECISION`→branch, `DERIVATION`→computed value). It is simply not pointed at `condition`.
+
+Additive grammar/IR + analyzer + codegen change, so it lands via a **Grammar RFC + VERSIONING**
+decision, never silently. Three questions the report flags for that RFC: (1) whether a parsed
+`conditionAst` sits **beside** the string (additive, lazy migration) or replaces it; (2) operand
+resolution — the **same problem as report `20260729-10`**, already fixed for MATH by resolving
+`ref` leaves, and it should be solved once for both (an unresolvable operand makes a parsed
+condition no better than a string); (3) how far the expression language goes — a real government
+rule set needed only comparison / equality / boolean / membership, i.e. the existing math grammar
+plus comparison operators. This is the single highest-leverage behavioural extension.
+
+### RFC-14 — an action `procedure` surface (ACTION dimension) (field report `20260729-14`)
+
+`action-decl` is rich about an operation's **contract** (`operation`/`scope`/`selection`/
+`mutate`/`idempotency`/`atomicity`/`concurrency`/`authorization`/pre-&post-conditions) but says
+nothing about what a domain operation **does**. For CRUD that is correct — the procedure is implied
+by `operation`+`target`, and KCF generates those cleanly. For an `invoke` (domain) action it is the
+whole difficulty: a source that specifies an algorithm as ordered steps (lock a series, pad a
+number, apply a format, emit an event; FIFO costing; straight-line accrual; approval routing) has
+**no construct to compile it into** — `process` (WORK) is BPMN choreography over work items, not a
+procedure over data; `math` holds an expression, not a sequence with side effects. So such actions
+become contract-checked endpoints with an empty body, and that body is the entire behavioural gap
+between a generated app and a working one (~990 lines of domain service in one measured build).
+The existing contract already tells a generator how to *wrap* a body (transaction boundary, no-op
+detection, version guard, policy gate); only the body is missing.
+
+Largest of this batch and the most likely to be declined on scope grounds — whether procedural
+behaviour belongs inside KCF's boundary is a project decision, not a defect. Filed with concrete
+evidence and routed to a **Grammar RFC + VERSIONING** decision; the report proposes no production.
+(What is *not* a scope decision — that nothing told you which side of the line your model fell on —
+is fixed independently by reports `20260729-10`, `-12`, and `-13`, with no contract change.)
+
 ## Downstream guidance (reclassify — not a model requirement)
 
 These read like enforceable requirements but are implementation/operational/packaging

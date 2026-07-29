@@ -22,9 +22,24 @@
         "identityCount": {"type": "integer"},
         "accountedFor": {"type": "integer"},
         "missing": {"type": "integer"},
-        "byDisposition": {"type": "object", "additionalProperties": {"type": "integer"}}
+        "byDisposition": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "byClass": {
+          "type": "object",
+          "description": "Per-construct-class realization ratio (realized vs total accounted). Distinguishes an implementation from a scaffold that accounts for every identity but realizes none of a behavioural class (e.g. rules, invoke actions).",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["realized", "total"],
+            "properties": {"realized": {"type": "integer"}, "total": {"type": "integer"}},
+            "additionalProperties": false
+          }
+        }
       },
       "additionalProperties": false
+    },
+    "notices": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Non-fatal observations - notably a construct class that is 0% realized (accounted for but entirely delegated/deferred), which is almost always worth a human look. Reporting only; it does not fail the build (a frontend-only tier legitimately delegates persistence)."
     },
     "positionUnstableIdentities": {
       "type": "array",

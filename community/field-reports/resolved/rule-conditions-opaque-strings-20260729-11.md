@@ -110,3 +110,17 @@ us), `realization-ratio-not-reported-…-13` (why the manifest did not either), 
 `no-procedure-surface-for-actions-…-14`.
 
 If only one of the five is actioned, `…-10` is cheaper; this one has more leverage.
+
+## Triage result — ACCEPTED — routed to a Grammar RFC (contract change)
+
+Confirmed: a `formula` expression compiles to an AST while a `rule` `condition` compiles to a bare
+string (`rule-decl` types it as a scalar), so the RULE dimension — a system's business rules — is
+unreachable by code generation (0/51 conditions parsed in a real model; all delegated; the app
+enforced no approval/SoD/balance rules while `assess` said `ready`). Changing `rule-decl`, the
+`model-ir-v1` shape of `rules[].condition`, the analyzer, and codegen is a contract change, so per
+the field-report routing and the one rule for core changes it goes through a **Grammar RFC +
+VERSIONING** decision, never a silent change. Registered as **RFC-13** in `docs/IR-ROADMAP.md`,
+carrying the report's three design questions (AST beside vs replacing the string; shared operand
+resolution with report `-10`, already fixed for MATH; expression-language scope). Meanwhile the
+gap is now **visible** rather than silent: `assess.behaviourallyComplete` (report `-12`) reports
+`withParsedCondition: 0/N`. No grammar/IR change was made here.

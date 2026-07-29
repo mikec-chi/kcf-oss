@@ -122,7 +122,28 @@ def model_semantic_ids(model: dict) -> dict[str, str]:
             if value:
                 identities.setdefault(value, section)
     for section in SINGLETON_SECTIONS:
-        if model.get(section):
+        block = model.get(section)
+        if not block:
+            continue
+        # A profile section (experience/design/security/…) is not one opaque identity:
+        # its declared members (views, tokens, controls, threats, adapters, …) are each a
+        # semantic identity a realization must account for individually. Otherwise a
+        # manifest that builds NONE of the declared screens verifies clean (disposition the
+        # section with one note) while an honest per-screen `delegated` entry is rejected as
+        # an unknown identity — the same inverted incentive as the resolved
+        # document-profile report. (Report profile-members-not-identities-20260729-15.)
+        members_found = False
+        if isinstance(block, dict):
+            for key, value in block.items():
+                if not isinstance(value, list):
+                    continue
+                for index, item in enumerate(value):
+                    if isinstance(item, dict):
+                        member = item.get("id") or item.get("qualifiedName") or item.get("name") or f"{section}.{key}#{index}"
+                        identities.setdefault(member, f"{section}.{key}")
+                        members_found = True
+        # A section with no enumerable members stays one opaque identity (back-compatible).
+        if not members_found:
             identities.setdefault(section, section)
     for section in EXTENSION_KEY_SECTIONS:
         for key in (model.get(section) or {}):

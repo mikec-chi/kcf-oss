@@ -101,3 +101,18 @@ behavioural half does not generate at all.
 
 This one is first in that set deliberately: it is the cheapest to fix, needs no contract
 change, and is a precondition for making rule conditions useful (report `…-11`).
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed: MATH expressions parsed to a real AST but `ref` leaves were never resolved, so a
+formula over phantom fields compiled, validated, and assessed `ready`. Fixed in the analyzer
+(`tools/semantic_analyzer.py`, `check_quantitative`): each `formula`'s expression operands are
+now resolved against the attribute names of its result measure's subject entities, plus
+locally-bound parameters and declared measure/unit names. An operand that resolves to nothing
+emits an advisory **warning** under the existing `kcf.math.reference` rule (no new rule id, no
+catalogue change) — mirroring how an unresolved trait is surfaced, and warning (not error) so
+existing models aren't broken. Scope is skipped when it can't be determined (no result measure /
+no subject), so there are no false positives. Verified: a phantom-operand formula warns; a
+fully-declared one does not. Analyzer-only — the IR already carried the AST, so no
+`model-ir-v1` change. This is the precondition for RFC-13 (parsed rule conditions), which reuses
+the same operand resolution. Regression-pinned in `run_conformance.py`.

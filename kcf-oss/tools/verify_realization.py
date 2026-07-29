@@ -129,6 +129,27 @@ def verify(model: dict, manifest: dict, repo: Path | None = None) -> dict:
     ok = not errors
     # tests-present only counts if every test file was actually found (no missing-test-file).
     tests_present = tests_present and not any(error["code"] == "missing-test-file" for error in errors)
+
+    # Per-construct-class realization ratio: "accounted for" is not "realized". A manifest
+    # can account for every identity (each delegated with an honest note) and realize
+    # nothing - that verifies clean today, which hides a scaffold. Weigh the dispositions
+    # by construct class so a 0%-realized behavioural class (rules, invoke actions) is
+    # visible, and raise a non-fatal notice for each fully-unrealized class.
+    # (Report realization-ratio-not-reported-20260729-13.)
+    disposition_by_id = {entry.get("semanticId"): entry.get("disposition")
+                         for entry in manifest.get("dispositions", []) if entry.get("semanticId") in identities}
+    operation_by_action = {action.get("id"): action.get("operation") for action in model.get("actions", [])}
+    by_class: dict = {}
+    for semantic_id, section in identities.items():
+        cls = f"action.{operation_by_action.get(semantic_id) or 'other'}" if section == "actions" else section
+        bucket = by_class.setdefault(cls, {"realized": 0, "total": 0})
+        bucket["total"] += 1
+        if disposition_by_id.get(semantic_id) == "realized":
+            bucket["realized"] += 1
+    notices = [f"0/{bucket['total']} of construct class '{cls}' is realized (the rest is "
+               f"delegated/deferred/out-of-tier) - a scaffold, not an implementation, for this class"
+               for cls, bucket in sorted(by_class.items()) if bucket["total"] and bucket["realized"] == 0]
+
     return {
         "realizationReportVersion": "1.0.0",
         "model": model.get("id", "<model>"),
@@ -141,7 +162,9 @@ def verify(model: dict, manifest: dict, repo: Path | None = None) -> dict:
             "accountedFor": len(accounted),
             "missing": sum(1 for sid in identities if sid not in accounted),
             "byDisposition": by_disposition,
+            "byClass": by_class,
         },
+        "notices": notices,
         # Position-based fallback identities (section#index) - accounted but NOT stable
         # across reordering/versions. A durable manifest should give these items a stable id.
         "positionUnstableIdentities": anonymous_identities(model),

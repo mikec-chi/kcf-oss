@@ -71,3 +71,27 @@ decision. No grammar / `model-ir-v1` / analyzer *contract* changed in this batch
 pure data, the analyzer/coverage changes are advisory-warning/exemption behaviour and recognized-
 qualifier membership, #05 is an additive `metadata` projection, and the rest are CLI/matching
 safety changes in the spirit of `import-dbml-silent-noop-20260727-01`.
+
+### 2026-07-29 behavioural-gap batch (#10–#15, kcfVersion 1.11.0)
+
+Six reports from generating an app out of a 721-identity IR and comparing it to a hand-built
+system from the same source: **the structural half generated flawlessly, the behavioural half did
+not generate at all, and nothing in the toolchain said so** (arrived as PR #20). Four fixes make
+the gap visible with no contract change; two behavioural-grammar extensions route to RFCs.
+
+| # | Report | Area | Sev | Disposition |
+|---|--------|------|-----|-------------|
+| 10 | MATH expression `ref` operands never resolved → a formula over phantom fields compiles/validates/assesses ready | analyzer | high | **ACCEPTED** — analyzer resolves operands against the result measure's subject attributes (+params/measures/units); phantom operand → advisory `kcf.math.reference` warning |
+| 11 | rule `condition` compiles to a string while a formula compiles to an AST → RULE dimension ungenerable | grammar-gap | high | **ACCEPTED → Grammar RFC** — **RFC-13** in `docs/IR-ROADMAP.md`; gap now visible via `behaviourallyComplete` (#12) |
+| 12 | no behavioural coverage obligation → `ready: true` reachable with every rule/operand/procedure absent | coverage-model | high | **ACCEPTED** — honest **`behaviourallyComplete`** axis in `assess`, reported separately from `ready` (mirror of `domainComplete`); no coverage-contract change |
+| 13 | `verify-realization` checks delegation is *explained*, never *how much* → a fully-delegated manifest passes at top evidence | tooling | medium | **ACCEPTED** — per-class **`byClass`** realized/total ratio (+`action.invoke` split) and a 0%-realized **`notices`** list |
+| 14 | ACTION carries a full contract but no procedure → specified algorithms have nowhere to compile | grammar-gap | medium | **ACCEPTED → Grammar RFC** — **RFC-14** in `docs/IR-ROADMAP.md`; visibility via `behaviourallyComplete` + byClass |
+| 15 | profile-section members carry no identity → building none of the declared screens passes; admitting one is rejected | tooling | high | **ACCEPTED** — `ir_identity.model_semantic_ids` makes each section member (view/control/threat/…) an accountable identity |
+
+Six accepted — four landed as analyzer/assess/verifier/accounting fixes (all regression-pinned;
+green under `kcf check`), two (#11, #14) routed to **Grammar RFCs (RFC-13, RFC-14)** because they
+extend the grammar / `model-ir-v1` contract. No grammar / `model-ir-v1` / analyzer *contract*
+changed in this batch: #10 is an advisory analyzer warning, #12 an additive report axis, #13 an
+additive report field, #15 re-reads existing IR structure for accounting. The through-line — *the
+toolchain never told you which side of the app/scaffold line your model fell on* — is closed by
+#10, #12, #13 without touching the contract.

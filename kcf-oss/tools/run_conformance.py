@@ -406,8 +406,46 @@ def main():
     profiles_ir = compile_file(DOMAINS_ROOT / "profiles.kcf")
     profile_ids = ir_identities(profiles_ir)
     inventoried_sections = set(profile_ids.values())
-    check({"integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"} <= set(profile_ids),
-          f"authoritative identity inventory omits profile sections: {sorted(inventoried_sections)}")
+    # Each profile section's declared MEMBERS are now individually inventoried (under a
+    # `<section>.<key>` section label) rather than the section being one opaque identity,
+    # so a manifest can account for a specific declared view/control/threat and omitting
+    # them fails - report profile-members-not-identities-20260729-15. Assert every profile
+    # section is represented, by a member identity (`<section>.…`) or, when it has no
+    # enumerable members, by the opaque section identity itself.
+    for _section in ("integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"):
+        represented = (_section in profile_ids) or any(
+            value == _section or value.startswith(_section + ".") for value in inventoried_sections)
+        check(represented, f"authoritative identity inventory omits profile section {_section!r}: {sorted(inventoried_sections)}")
+    check(any(str(value).count(".") >= 1 and value.split(".")[0] in
+              {"integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"}
+              for value in inventoried_sections),
+          "profile-section members are not individually inventoried (regression of report 20260729-15)")
+
+    # 2026-07-29 behavioural-gap batch (#10 operands, #12 behaviourallyComplete, #13 ratio):
+    # the behavioural half of a model must not be silently unrealizable. (#11/#14 are
+    # RFC-13/RFC-14 in docs/IR-ROADMAP.md.)
+    _bg = compile_text(
+        "kcf model BG profile business-application { namespace bg;\n"
+        "  entity Order { identity id: UUID generated; required total: Decimal; }\n"
+        "  actor Clerk { } work Fulfil { kind TASK; } measure Margin { kind KPI; subject Order; }\n"
+        "  relationship pa: PARTICIPATION Clerk -> Fulfil strength 1.0;\n"
+        "  relationship tr: TRANSFORMATION Fulfil -> Order strength 1.0;\n"
+        "  formula NetTotal { result Margin; expression total - discount_rate; }\n"
+        "  rule Big { kind DECISION; condition \"total > 100000\"; effect Fulfil; applies-to Order; authority Clerk; }\n"
+        "  policy Pol { authority Clerk; rule Big; default-conflict deny-overrides; } }")
+    _bg_diags = Analyzer(_bg).run()
+    check(any(d.get("rule_id") == "kcf.math.reference" and d["severity"] == "warning" for d in _bg_diags),
+          "#10: a phantom MATH operand (discount_rate) produced no advisory warning")
+    _bg_behav = assess_model(_bg)["behaviourallyComplete"]
+    check(_bg_behav["status"] == "not-proven" and _bg_behav["rules"]["withParsedCondition"] == 0,
+          f"#12: behaviourallyComplete should be not-proven for an unparsed condition / phantom operand: {_bg_behav}")
+    _bg_ids = model_semantic_ids(_bg)
+    _bg_manifest = {"realizationManifestVersion": "1.0.0", "model": _bg.get("id", "BG"), "stack": "x", "tier": "backend",
+                    "dispositions": [{"semanticId": sid, "disposition": "delegated", "note": "not in this tier"} for sid in _bg_ids]}
+    _bg_report = verify_realization(_bg, _bg_manifest)
+    check(_bg_report["ok"] and "byClass" in _bg_report["summary"], "#13: realization report lacks a per-class ratio")
+    check(any(bucket["realized"] == 0 for bucket in _bg_report["summary"]["byClass"].values()) and _bg_report["notices"],
+          "#13: a fully-delegated manifest produced no 0%-realized notice (accounted != realized)")
 
     # V6: schema-to-identity-inventory conformance. Every top-level property of the IR
     # schema must be classified in ir_identity (a list/string/singleton identity source
