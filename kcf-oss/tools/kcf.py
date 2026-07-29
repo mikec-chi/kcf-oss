@@ -16,7 +16,7 @@ from compiler import compile_file  # noqa: E402
 from confirm_synthetic import confirm as confirm_synthetic  # noqa: E402
 from coverage_report import by_concept, load_coverage_model, report as coverage_report  # noqa: E402
 from assess import assess as assess_model  # noqa: E402
-from document_profile import check_document, is_conformant, load_document_profiles  # noqa: E402
+from document_profile import check_document, emit_warnings, is_conformant, load_document_profiles  # noqa: E402
 from import_mermaid import import_mermaid  # noqa: E402
 from import_dbml import import_dbml  # noqa: E402
 from ingest import ingest as ingest_model  # noqa: E402
@@ -324,6 +324,7 @@ def main() -> int:
         document = json.loads(args.document.read_text(encoding="utf-8"))
         report = check_document(document, load_document_profiles())
         write_json(report, args.output)
+        emit_warnings(report)
         return 0 if is_conformant(report) else 1
     if args.command == "import-mermaid":
         result = import_mermaid(args.source.read_text(encoding="utf-8"), args.id, args.namespace)

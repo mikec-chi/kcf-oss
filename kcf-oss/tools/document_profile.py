@@ -18,7 +18,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
+from typing import TextIO
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -76,6 +78,18 @@ def check_document(document: dict, profiles: dict[str, dict]) -> dict:
     }
 
 
+def emit_warnings(report: dict, stream: TextIO | None = None) -> None:
+    """Print a document-check report's warnings to `stream` (stderr by default).
+
+    Shared by every entry point (`document_profile.py`'s own `main()` and the `kcf
+    document-check` CLI handler) so an operator sees the same signal regardless of how
+    the check was invoked — a report-producing tool must not surface its warnings on one
+    path and swallow them on another.
+    """
+    for warning in report.get("warnings", []):
+        print(f"warning: {warning}", file=stream if stream is not None else sys.stderr)
+
+
 def is_conformant(report: dict) -> bool:
     # Conformance is about segmentation drift, not whether a profile happens to ship: a
     # segment kind foreign to a RESOLVED profile is the only hard failure. A missing or
@@ -99,9 +113,7 @@ def main() -> int:
         args.output.write_text(text, encoding="utf-8")
     else:
         print(text, end="")
-    import sys
-    for warning in report["warnings"]:
-        print(f"warning: {warning}", file=sys.stderr)
+    emit_warnings(report)
     return 0 if is_conformant(report) else 1
 
 
