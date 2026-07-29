@@ -74,8 +74,11 @@ First public release of the open standard. Cut this section to a dated version
   an unprofiled `documentKind` while **passing** one that omitted the field — rewarding stripping
   provenance. Conformance now fails only on genuine segmentation **drift** (a segment kind foreign
   to a resolved profile); a missing, unprofiled, or omitted modality is a non-fatal `warning` (new
-  `warnings` field, also to stderr). Declaring a modality is never worse than omitting it. No
-  grammar / `model-ir-v1` / analyzer *contract* change.
+  `warnings` field). Declaring a modality is never worse than omitting it. The warnings are
+  surfaced to stderr on **every** entry point — a shared `emit_warnings()` helper is called by both
+  `document_profile.py` and the `kcf document-check` CLI handler (the CLI path originally dropped
+  them; report `document-check-warnings-not-surfaced-by-cli-20260729-02`), and the behavior is now
+  pinned in `run_conformance.py`. No grammar / `model-ir-v1` / analyzer *contract* change.
 - **tooling** — `kcf import-dbml` no longer silently emits an empty model. When a
   source parses to 0 tables (typically a non-dbml.org DBML dialect), it now warns to
   stderr naming the accepted `Table { ... }` subset and exits non-zero without writing

@@ -91,3 +91,26 @@ instead of failing, and genuine drift (an `image` document using `position` /
 path.
 
 Reproduced on `mikec-chi/kcf-oss@fbacd1a`, grammar-stack 1.11.0, Python 3.12.10 on Windows.
+
+## Triage result — ACCEPTED, fixed
+
+Correct, and a fair catch on the prior fix's own residue: the `warnings` were printed to stderr
+only by `document_profile.py`'s `main()`, while the documented entry point — the `kcf
+document-check` handler in `tools/kcf.py` — called `check_document`, wrote the JSON, and returned
+without emitting them. So via the CLI a document that omitted `documentKind` exited 0 with empty
+stderr, and the CHANGELOG's "also to stderr" was inaccurate for that path.
+
+Fixed per the report's better suggestion — factor the emit so a handler cannot drift again: a shared
+`emit_warnings(report, stream=None)` helper now lives in `tools/document_profile.py` and is called
+by **both** entry points (`document_profile.py:main()` and the `kcf document-check` handler in
+`tools/kcf.py`). Reproduced the report's exact scenario through the CLI: `kcf document-check` on a
+document with no `documentKind` now writes the 204-byte `warning:` line to stderr and still exits 0
+(byte-for-byte what `document_profile.py` produced). The CHANGELOG entry for the `-01` fix was
+corrected to describe the shared emitter rather than a single path.
+
+The behavior was previously unpinned; it is now regression-gated in `tools/run_conformance.py`
+(part of `kcf check`): a profiled `prose` document is conformant with `warnings == []`; a document
+with no `documentKind` and a declared-but-unprofiled kind are each conformant **with one warning**
+(declaring is never worse than omitting); and `emit_warnings` writes the warning to a supplied
+stream. `kcf check` + `check_handoff.py` green. Tooling/DX only — no grammar / `model-ir-v1` /
+analyzer *contract* change.

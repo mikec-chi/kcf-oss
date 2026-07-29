@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 import re
 import subprocess
@@ -21,7 +22,7 @@ from merge_models import merge
 from migrate_ir import migrate
 from assess import assess as assess_model
 from execution_plan import execution_plan
-from document_profile import check_document, is_conformant as document_conformant, load_document_profiles
+from document_profile import check_document, emit_warnings, is_conformant as document_conformant, load_document_profiles
 from import_mermaid import import_mermaid
 from import_dbml import import_dbml
 from ingest import ingest as ingest_model
@@ -561,6 +562,19 @@ def main():
     check(document_conformant(doc_check) and doc_check["documentKind"] == "flowchart", f"imported flowchart failed document-check: {doc_check}")
     drifted_doc = dict(imported["document"], segments=[*imported["document"]["segments"], {"segmentId": "x", "text": "?", "kind": "field"}])
     check(not document_conformant(check_document(drifted_doc, document_profiles)), "document-check did not flag a segment kind foreign to the flowchart profile")
+    # document-check warnings: a missing/unprofiled modality is a non-fatal warning (not a
+    # hard fail) and MUST be surfaced by emit_warnings on every entry point (report
+    # document-check-warnings-not-surfaced-by-cli-20260729-02); declaring is never worse
+    # than omitting, so both stay conformant.
+    prose_seg = {"segmentId": "p1", "kind": "statement", "text": "Every item carries a unique tag."}
+    profiled = check_document({"documentId": "d", "documentKind": "prose", "segments": [prose_seg]}, document_profiles)
+    check(profiled["hasProfile"] and document_conformant(profiled) and profiled["warnings"] == [], "profiled prose document should be conformant with no warnings")
+    no_kind = check_document({"documentId": "d", "segments": [prose_seg]}, document_profiles)
+    check(document_conformant(no_kind) and len(no_kind["warnings"]) == 1, "a document with no documentKind should be conformant but warn")
+    unprofiled = check_document({"documentId": "d", "documentKind": "spreadsheet", "segments": [prose_seg]}, document_profiles)
+    check(document_conformant(unprofiled) and len(unprofiled["warnings"]) == 1, "a declared-but-unprofiled kind should be conformant but warn (never worse than omitting)")
+    _buf = io.StringIO(); emit_warnings(no_kind, _buf)
+    check(_buf.getvalue().startswith("warning: ") and "documentKind" in _buf.getvalue(), "emit_warnings did not write the warning to the given stream")
 
     # --- Walkthrough: the documented model -> coverage -> handoff loop (docs/WALKTHROUGH.md) ---
     walkthrough_root = FIXTURES_ROOT / "walkthrough"
