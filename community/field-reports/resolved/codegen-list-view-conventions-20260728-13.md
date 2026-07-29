@@ -49,3 +49,16 @@ workaround: >
   options are the distinct values in the dataset).
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Landed as codegen guidance (registry-derived; no grammar/IR/analyzer change).
+`kcf-oss/codegen/system-prompt.md` now carries non-negotiable **rule 13 (standard data-grid
+conventions)**: the generated list view (a) excludes the identity/UUID and free-text columns
+(rows click through to the record), (b) has sortable column headers with an active-sort
+indicator, (c) offers a filter bar = free-text search + faceted filters for every categorical
+column (enum value set / boolean / guarded lifecycle `state`, options taken from the data), and
+(d) paginates the result. Column headers use the rule-12 humanized labels. Mirrored in
+`design-system-default.md` (Tables/lists convention), `codegen/CONSTRUCT_COVERAGE.md` (ENTITY
+frontend cell), and `generate-frontend.md`. All derived from the entity registry — no domain
+knowledge and no contract touch.

@@ -55,7 +55,8 @@ backend/frontend pair. See `CONSTRUCT_COVERAGE.md` → "Platform target — NetS
 | `system-prompt.md` | The durable, tier-aware contract. Install as the LLM's system prompt. Defines how to read `model-ir-v1`, the non-negotiable rules (generate only what's declared, cover every construct, honor action contracts/lifecycles), the Swagger/OpenAPI mandate, and the required **coverage self-audit**. |
 | `CONSTRUCT_COVERAGE.md` | The audit: every IR construct → its backend and frontend representation, plus the completeness verdict. |
 | `COOKBOOK.md` | Worked realization of every **tail** construct (quantitative/knowledge/cross-cutting) per tier — the target the stack examples don't show. Rides along automatically when a model uses one. |
-| `design-system-default.md` | Brand-neutral, accessible baseline theme (tokens + component conventions) the generator applies when a model declares no `design` block. |
+| `design-system-default.md` | Brand-neutral, accessible baseline theme (tokens + component conventions) — the `default` entry of the preset registry, applied when no preset is selected and a model declares no `design` block. |
+| `design-systems\` | The **design-system preset registry** (`README.md` + `<name>.md`): named, selectable looks (`default`, `dense-enterprise`, …) so an org standardizes one appearance across every generated app by selecting a preset. Skin only — structure stays IR-derived. |
 | `generate-backend.md` / `generate-frontend.md` | The per-run user prompts. Backend: paste the IR + example. Frontend: paste the IR + the **backend's OpenAPI** + example. |
 | `stacks/<id>/` | A shipped stack: `stack.json` (`stack-target-v1`, incl. `tier`) + `EXAMPLE.md` (the same reference model realized in that stack). |
 | `stack-target.schema.json` | The `stack-target-v1` schema. Author your own `stack.json` to target a stack we don't ship. |

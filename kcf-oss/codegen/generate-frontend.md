@@ -10,6 +10,7 @@ inputs: the KCF IR (meaning + UX intent) and the **backend's OpenAPI document**
 
 **Tier:** frontend
 **Target stack:** `[STACK ID — e.g. react-typescript-openapi]`
+**Design system:** `[PRESET — e.g. default | dense-enterprise; see design-systems/README.md]`
 
 *(Generate from a **valid** model — it need not be fully `ready`. Optionally paste
 `kcf coverage-report <model> --by-concept` output as enrichment guidance:
@@ -68,9 +69,15 @@ coverage self-audit still must hold.*
   remains the source of truth.
 - Add a charting lib only if the model uses `MEASURE`/`analytics`, and a map lib
   only for `SPATIAL`.
-- If the model declares no `design` block, apply `design-system-default.md` (a
-  brand-neutral, accessible baseline theme) so the app is coherent by default;
-  declared design tokens override it.
+- Apply the selected **design-system preset** (`design-systems/<preset>.md`; default =
+  `design-system-default.md`, a brand-neutral accessible baseline) so the app is coherent
+  and the look is standardized across apps. Emit the preset's tokens, then layer any model
+  `design` tokens on top as brand overrides; the preset changes only the skin, never which
+  screens/nav/controls are generated. See `design-systems/README.md`.
+- Never render raw identifiers: `humanize()` all field/column/entity/nav/enum/state labels
+  (system-prompt rule 12). Generate list views with the data-grid conventions (rule 13):
+  no identity/UUID column, sortable headers, a filter bar (search + faceted filters for
+  categorical columns), pagination.
 - If the model uses **tail** constructs (measures, temporal/spatial, logic/math,
   information/resource/organization/reasoning, rich events, profile blocks), also
   paste `COOKBOOK.md` and realize each per its frontend column.

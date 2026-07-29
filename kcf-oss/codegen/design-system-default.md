@@ -1,10 +1,16 @@
 # Default design system — a brand-neutral baseline
 
+This is the **`default` preset** in the design-system registry
+([`design-systems/`](design-systems/README.md)) — the look applied when no other preset
+is selected. To standardize a different look across every generated app, select another
+preset as a generation setting (see the registry); this file stays the fallback baseline.
+
 Design tokens are authorable (`design { design-system … }` → `ir.design`), but most
-models don't declare them. **When a model declares no `design` block, apply this
-neutral default** so every generated app gets a coherent, accessible baseline theme for
-free — instead of unstyled markup or an ad-hoc per-project theme. If the model *does*
-declare design tokens, those win; treat this only as the fallback.
+models don't declare them. **When a model declares no `design` block and no preset is
+selected, apply this neutral default** so every generated app gets a coherent, accessible
+baseline theme for free — instead of unstyled markup or an ad-hoc per-project theme. If the
+model *does* declare design tokens, those values win (layered over whichever preset is
+active); treat this only as the fallback.
 
 Emit these as CSS custom properties (or the stack's token mechanism — Tailwind theme,
 CSS-in-JS tokens, design-token JSON) and reference them everywhere; never hard-code
@@ -60,9 +66,15 @@ colors/spacing in components.
 - **Density**: comfortable — `--space-3`/`--space-4` padding on controls and cells.
 - **Buttons**: accent = filled (`--color-accent`/`--color-accent-text`); secondary =
   bordered; destructive = `--color-danger`. Radius `--radius-md`.
+- **Labels**: never show a raw identifier — `humanize()` every field/column/entity/
+  nav/enum/state label to Title Case with acronyms upper-cased (system-prompt rule 12).
 - **Forms**: label above input; `--color-danger` inline validation; required marked;
   `identity` fields read-only after create.
 - **Tables/lists**: zebra via `--color-surface`; sticky header; row actions on the right.
+  Apply the data-grid convention (system-prompt rule 13): drop the identity/UUID and
+  free-text columns (rows click through to the record), sortable headers with an
+  active-sort indicator, a filter bar (free-text search + faceted filters for
+  categorical columns, options from the data), and pagination.
 - **Status/lifecycle**: badge tinted by semantic color (success/warning/danger/info).
 - **Feedback**: toast for action results; skeleton loaders keyed to the query state.
 - **Accessibility**: visible focus ring (`--color-accent`), AA contrast, keyboard-navigable

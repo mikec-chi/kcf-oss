@@ -21,6 +21,11 @@ honestly-labelled, **unenforced** normative intent — it does not pretend to be
 
 ## IR-RFC candidates
 
+> RFC-1…RFC-8 derive from the `needs-ir-extension` analyzer rules above. **RFC-10 and
+> RFC-11 originate from community field reports** (`community/field-reports/`), not the
+> automation catalogue — the same routing applies: an additive grammar/IR change lands only
+> via a Grammar RFC + VERSIONING decision, never a silent change.
+
 ### RFC-1 — an IR type system (12 rules)
 `stack.type.assignment/collection/condition-boolean/known/nullability/operator`,
 `stack.value.finite/unit-compatible`, `stack.time.duration/window-compatible`,
@@ -57,6 +62,16 @@ No fields for an optimistic version/comparison token, a declared "requires atomi
 an idempotency key/condition, or a retry backoff/failure-classification policy.
 Extension: an execution-semantics block on state-changing actions.
 
+> **Vocabulary landed (additive, IR "1.1" extension).** `model-ir-v1` `$defs/action` now carries the
+> executable-contract fields that these rules require: `expectedVersion` (optimistic-concurrency
+> token → `action.concurrency.version/lost-update`), `idempotencyKey` (→ `action.idempotency.*`),
+> `transactionBoundary` (→ `action.transaction.required`), plus `preconditions`/`postconditions`.
+> They author as `expected-version`, `idempotency-key`, `transaction-boundary`, `precondition`,
+> `postcondition` and flow end-to-end (see `tests/domains/executable-contract.kcf`). The fields are
+> **optional and backward-compatible**, so no `irVersion` bump was forced (a formal `1.1.0` stamp is a
+> `docs/VERSIONING.md` decision); the rules above are now *mechanically automatable* against the IR —
+> each still needs an analyzer handler + invalid-fixture case to move to `automated`.
+
 ### RFC-5 — operational safety & composition (9 rules)
 `action.destructive.recovery/retention/scope`, `action.device.safety`,
 `action.compose.order/saga`, `action.event.commit-order/duplicate/payload`.
@@ -65,6 +80,14 @@ No representation of delete-behavior/retention/recovery, device interlocks/permi
 saga forward/compensation composition, or event before/after (commit-order) semantics.
 Extension(s): destructive-action policy, a saga/composition construct, and event
 change-semantics.
+
+> **Vocabulary partially landed (additive).** `$defs/action` now carries `deleteBehavior`, `retention`,
+> `reversibility`, and `compensation` (author: `delete-behavior`, `retention`, `reversibility`,
+> `compensation`) — unblocking `action.destructive.recovery/retention` and the forward/compensation
+> half of `action.compose.saga`. Set/bulk safety gains `bulkLimit`/`bulkOrdering`/`bulkFailurePolicy`
+> (author: `bulk-limit`, `bulk-ordering`, `bulk-failure`). Still **needing IR work**: device
+> interlocks/permissives, saga ordering across multiple steps, and the event commit-order/duplicate/
+> payload contract (an event-change-semantics block — the next slice).
 
 ### RFC-6 — relationship reasoning semantics (5 rules)
 `kcf.relationship.canonical/condition/inverse/participation/transitivity`.
@@ -86,6 +109,46 @@ mapping or protocol/serialization contract to check coverage against.
 Specialization kind-refinement, trait-permission constraints, per-construct version
 compatibility, and lineage field-schema/derived-artifact completeness need declarations
 the IR does not yet carry.
+
+### RFC-10 — authorable human `label` / `description` on concepts & attributes (field report `20260728-12`)
+
+Concepts and attributes have no authorable human **label**/**description**, so a domain
+term an identifier can't convey (acronyms, regulatory phrasings) cannot override the
+codegen-derived label. This is compounded by a **doc↔parser drift**: the metagrammar's
+`metadata` production (`grammars/core/KCF-v1.0-Semantic-Metagrammar.ebnf:103-104`) advertises
+`metadata { label; description; … }`, and it is wired into the *meta* definitions
+(`concept-kind-def`, `trait-def`, `profile-def`, …) — but **not** into entity/attribute
+authoring: `parse_concept`'s catch-all treats an unknown keyword as a scalar metadata pair,
+so an entity-level `metadata { … }` block and an attribute-level `attr: T { label: … }`
+block both fail to parse (`expected scalar/';' , found '{'`). So the surface reads as
+advertised-but-unavailable where a modeler would reach for it.
+
+Extension (additive, opt-in): an **advisory** `label`/`description` on both concepts and
+attributes — analyzer-ignored like other advisory metadata — projecting to
+`concept.label/description` and `attribute.label/description` in `model-ir-v1`. Codegen uses
+them as the label, falling back to the `humanize()` derivation (codegen system-prompt
+rule 12) when absent — which is why the *default* UX already shipped as a codegen convention
+(field report `20260728-11`), independent of this RFC. Reconcile the reference compiler with
+the metagrammar's `metadata` block at the entity/attribute level (or, if the block is not
+intended there, correct the metagrammar so it stops advertising an unavailable surface).
+Grammar/IR + compiler change → **Grammar RFC + VERSIONING** (additive; labels optional,
+derivation remains the default; no `irVersion` break since the fields are optional).
+
+### RFC-11 — design page `section`s that bind fields (model-driven record layout) (field report `20260728-10`)
+
+A `design` page `section` is a bare **name** (`ir.design.pages[].sections` is a `string[]`),
+so it cannot list which of an entity's attributes belong to it. A grouped record layout
+(titled field-groups — "Primary Information", "Amounts", "System") therefore can't be
+model-driven; codegen falls back to a by-role heuristic (Primary / Details / Amounts / Flags
+/ Dates / System) that a modeler can't override or version.
+
+Extension (additive, opt-in): let a `section` optionally enumerate the attributes it contains
+(and optional order/columns), projecting into `ir.design.pages[].sections[]` as objects
+`{ id, fields: [...] }` while a bare string stays valid. Codegen then renders model-declared
+field-groups, keeping the by-role heuristic as the fallback when a page declares none. This
+is the *structural* half that a design-system preset (codegen `design-systems/`) deliberately
+does **not** cover — a preset skins field-groups but cannot invent them. Grammar/IR change →
+**Grammar RFC + VERSIONING** (additive; the object form is opt-in, the string form unchanged).
 
 ## Downstream guidance (reclassify — not a model requirement)
 

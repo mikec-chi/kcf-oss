@@ -54,3 +54,18 @@ workaround: >
   not the domain's own sectioning.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED — routed to a Grammar RFC (contract change)
+
+Confirmed: `ir.design.pages[].sections` is a `string[]` (bare names), so a section can't
+enumerate the entity attributes it contains and a grouped record layout can't be model-driven.
+This is an additive grammar/IR change, so per the field-report routing
+(`community/field-reports/README.md`) and the one rule for core changes (`CLAUDE.md`) it goes
+through a Grammar RFC + a VERSIONING decision rather than a silent change. Registered as
+**RFC-11** in `docs/IR-ROADMAP.md`: a `section` may optionally enumerate its attributes (and
+order/columns), projecting into `ir.design.pages[].sections[]` as objects `{ id, fields: [...] }`
+while a bare string stays valid (opt-in, backward-compatible). Codegen would then render
+model-declared field-groups with the existing by-role heuristic as the fallback. This is the
+*structural* half a design-system preset (report `20260728-09`) deliberately can't cover — a
+preset skins field-groups but cannot invent them. No silent grammar/IR/analyzer contract change
+was made here.
