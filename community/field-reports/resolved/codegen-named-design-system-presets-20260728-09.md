@@ -53,3 +53,20 @@ workaround: >
   activate a scoped structural layer; flipping the preset name reverts to the default look.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Landed as codegen guidance (docs-only; no grammar/IR/analyzer change). Promoted design systems
+to a small named **preset registry** under `kcf-oss/codegen/design-systems/`:
+`README.md` (the preset contract — the token set + the component/layout conventions a preset
+standardizes, the selection precedence, and how the generator applies it), `default.md` (names
+today's `design-system-default.md` baseline as the `default` preset), and a second preset
+`dense-enterprise.md` (a dense, data-first skin) demonstrating **two presets over the same IR**
+so it's explicit that structure is model-derived and only the skin swaps. The active preset is a
+**generation setting** (`generate-frontend.md` → *Design system:*), applied to every app;
+`design-system-default.md`, `codegen/CONSTRUCT_COVERAGE.md` (`design` row), and `codegen/README.md`
+were updated to point at the registry. Model `design` tokens still override a preset's brand
+values. Selecting by name needs no grammar change; binding a *model* to a named preset by
+reference (`design { design-system "<name>" }`) would need the design grammar to accept a preset
+reference and is deliberately left to the design Grammar RFC (see **RFC-11**, companion report
+`20260728-10`).

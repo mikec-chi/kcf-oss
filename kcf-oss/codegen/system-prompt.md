@@ -256,6 +256,29 @@ aren't implied (statuses, business rules, extra fields).
     `relationships` where `rootKind == CAUSATION` and `source ==` the work, not a
     single "primary" event. A *do-X-and-notify* work with two event targets emits
     both; downstream consumers of the secondary events must not be silently dropped.
+12. **Humanize identifiers into UI labels (frontend).** Identifiers are for code, not
+    end users — never render a raw identifier as a user-facing label. Derive a
+    Title-Case label from every concept / attribute / enum-value / lifecycle-state /
+    nav identifier with a single deterministic, domain-agnostic `humanize()` helper:
+    split camelCase and snake_case (and letter→digit boundaries), Title-Case the
+    words, and upper-case a configured acronym set (`ID`, `URL`, `UUID`, …), e.g.
+    `firstName`→"First Name", `annualRevenue`→"Annual Revenue", `stageId`→"Stage ID",
+    `QualifiedOpportunity`→"Qualified Opportunity". Apply it uniformly through form
+    labels, table/column headers, detail fields, entity/nav labels, and state badges.
+    A model-declared human label (once authorable — see the label/description Grammar
+    RFC in `docs/IR-ROADMAP.md`) overrides the derivation; until then the derivation is
+    the default and needs no model change. (A raw identifier in the UI is the single
+    most visible "skeleton" tell.)
+13. **Apply standard data-grid conventions to list views (frontend).** A generated
+    list/table must read as a usable enterprise grid, all derivable from the registry
+    with no domain knowledge: (a) **exclude the identity / UUID column** (and free-text
+    blob fields) from the grid — rows are click-through to the record; columns = the
+    first N non-identity, non-free-text fields plus the lifecycle `state`; (b) **make
+    column headers sortable** (toggle asc/desc, show the active-sort indicator);
+    (c) offer a **filter bar** = free-text search **plus faceted filters for every
+    categorical column** (enum via its value set, boolean, and the guarded lifecycle
+    `state`), with options taken from the values present in the data; (d) **paginate**
+    the filtered+sorted result. Column headers use the rule-12 `humanize()` labels.
 
 ## Prevent drift: refer to the model as you code
 

@@ -47,6 +47,22 @@ First public release of the open standard. Cut this section to a dated version
   scope, source-confirmation, and an accounted realization handoff at an explicit
   evidence level — it does not claim domain completeness, "any stack", or behavioral
   proof.
+- **codegen pack — 2026-07-28 field-report batch (UI fidelity), guidance-only.** Three
+  advisory conventions landed in the codegen pack (no grammar/IR/analyzer contract change):
+  `system-prompt.md` **rule 12** humanizes identifiers into Title-Case UI labels
+  (`firstName`→"First Name"; report `20260728-11`); **rule 13** applies standard data-grid
+  conventions to list views — drop identity/free-text columns, sortable headers, faceted
+  filter bar + search, pagination (report `20260728-13`); and a new **design-system preset
+  registry** `codegen/design-systems/` (`README.md` contract + `default` + `dense-enterprise`)
+  lets an org standardize one look across every generated app via a generation setting, skin
+  only (report `20260728-09`). Reflected in `design-system-default.md`,
+  `codegen/CONSTRUCT_COVERAGE.md`, `codegen/generate-frontend.md`, and `codegen/README.md`.
+- **`docs/IR-ROADMAP.md`** — two field reports that touch the grammar/IR contract were
+  routed to Grammar RFCs rather than changed silently: **RFC-10** (additive advisory
+  `label`/`description` on concepts + attributes, and reconciling the compiler with the
+  metagrammar's `metadata` block; report `20260728-12`) and **RFC-11** (design page
+  `section`s that optionally bind fields for model-driven record layout; report
+  `20260728-10`). No `grammar-stack` / `ir` change lands until an RFC is accepted.
 
 ### Fixed
 

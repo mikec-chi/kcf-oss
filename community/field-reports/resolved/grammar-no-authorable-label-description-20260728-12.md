@@ -47,3 +47,24 @@ workaround: >
   are carried in a small stack-side acronym set until model labels exist.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED — routed to a Grammar RFC (contract change)
+
+Confirmed on both counts. (1) The doc↔parser drift is real: the metagrammar's `metadata`
+production (`grammars/core/KCF-v1.0-Semantic-Metagrammar.ebnf:103-104`) advertises
+`metadata { label; description; … }` and is wired into the *meta* definitions (`concept-kind-def`,
+`trait-def`, `profile-def`), but **not** into entity/attribute authoring — `parse_concept`'s
+catch-all treats an unknown keyword as a scalar metadata pair, so an entity `metadata { … }`
+block and an attribute `attr: T { label: … }` block both fail to parse. (2) There is genuinely
+no authorable human label/description on concepts or attributes.
+
+Per the field-report routing (`community/field-reports/README.md`) and the one rule for core
+changes (`CLAUDE.md`), a grammar/IR + compiler change **must not** land silently — it goes
+through a Grammar RFC + a VERSIONING decision. Registered as **RFC-10** in
+`docs/IR-ROADMAP.md`: an additive, advisory `label`/`description` on concepts and attributes
+(analyzer-ignored like other advisory metadata) projecting to `concept.label/description` and
+`attribute.label/description`, plus reconciling the reference compiler with the metagrammar's
+`metadata` block at the entity/attribute level (or correcting the metagrammar if the block is
+not intended there). The **default UX is unaffected in the meantime** — codegen already derives
+labels via `humanize()` (rule 12, companion report `20260728-11`); model labels, once landed,
+simply override the derivation. No silent grammar/IR/analyzer contract change was made here.

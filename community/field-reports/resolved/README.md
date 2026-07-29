@@ -25,3 +25,25 @@ Seven accepted (all landed and green under `kcf check`), one rejected. None chan
 grammar / `model-ir-v1` / analyzer *contract*: the accepted codegen changes are
 prompt/guidance, #07 is an advisory (non-`required`) coverage obligation, and #01 is a
 CLI safety guard.
+
+## 2026-07-28 batch (kcfVersion 1.11.0)
+
+Five observations from making a generated app match an enterprise (dense, data-first) look
+(arrived as PRs #9/#10). Triaged by area: three are advisory codegen conventions (landed);
+two touch the grammar/IR contract and were routed to Grammar RFCs rather than changed
+silently.
+
+| # | Report | Area | Sev | Disposition |
+|---|--------|------|-----|-------------|
+| 09 | ship named, selectable design-system presets (one look across every app) | codegen | low | **ACCEPTED** — preset registry `codegen/design-systems/` (contract `README.md` + `default` + `dense-enterprise`); active preset is a generation setting; docs-only, skin-only (structure stays IR-derived) |
+| 10 | design page `section`s can't bind fields (no model-driven record layout) | grammar-gap | low | **ACCEPTED → Grammar RFC** — **RFC-11** in `docs/IR-ROADMAP.md`: additive opt-in `section { fields… }` → `sections[]` objects; by-role heuristic stays the fallback. No silent contract change |
+| 11 | UIs render raw identifiers; humanize into Title-Case labels | codegen | medium | **ACCEPTED** — codegen system-prompt **rule 12**: a `humanize()` label helper applied to all field/column/entity/nav/enum/state labels |
+| 12 | human `label`/`description` not authorable + metagrammar↔parser drift | grammar-gap | medium | **ACCEPTED → Grammar RFC** — **RFC-10** in `docs/IR-ROADMAP.md`: additive advisory `label`/`description` on concepts+attributes + reconcile compiler with the metagrammar. Default UX already covered by rule 12 |
+| 13 | list view needs data-grid conventions (drop UUID cols, sort, facets) | codegen | medium | **ACCEPTED** — codegen system-prompt **rule 13**: exclude identity/free-text columns, sortable headers, faceted filter bar + search, pagination — all registry-derived |
+
+Five accepted — three landed as codegen guidance (rules 12–13 + the `design-systems/` preset
+registry; green under `kcf check`), two routed to **Grammar RFCs** (RFC-10, RFC-11 in
+`docs/IR-ROADMAP.md`) because they change the grammar / `model-ir-v1` contract and, per the
+field-report routing and the one rule for core changes, must land through a Grammar RFC +
+VERSIONING decision, never a silent change. No grammar/IR/analyzer *contract* changed in this
+batch.

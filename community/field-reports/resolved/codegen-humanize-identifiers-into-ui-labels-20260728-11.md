@@ -47,3 +47,16 @@ workaround: >
   wired them through the form, detail, list, nav, related tabs, and state badges.
 domainSanitized: true
 ```
+
+## Triage result — ACCEPTED, fixed
+
+Landed as codegen guidance (no grammar/IR/analyzer change). `kcf-oss/codegen/system-prompt.md`
+now carries non-negotiable **rule 12 (humanize identifiers into UI labels)**: a single
+deterministic, domain-agnostic `humanize()` helper (split camelCase/snake_case + letter→digit
+boundaries, Title-Case, upper-case a configured acronym set) applied uniformly to field labels,
+column headers, detail fields, entity/nav labels, and lifecycle-state badges — so no raw
+identifier ever reaches the UI (`firstName`→"First Name", `stageId`→"Stage ID"). Reinforced in
+`design-system-default.md` (Labels convention), `codegen/CONSTRUCT_COVERAGE.md` (ENTITY frontend
+cell), and `generate-frontend.md` (instruction). The derivation is the **default**; a
+model-declared human label will override it once labels are authorable — routed as **RFC-10**
+in `docs/IR-ROADMAP.md` (companion report `20260728-12`).
