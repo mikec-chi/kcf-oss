@@ -14,6 +14,15 @@ for your target stack. This is **knowledge coding = semantic modeling + vibe cod
 → it **generates** the backend, then a matching frontend. Every step is a tool below;
 the assistant drives them in that order (see [Built to be agent-driven](#built-to-be-agent-driven)).
 
+> **Same six stages as the CLI.** This server is the conversational face of the one
+> canonical journey — *add evidence → elicit → review → approve → choose a stack →
+> generate + verify* (see the CLI table in the [repo README](../README.md#the-six-stage-journey-evidence--verified-app)).
+> The MCP tools map onto it: `next_action`/`capabilities` = `kcf status`; `compile`/`assess`/
+> `coverage` = elicit + review; `review_queue`/`confirm_synthetic` = `kcf approve`;
+> `codegen_prompt`/`list_stacks` = `kcf generate-plan`; `verify_realization` = `kcf verify-project`.
+> A file-based project scaffolded with `kcf init --guided` and this server describe the
+> same stages, so the CLI, the agent, and the docs never disagree.
+
 ### Try the hosted demo (no install)
 
 Just want to point ChatGPT (or any remote MCP host) at a live server? Use the

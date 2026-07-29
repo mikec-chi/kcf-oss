@@ -34,6 +34,7 @@ from merge_models import merge  # noqa: E402
 from migrate_ir import migrate  # noqa: E402
 from profile_resolver import resolve_profile  # noqa: E402
 from semantic_analyzer import Analyzer  # noqa: E402
+import journey  # noqa: E402  — the canonical six-stage project journey
 
 
 
@@ -48,6 +49,13 @@ def write_json(value: dict, output: Path | None) -> None:
 
 
 def main() -> int:
+    # Print UTF-8 regardless of the platform console codepage (Windows defaults to cp1252,
+    # which would garble the em-dashes/arrows in journey output). Best-effort.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+        except (AttributeError, ValueError):
+            pass
     parser = argparse.ArgumentParser(prog="kcf", description="KCF compiler, validator, profile, and migration CLI. OSS stops at the semantic IR; code generation is LLM-based (see codegen/).")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -181,22 +189,201 @@ def main() -> int:
     init_command.add_argument("directory", type=Path, help="target project directory")
     init_command.add_argument("--name", help="model name (default: the directory name)")
     init_command.add_argument("--profile", default="business-application", choices=PROFILES)
+    init_command.add_argument("--guided", action="store_true",
+                              help="evidence-first scaffold + START_HERE.md + inputs/ intake tree (the six-stage journey)")
+
+    # --- the canonical six-stage project journey (evidence -> generated app) ---
+    def _project_arg(p):
+        p.add_argument("--project", type=Path, default=None, help="project dir (default: nearest kcf.project.json)")
+
+    status_command = commands.add_parser("status", help="current stage, project health, and the single recommended next action")
+    _project_arg(status_command)
+    status_command.add_argument("--json", action="store_true", help="emit the full status as JSON")
+
+    sources_command = commands.add_parser("sources", help="register evidence under inputs/ as sources")
+    sources_sub = sources_command.add_subparsers(dest="sources_command", required=True)
+    sources_add = sources_sub.add_parser("add", help="register a file or a whole directory of evidence")
+    sources_add.add_argument("path", type=Path)
+    _project_arg(sources_add)
+    sources_list = sources_sub.add_parser("list", help="list registered sources")
+    _project_arg(sources_list)
+
+    elicit_command = commands.add_parser("elicit", help="assemble the coding-agent elicitation prompt for the registered evidence")
+    elicit_command.add_argument("--agent", choices=["generic", "claude", "codex"], default="generic")
+    elicit_command.add_argument("--output", "-o", type=Path)
+    _project_arg(elicit_command)
+
+    review_command_j = commands.add_parser("review", help="generate the human-readable model review packet (review/model-summary.md)")
+    review_command_j.add_argument("--open", dest="open_html", action="store_true", help="also write + open an HTML view")
+    _project_arg(review_command_j)
+
+    approve_command = commands.add_parser("approve", help="approve inferred constructs -> governed IR + review envelope")
+    approve_command.add_argument("--reviewer", required=True)
+    approve_command.add_argument("--confirm", action="append", help="inferred ids to confirm (comma-separated; repeatable)")
+    approve_command.add_argument("--reject", action="append", help="inferred ids to reject (comma-separated; repeatable)")
+    approve_command.add_argument("--all", dest="confirm_all", action="store_true", help="confirm every pending inferred item")
+    approve_command.add_argument("--as-of", help="ISO timestamp to record (default: now, UTC)")
+    _project_arg(approve_command)
+
+    genplan_command = commands.add_parser("generate-plan", help="assemble deterministic backend/frontend codegen prompt packages")
+    genplan_command.add_argument("--backend", help="backend stack id (e.g. fastapi-sqlmodel-postgres)")
+    genplan_command.add_argument("--frontend", help="frontend stack id (e.g. react-typescript-openapi)")
+    genplan_command.add_argument("--deployment", default="docker-compose")
+    genplan_command.add_argument("--instructions", default="", help="house conventions to inject")
+    _project_arg(genplan_command)
+
+    verifyproj_command = commands.add_parser("verify-project", help="compile+assess+coverage+review+delta+realization+drift, one report card")
+    verifyproj_command.add_argument("--json", action="store_true", help="emit the full report as JSON")
+    _project_arg(verifyproj_command)
 
     args = parser.parse_args()
 
     if args.command == "init":
         name = args.name or "".join(w.capitalize() for w in args.directory.name.replace("-", " ").replace("_", " ").split()) or "App"
         try:
-            created = init_project(args.directory, name, args.profile)
+            created = init_project(args.directory, name, args.profile, guided=args.guided)
         except ValueError as exc:
             print(f"kcf init: {exc}", file=sys.stderr)
             return 1
         print(f"Seeded knowledge application '{name}' ({args.profile}) at {args.directory}:")
         for path in created:
             print(f"  + {path}")
-        print("\nNext: point your coding agent at AGENTS.md, then model your domain in "
-              f"model/{name}.kcf and keep code in sync with it (see .kcf/MODEL_SYNC.md).")
+        if args.guided:
+            print(f"\nNext: read {args.directory}/START_HERE.md, drop evidence under inputs/, then:"
+                  f"\n  cd {args.directory} && kcf sources add inputs/ && kcf status")
+        else:
+            print("\nNext: point your coding agent at AGENTS.md, then model your domain in "
+                  f"model/{name}.kcf and keep code in sync with it (see .kcf/MODEL_SYNC.md).")
         return 0
+
+    # ---- canonical six-stage journey commands (operate on a project dir) ----
+    if args.command in {"status", "sources", "elicit", "review", "approve", "generate-plan", "verify-project"}:
+        try:
+            root = journey.find_project(getattr(args, "project", None))
+        except journey.ProjectError as exc:
+            print(f"kcf {args.command}: {exc}", file=sys.stderr)
+            return 2
+
+        if args.command == "status":
+            report = journey.status(root)
+            if args.json:
+                write_json(report, None)
+            else:
+                s = report
+                stacks = s["selectedStacks"]
+                print(f"Project:            {s['project']}")
+                print(f"Stage:              {s['stage']}")
+                print(f"Sources found:      {s['sourcesFound']}"
+                      + (f"  ({len(s['evidenceFilesUnregistered'])} unregistered file(s) under inputs/)" if s["evidenceFilesUnregistered"] else ""))
+                print(f"Model valid:        {s['modelValid']}" + (f"  ({s['modelError']})" if s.get("modelError") else ""))
+                print(f"Required gaps:      {s['requiredGaps'] if s['requiredGaps'] is not None else '-'}")
+                if s["pendingReview"] is not None:
+                    print(f"Pending inferred:   {s['pendingReview']['inferred']}")
+                    print(f"Unresolved:         {s['pendingReview']['unresolved']}")
+                print(f"Selected stacks:    backend={stacks['backend']} frontend={stacks['frontend']} deploy={stacks['deployment']}")
+                print(f"Generation:         {s['generation']}")
+                print(f"Realization:        {'verified' if s['realizationVerified'] else 'not verified'}")
+                print(f"\nNext: {s['next']}")
+            return 0
+
+        if args.command == "sources":
+            if args.sources_command == "add":
+                try:
+                    added = journey.add_sources(root, args.path)
+                except journey.ProjectError as exc:
+                    print(f"kcf sources add: {exc}", file=sys.stderr)
+                    return 1
+                if not added:
+                    print("No new sources (already registered, or the path held no files).")
+                for e in added:
+                    print(f"  + {e['path']}  ({e['kind']})")
+                print(f"\nRegistered {len(added)} source(s). Next: kcf elicit")
+                return 0
+            if args.sources_command == "list":
+                write_json({"sources": journey.load_project(root).get("sources", [])}, None)
+                return 0
+
+        if args.command == "elicit":
+            prompt = journey.elicit_prompt(root, args.agent)
+            if args.output:
+                args.output.parent.mkdir(parents=True, exist_ok=True)
+                args.output.write_text(prompt, encoding="utf-8")
+                print(f"Wrote elicitation prompt to {args.output}")
+            else:
+                print(prompt)
+            return 0
+
+        if args.command == "review":
+            try:
+                md, meta = journey.review_packet(root)
+            except journey.ProjectError as exc:
+                print(f"kcf review: {exc}", file=sys.stderr)
+                return 1
+            project = journey.load_project(root)
+            packet_rel = (project.get("artifacts") or {}).get("reviewPacket") or "review/model-summary.md"
+            (root / packet_rel).parent.mkdir(parents=True, exist_ok=True)
+            (root / packet_rel).write_text(md, encoding="utf-8")
+            print(f"Wrote {packet_rel}  (valid={meta['valid']}, required gaps={meta['requiredGaps']}, "
+                  f"stated={meta['stated']}, inferred={meta['inferred']}, unresolved={meta['unresolved']})")
+            if args.open_html:
+                html_rel = packet_rel.rsplit(".", 1)[0] + ".html"
+                (root / html_rel).write_text(journey.review_html(md, project.get("name", "Model review")), encoding="utf-8")
+                print(f"Wrote {html_rel}")
+                import webbrowser
+                webbrowser.open((root / html_rel).as_uri())
+            print(f"\nNext: kcf approve --reviewer <you>  (approve inferred items / --all)")
+            return 0
+
+        if args.command == "approve":
+            from datetime import datetime, timezone
+            as_of = args.as_of or datetime.now(timezone.utc).isoformat()
+            confirm_ids = [i for chunk in (args.confirm or []) for i in chunk.split(",") if i]
+            reject_ids = [i for chunk in (args.reject or []) for i in chunk.split(",") if i]
+            try:
+                summary = journey.approve(root, args.reviewer, confirm_ids=confirm_ids,
+                                          reject_ids=reject_ids, confirm_all=args.confirm_all, as_of=as_of)
+            except journey.ProjectError as exc:
+                print(f"kcf approve: {exc}", file=sys.stderr)
+                return 1
+            print(f"Approved by {summary['reviewer']}: confirmed {len(summary['confirmed'])}, rejected {len(summary['rejected'])}.")
+            if summary["notFound"]:
+                print(f"  not found: {', '.join(summary['notFound'])}", file=sys.stderr)
+            print(f"  governed IR:      {summary['governedIr']}")
+            print(f"  review envelope:  {summary['envelope']}  (structurally valid: {summary['envelopeValid']})")
+            print(f"  remaining:        {summary['remaining']['inferred']} inferred, {summary['remaining']['unresolved']} unresolved")
+            nxt = "kcf generate-plan --backend fastapi-sqlmodel-postgres --frontend react-typescript-openapi" \
+                if summary["remaining"]["inferred"] == 0 else "kcf review   # then approve the rest"
+            print(f"\nNext: {nxt}")
+            return 0
+
+        if args.command == "generate-plan":
+            if not (args.backend or args.frontend):
+                print("provide --backend and/or --frontend (see `codegen/stacks/`)", file=sys.stderr)
+                return 2
+            try:
+                result = journey.generate_plan(root, backend=args.backend, frontend=args.frontend,
+                                                deployment=args.deployment, instructions=args.instructions)
+            except journey.ProjectError as exc:
+                print(f"kcf generate-plan: {exc}", file=sys.stderr)
+                return 1
+            for path in result["written"]:
+                print(f"  + {path}")
+            print(f"\nStacks: {result['stacks']}  deploy: {result['deployment']}  "
+                  f"(required gaps: {result['requiredGaps']}, recommended: {result['recommendedGaps']})")
+            print("\nNext: run plans/backend-prompt.md then plans/frontend-prompt.md with your agent, "
+                  "then `kcf verify-project`.")
+            return 0
+
+        if args.command == "verify-project":
+            result = journey.verify_project(root)
+            if args.json:
+                write_json(result, None)
+            else:
+                if result.get("error"):
+                    print(f"verify-project: {result['error']}", file=sys.stderr)
+                else:
+                    print(journey.report_card(result))
+            return 0 if result.get("ok") else 1
 
     if args.command == "compile":
         model = compile_file(args.source)

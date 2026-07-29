@@ -29,6 +29,87 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[1]  # kcf-oss/
 PROFILES = ("business-application", "operational-system", "organizational-knowledge",
             "event-driven-system", "ai-application", "analytics-platform")
 
+# The evidence-first intake tree `kcf init --guided` creates. A user drops whatever they
+# have into the matching folder; nothing needs manual normalization.
+INPUT_DIRS = ("requirements", "documents", "screenshots", "diagrams", "schemas",
+              "data", "questionnaires", "transcripts")
+
+
+def _start_here_md(name: str, model_rel: str) -> str:
+    return f"""\
+# START HERE — {name}
+
+This is a **KCF knowledge application**. You go from *evidence* to a *generated,
+verified application* in six visible stages. You never have to know which low-level
+tool to run — `kcf status` always tells you the single next step.
+
+## The six stages
+
+1. **Add your evidence.** Drop anything you have under `inputs/` — prose requirements,
+   Word/PDF docs, screenshots, diagrams, questionnaires, interview transcripts, database
+   schemas, example data. Then register it: `kcf sources add inputs/`.
+2. **Start elicitation.** Point your coding agent here (see `AGENTS.md`) or run
+   `kcf elicit` to get the exact prompt. The agent inventories `inputs/`, asks only the
+   highest-value questions, and authors the model in `{model_rel}`. It does **not**
+   generate application code until you approve the model.
+3. **Review what KCF understood.** `kcf review --open` produces a human-readable
+   `review/model-summary.md`: actors, records, relationships, workflows, lifecycles,
+   commands, rules, permissions, implied screens, source coverage, inferred knowledge,
+   and open questions. Read this before ever opening the `.kcf` or the JSON IR.
+4. **Approve the model.** The review sorts everything into **stated** (directly
+   supported), **inferred** (LLM-proposed — needs your approval), and **unresolved**
+   (contradictory/insufficient). Approve with, e.g.:
+   `kcf approve --reviewer you --confirm item1,item2 --reject item3` (or `--all`).
+   This produces a governed IR and a review envelope.
+5. **Choose what to generate.** `kcf generate-plan --backend fastapi-sqlmodel-postgres
+   --frontend react-typescript-openapi` assembles deterministic prompt packages under
+   `plans/` and explains what each tier realizes and what remains.
+6. **Generate and verify.** Run the prompts in `plans/` (backend first), then
+   `kcf verify-project` for the final report card: model validity, required gaps, source
+   coverage, unresolved decisions, realization accounting, and model/code drift.
+
+## Right now
+
+Run:
+
+    kcf status
+
+and do exactly what it says under **Next**.
+"""
+
+
+def _guided_agents_md(name: str, model_rel: str, ir_rel: str) -> str:
+    return f"""\
+# Working in this repo — read this first (coding agents)
+
+This is a **KCF knowledge application** built evidence-first. The model is the source of
+truth and the code is a projection of it. Follow the canonical journey; `kcf status`
+tells you the current stage and the single next action.
+
+## Authoritative instruction
+
+To start or continue this project:
+
+1. Read `START_HERE.md`, this file, and `kcf.project.json`.
+2. Run `kcf status`.
+3. Perform only the reported next stage.
+4. Treat files under `inputs/` as **evidence**.
+5. Treat `{model_rel}` as **editable semantic truth**.
+6. Do **not** edit `{ir_rel}` (or any `model-ir*.json`) directly.
+7. Do **not** generate application code before model approval (`kcf approve`).
+8. Never silently promote inferred knowledge — leave it for review, mark it inferred.
+9. Generate the **backend before the frontend**.
+10. Finish by verifying the realization manifest and model/code synchronization
+    (`kcf verify-project`).
+
+## The drift rule (non-negotiable)
+
+If a change adds or alters meaning — an entity, field, command/query, rule, policy,
+lifecycle, relationship, or authorization — update `{model_rel}` **first**, then
+`kcf compile {model_rel} -o {ir_rel} --validate` and `kcf status`. Never reverse-engineer
+the model from generated code. The full protocol is in `.kcf/MODEL_SYNC.md`.
+"""
+
 
 def _starter_model(name: str, profile: str, ns: str) -> str:
     return f"""\
@@ -157,8 +238,13 @@ your LLM. Learn more: <https://github.com/mikec-chi/kcf-oss>.
 """
 
 
-def init_project(target: Path, name: str, profile: str) -> list[str]:
-    """Scaffold a knowledge application at ``target``. Returns created paths."""
+def init_project(target: Path, name: str, profile: str, guided: bool = False) -> list[str]:
+    """Scaffold a knowledge application at ``target``. Returns created paths.
+
+    ``guided`` produces the evidence-first layout of the canonical six-stage journey:
+    an ``inputs/`` intake tree, ``START_HERE.md``, a ``review/`` folder, and a
+    journey-aware ``kcf.project.json`` (stage/sources/artifacts). Without it, the classic
+    model-first scaffold is produced (unchanged)."""
     if profile not in PROFILES:
         raise ValueError(f"unknown profile '{profile}'. Choose one of: {', '.join(PROFILES)}")
     target = target.resolve()
@@ -190,23 +276,54 @@ def init_project(target: Path, name: str, profile: str) -> list[str]:
             (target / dst).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
             created.append(dst)
 
-    # 3. agent instructions + project config + readme
-    (target / "AGENTS.md").write_text(_agents_md(name, model_rel, ir_rel), encoding="utf-8")
+    # 3. evidence-first intake (guided only): inputs/ tree, review/, START_HERE.md
+    if guided:
+        for sub in INPUT_DIRS:
+            (target / "inputs" / sub).mkdir(parents=True, exist_ok=True)
+            (target / "inputs" / sub / ".gitkeep").write_text("", encoding="utf-8")
+            created.append(f"inputs/{sub}/")
+        (target / "review").mkdir(parents=True, exist_ok=True)
+        (target / "review" / ".gitkeep").write_text("", encoding="utf-8")
+        created.append("review/")
+        (target / "START_HERE.md").write_text(_start_here_md(name, model_rel), encoding="utf-8")
+        created.append("START_HERE.md")
+
+    # 4. agent instructions + project config + readme
+    agents_md = _guided_agents_md(name, model_rel, ir_rel) if guided else _agents_md(name, model_rel, ir_rel)
+    (target / "AGENTS.md").write_text(agents_md, encoding="utf-8")
     (target / "CLAUDE.md").write_text(
-        "# Project instructions\n\nSee **[AGENTS.md](AGENTS.md)** — this is a KCF "
-        "knowledge application; the model is the source of truth and must be kept in "
-        "sync with the code (drift-prevention protocol in `.kcf/MODEL_SYNC.md`).\n",
+        "# Project instructions\n\nSee **[AGENTS.md](AGENTS.md)**"
+        + (" and **[START_HERE.md](START_HERE.md)**" if guided else "")
+        + " — this is a KCF knowledge application; the model is the source of truth and "
+        "must be kept in sync with the code (drift-prevention protocol in "
+        "`.kcf/MODEL_SYNC.md`).\n",
         encoding="utf-8")
-    (target / "kcf.project.json").write_text(json.dumps({
+    project_config = {
         "kcfProjectVersion": "1.0.0",
         "name": name,
         "profile": profile,
         "model": model_rel,
         "ir": ir_rel,
         "sourceOfTruth": "model",
-        "stack": {"backend": None, "frontend": None},
+        "stack": {"backend": None, "frontend": None, "deployment": "docker-compose"},
         "conventions": {"elicitationGuide": None, "codegenOverrides": None},
-    }, indent=2) + "\n", encoding="utf-8")
+    }
+    if guided:
+        project_config.update({
+            "guided": True,
+            "stage": "evidence",
+            "sources": [],
+            "artifacts": {
+                "reviewPacket": "review/model-summary.md",
+                "reviewEnvelope": "review/approval.json",
+                "governedIr": "model/model-ir.governed.json",
+                "verificationReport": "review/verification.json",
+                "sourceDocument": None,
+                "sourceTrace": None,
+                "realizationManifest": "generated/realization-manifest.json",
+            },
+        })
+    (target / "kcf.project.json").write_text(json.dumps(project_config, indent=2) + "\n", encoding="utf-8")
     (target / "README.md").write_text(_readme_md(name, model_rel), encoding="utf-8")
     created += ["AGENTS.md", "CLAUDE.md", "kcf.project.json", "README.md"]
 
