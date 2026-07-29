@@ -615,6 +615,52 @@ def main():
     _clow = {t.lower() for t in _cterms}
     check(_cap_covers("procure_to_pay", _cterms, _clow) and _cap_covers("cap.procure_to_pay", _cterms, _clow), "scope capability must match by bare local name and by namespace-qualified form")
 
+    # --- The canonical six-stage journey (evidence -> generated app) ---
+    # Smoke-test the orchestration end to end so the guided scaffold + status/stage
+    # detection + review packet + approve (governed IR + review envelope) + verify-project
+    # cannot silently regress. (generate-plan is exercised separately - it pulls the mcp
+    # prompt-assembly, out of scope for the core gate.)
+    import tempfile as _tempfile, shutil as _shutil
+    from init_project import init_project as _init_project
+    import journey as _journey
+    _JOURNEY_KCF = (
+        "kcf model JourneyDemo profile business-application {\n"
+        "  namespace journeydemo;\n"
+        "  entity Order { identity id: UUID; required title: String; required status: String; }\n"
+        "  actor Clerk { }\n  work ManageOrderWork { }\n"
+        "  rule OrderAccess { kind CONSTRAINT; condition \"the clerk is assigned\"; effect ManageOrderWork; applies-to Order; authority Clerk; }\n"
+        "  policy OrderPolicy { authority Clerk; rule OrderAccess; default-conflict deny-overrides; }\n"
+        "  command CreateOrder { operation create; scope record; target Order; input one; output one; idempotency conditional; idempotency-key rid; atomicity atomic; authorization journeydemo.OrderPolicy; }\n"
+        "  query GetOrder { operation read; scope record; target Order; selection identity; input one; output one; }\n"
+        "  lifecycle OrderLifecycle for Order { initial Open; terminal Resolved; transition Open -> Resolved; }\n}\n")
+    _jtmp = Path(_tempfile.mkdtemp(prefix="kcf-journey-"))
+    try:
+        _proj = _jtmp / "demo"
+        _init_project(_proj, "JourneyDemo", "business-application", guided=True)
+        check((_proj / "START_HERE.md").is_file() and (_proj / "inputs").is_dir()
+              and (_proj / "kcf.project.json").is_file(), "guided init did not produce the evidence-first scaffold")
+        (_proj / "model" / "JourneyDemo.kcf").write_text(_JOURNEY_KCF, encoding="utf-8")
+        (_proj / "inputs" / "requirements" / "r.md").write_text("An Order has a title and a status.\n", encoding="utf-8")
+        _added = _journey.add_sources(_proj, _proj / "inputs" / "requirements" / "r.md")
+        check(len(_added) == 1 and _added[0]["kind"] == "prose", "sources add did not register the prose evidence")
+        _st = _journey.status(_proj)
+        check(_st["modelValid"] and _st["stage"] == "review" and _st["next"], f"journey status wrong: stage={_st['stage']} valid={_st['modelValid']}")
+        _md, _meta = _journey.review_packet(_proj)
+        check(_meta["valid"] and "## Approval buckets" in _md and "stateDiagram" in _md, "review packet missing expected sections")
+        _summary = _journey.approve(_proj, "tester", as_of="2026-07-29T00:00:00Z")
+        check(_summary["envelopeValid"] and (_proj / _summary["governedIr"]).is_file()
+              and (_proj / _summary["envelope"]).is_file(), "approve did not emit a valid envelope + governed IR")
+        _result = _journey.verify_project(_proj)
+        check(_result["ok"] and _result["checks"]["requiredGaps"] == 0
+              and _result["checks"]["driftFromApproved"] in (0, None), f"verify-project not ok: {_result.get('checks')}")
+        # Drift: an approved model that then changes must fail verification.
+        (_proj / "model" / "JourneyDemo.kcf").write_text(
+            _JOURNEY_KCF.replace("actor Clerk { }", "actor Clerk { }\n  entity Note { identity id: UUID; required body: String; }"),
+            encoding="utf-8")
+        check(not _journey.verify_project(_proj)["ok"], "verify-project did not detect model/code drift after an approved model changed")
+    finally:
+        _shutil.rmtree(_jtmp, ignore_errors=True)
+
     # --- Walkthrough: the documented model -> coverage -> handoff loop (docs/WALKTHROUGH.md) ---
     walkthrough_root = FIXTURES_ROOT / "walkthrough"
     draft = json.loads((walkthrough_root / "support-ticket-draft.json").read_text())

@@ -28,6 +28,34 @@ kcf assess model-ir.json            # → { "valid": true, "ready": true, "domai
 # then hand the ready IR to the LLM you choose, for your target stack (see codegen/)
 ```
 
+## The six-stage journey (evidence → verified app)
+
+`kcf init --guided` scaffolds an **evidence-first** project and one canonical journey a
+person — or a coding agent (Claude Code, Codex) — follows without knowing which
+low-level tool to run. `kcf status` always reports the current stage and the **single
+recommended next action**, so you never have to discover the workflow from the docs.
+
+| # | Stage | Command | What happens |
+|---|-------|---------|--------------|
+| 1 | Add evidence | `kcf sources add inputs/` | Drop prose, PDFs, screenshots, diagrams, schemas, transcripts, sample data under `inputs/`; register them (no manual source-JSON). |
+| 2 | Elicit | `kcf elicit [--agent claude\|codex]` | Assembles the coding-agent prompt for the registered evidence; the agent authors `model/*.kcf`, asking only the highest-value questions, and does **not** write app code until you approve. |
+| 3 | Review | `kcf review --open` | Generates a human-readable `review/model-summary.md` (actors, records, relationships, workflows, lifecycle diagrams, commands, rules, permissions, implied screens, source coverage, inferred knowledge, open questions) — read this before the `.kcf` or the IR. |
+| 4 | Approve | `kcf approve --reviewer you [--confirm … --reject … \| --all]` | Sorts constructs into **stated / inferred / unresolved**; your decisions produce a governed IR + a machine-readable review envelope. |
+| 5 | Choose a stack | `kcf generate-plan --backend fastapi-sqlmodel-postgres --frontend react-typescript-openapi` | Assembles deterministic backend/frontend prompt packages under `plans/` and explains what each realizes and what remains. KCF packages the prompts; it does not emit the code. |
+| 6 | Generate + verify | `kcf verify-project` | After the agent runs the plans, one report card: model validity, required gaps, source coverage, unresolved decisions, realization accounting, and **model/code drift**. |
+
+```bash
+kcf init --guided ./order-desk --name OrderDesk
+cd order-desk                       # drop files into inputs/, then:
+kcf sources add inputs/ && kcf status   # status tells you the next step at every stage
+```
+
+Everything above is orchestration over the same engines documented below (compile,
+assess, coverage, review-queue, confirm, source-coverage, codegen prompt assembly,
+realization verification) — it adds no grammar, IR, or analyzer semantics. The MCP server
+(`mcp/`) and the guided project's `START_HERE.md` + `AGENTS.md` present the **same six
+stages**, so the CLI, the agent instructions, and the docs never disagree.
+
 > **Maintainers & coding LLMs** should first read the repository
 > `LLM_HANDOFF.md`, repository `AGENTS.md`, and this package's `AGENTS.md`. The
 > authoritative/generated artifact index and current limitations are in
