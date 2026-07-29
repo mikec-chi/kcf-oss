@@ -66,6 +66,16 @@ First public release of the open standard. Cut this section to a dated version
 
 ### Fixed
 
+- **tooling / source-fidelity — 2026-07-29 field report (`document-profile-missing-prose-image-20260729-01`).**
+  Shipped two missing document profiles, `config/document-profiles/prose.json` and `image.json`
+  (pure data on the existing `document-profile-v1` schema; the natural-language front door's two
+  default modalities previously had none). And fixed a perverse incentive in
+  `tools/document_profile.py`: `document-check` used to **fail** a document that honestly declared
+  an unprofiled `documentKind` while **passing** one that omitted the field — rewarding stripping
+  provenance. Conformance now fails only on genuine segmentation **drift** (a segment kind foreign
+  to a resolved profile); a missing, unprofiled, or omitted modality is a non-fatal `warning` (new
+  `warnings` field, also to stderr). Declaring a modality is never worse than omitting it. No
+  grammar / `model-ir-v1` / analyzer *contract* change.
 - **tooling** — `kcf import-dbml` no longer silently emits an empty model. When a
   source parses to 0 tables (typically a non-dbml.org DBML dialect), it now warns to
   stderr naming the accepted `Table { ... }` subset and exits non-zero without writing

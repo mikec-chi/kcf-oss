@@ -47,3 +47,15 @@ registry; green under `kcf check`), two routed to **Grammar RFCs** (RFC-10, RFC-
 field-report routing and the one rule for core changes, must land through a Grammar RFC +
 VERSIONING decision, never a silent change. No grammar/IR/analyzer *contract* changed in this
 batch.
+
+## 2026-07-29 batch (kcfVersion 1.11.0)
+
+One observation from ingesting a model family as source documents (arrived as PR #12).
+
+| # | Report | Area | Sev | Disposition |
+|---|--------|------|-----|-------------|
+| 01 | no `prose`/`image` document profile ships → declaring the default modality fails document-check while omitting it passes | source-fidelity | medium | **ACCEPTED** — shipped `config/document-profiles/prose.json` + `image.json` (pure data, schema-valid); and fixed the incentive in `tools/document_profile.py` so only segmentation *drift* fails — a missing/unprofiled/omitted modality now `warns`, so declaring is never worse than omitting |
+
+One accepted. No grammar / `model-ir-v1` / analyzer *contract* change: two new shipped profiles
+(pure data on the existing `document-profile-v1` schema) plus a CLI-conformance safety change
+(warn-not-fail) in the same spirit as `import-dbml-silent-noop-20260727-01`.

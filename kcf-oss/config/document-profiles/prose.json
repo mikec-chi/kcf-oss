@@ -1,0 +1,24 @@
+{
+  "documentProfileVersion": "1.0.0",
+  "documentKind": "prose",
+  "title": "Prose / narrative source",
+  "description": "An unstructured or lightly-structured written source — requirements text, a terms-of-reference document, a specification, meeting notes, or a structured-DSL model read as text. Meaning is carried by declarative statements under headings, rather than by a diagram's nodes and edges or a form's fields. The default modality for the natural-language front door.",
+  "segmentKinds": ["heading", "section", "statement", "note", "example", "question"],
+  "targetDimensions": ["ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "RULE", "RELATIONSHIP", "INFORMATION"],
+  "mapping": [
+    {"segmentKind": "statement", "producesKind": "*", "notes": "the load-bearing kind: a declarative sentence yields whichever construct it asserts — a thing (ENTITY), a doer (ACTOR), an activity (WORK), something that happened (EVENT), a state progression (LIFECYCLE), or a constraint (RULE). Classify per statement; do not assume one kind per document"},
+    {"segmentKind": "heading", "producesKind": "INFORMATION", "notes": "a heading scopes the statements beneath it; keep it as a segment so that scope is addressable, but do not extract a construct from the heading alone"},
+    {"segmentKind": "section", "producesKind": "INFORMATION", "notes": "a titled body of prose becomes an information record carrying sourceDocument provenance"},
+    {"segmentKind": "note", "producesKind": "INFORMATION", "notes": "scope notes, caveats, and non-goals bound what the model should claim; they constrain extraction rather than adding constructs"},
+    {"segmentKind": "example", "producesKind": "RULE", "notes": "a worked example usually illustrates a rule or a formula; extract the rule it demonstrates, not the example instance"},
+    {"segmentKind": "question", "producesKind": "*", "notes": "an open question marks knowledge that is not yet settled — do not extract a construct; leave the gap open for the review/confirm step"}
+  ],
+  "guidance": [
+    "Segment at the granularity of an independently-citable assertion — one statement per claim. A segment that carries two unrelated claims cannot be traced to two constructs.",
+    "Prose is multi-dimensional: unlike a flowchart or a form, one document legitimately produces ENTITY, ACTOR, WORK, RULE, and LIFECYCLE constructs together. Do not force a single target dimension.",
+    "Keep headings and notes as segments even though they rarely produce constructs — omitting them makes the coverage denominator understate the source, so an uncovered region looks covered.",
+    "Do not extract a construct from a `question` segment or from prose hedged with 'may', 'could', or 'to be determined'. Unsettled knowledge belongs in the review queue, not the model.",
+    "Respect explicit scope notes: a source that states it does not describe a capability must not yield constructs asserting that capability.",
+    "Prose restates the same fact in several places. Cite every segment that grounds a construct, so removing one restatement does not orphan it."
+  ]
+}
