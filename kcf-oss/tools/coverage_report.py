@@ -75,6 +75,14 @@ def ev_concept_kind_has_lifecycle(model: dict, obligation: dict) -> list[dict]:
         # lifecycles, which distorts the shape that record-nature is inferred from).
         if _category(concept) in _NO_LIFECYCLE_CATEGORIES:
             continue
+        # Read-only / immutable data (an append-only ledger, an audit trail) has no
+        # operational state machine either — records are never updated, so a lifecycle
+        # cannot be satisfied except by an empty one. Honour the same exemption the CRUD
+        # and set-operation evaluators do (metadata.mutability/readOnly + exemptTraits),
+        # so an immutable transactional entity is not left with a permanently
+        # unsatisfiable recommended gap.
+        if _is_exempt(concept, obligation):
+            continue
         subject = _identity(concept)
         if subject not in subjects:
             gaps.append(gap(obligation, subject, f"{obligation['conceptKind']} {subject} has no lifecycle"))

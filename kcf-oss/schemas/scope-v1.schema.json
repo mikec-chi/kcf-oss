@@ -9,7 +9,7 @@
     "scopeVersion": {"const": "1.0.0"},
     "model": {"type": "string", "description": "The id of the model this scope is declared for (optional; for cross-checking)."},
     "packageKind": {"enum": ["vocabulary", "package"], "description": "Declares an intentionally sparse scope (a vocabulary/term library or sub-package). Only such a scope may leave includedCapabilities empty and still be closed-world complete."},
-    "includedCapabilities": {"type": "array", "items": {"type": "string"}, "description": "Capabilities the model is REQUIRED to cover. Each must map to at least one model construct to be closed-world complete. Must be non-empty unless packageKind is declared."},
+    "includedCapabilities": {"type": "array", "items": {"type": "string"}, "description": "Capabilities the model is REQUIRED to cover. Each must map to at least one model construct to be closed-world complete: matched against construct identities and each concept's traits/capabilities/skills, by either the bare local name (e.g. procure_to_pay) or the namespace-qualified form (cap.procure_to_pay). These are construct identities, not free prose — a human-phrased capability ('Procure to pay, end to end') will not match; declare it with a capability construct and name that here. Must be non-empty unless packageKind is declared."},
     "excludedCapabilities": {"type": "array", "items": {"type": "string"}, "description": "Capabilities deliberately out of scope (documented non-goals)."},
     "sourceDocuments": {"type": "array", "items": {"type": "string"}, "description": "The sources this model was built from (document ids/uris)."},
     "stakeholders": {"type": "array", "items": {"type": "string"}, "description": "Who defined / owns / signs off on this scope."},

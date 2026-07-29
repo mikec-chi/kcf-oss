@@ -106,3 +106,20 @@ form of the identifier rather than anything about the model.
 Sibling to the batch in `…-04` through `…-07`. Unlike those, this one is purely about the
 matching rule and the schema's documentation of it — no grammar or IR change is implied by
 the first suggestion.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed: `completeness._covers` matched exact/case-insensitive against
+`_model_capability_terms`, which collected only the **namespace-qualified** form
+(`cap.procure_to_pay`), so a scope naming the identical token the author typed
+(`procure_to_pay`) reported uncovered — the surprising same-token failure. Fixed the primary,
+no-schema-change case: `_model_capability_terms` now indexes both the qualified form **and** the
+bare local name, so a scope capability matches by either. Verified: both `procure_to_pay` and
+`cap.procure_to_pay` now cover the declared capability. Regression-pinned in
+`run_conformance.py`. Also made the failure actionable: the `completeness` CLI now prints, for
+each uncovered capability, the nearest available model term (or a note that
+`includedCapabilities` are construct identities) to stderr, and `scope-v1.schema.json` documents
+the matching rule (local or qualified name; not free prose). The human-phrasing case
+("Procure to pay, end to end") remains a documented limitation — supporting an explicit
+`{capability, satisfiedBy}` mapping is noted as a possible follow-up needing a scope-schema
+change, deliberately not bundled here. Tooling change only — no grammar / IR change.

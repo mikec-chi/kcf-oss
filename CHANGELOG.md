@@ -62,10 +62,28 @@ First public release of the open standard. Cut this section to a dated version
   `label`/`description` on concepts + attributes, and reconciling the compiler with the
   metagrammar's `metadata` block; report `20260728-12`) and **RFC-11** (design page
   `section`s that optionally bind fields for model-driven record layout; report
-  `20260728-10`). No `grammar-stack` / `ir` change lands until an RFC is accepted.
+  `20260728-10`); and **RFC-12** (attribute value domains / allowed-value sets, so a source
+  enumeration is machine-checkable rather than prose; report `20260729-07`). No `grammar-stack`
+  / `ir` change lands until an RFC is accepted.
 
 ### Fixed
 
+- **analyzer / tooling — 2026-07-29 field-report batch (#03–#06, #08), authoring & analysis fidelity.**
+  Five fixes from transcoding a large external model family, none changing the grammar /
+  `model-ir-v1` / analyzer *contract*: (#03 `ordering-dimension-qualifier-catch-22`) added the
+  required `dimension` qualifier to `KNOWN_RELATIONSHIP_QUALIFIERS`, so a valid `ORDERING` edge no
+  longer trips the spurious "not recognized" advisory; (#04 `source-coverage-blind-to-five-collections`)
+  `source_coverage.construct_ids` now walks **every** id-bearing IR collection (incl. `math`,
+  `propositions`, `authorities`, `processes`, and the profile sections) except an explicit
+  infrastructure exclusion list, so faithfulness is reachable for models beyond entities/actions;
+  (#05 `entity-immutable-declaration-dropped`) `immutable;` on a non-EVENT concept now projects to
+  `metadata.mutability = "read-only"` instead of silently vanishing; (#06 `lifecycle-obligation-ignores-exempt`)
+  `ev_concept_kind_has_lifecycle` now honours `_is_exempt`, so a read-only/immutable transactional
+  entity (ledger, audit trail) is no longer left a permanently-unsatisfiable lifecycle gap; (#08
+  `scope-capabilities-need-qualified-identifiers`) `completeness` matches a scope capability by both
+  its bare local name and its namespace-qualified form, and the CLI now prints the nearest model
+  term for an uncovered capability. Each is regression-pinned in `run_conformance.py`; the
+  `scope-v1` schema now documents the matching rule.
 - **tooling / source-fidelity — 2026-07-29 field report (`document-profile-missing-prose-image-20260729-01`).**
   Shipped two missing document profiles, `config/document-profiles/prose.json` and `image.json`
   (pure data on the existing `document-profile-v1` schema; the natural-language front door's two

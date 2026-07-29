@@ -101,3 +101,18 @@ lower-value and I would rather not split this envelope:
 - The authoring grammar has no value-domain / allowed-values surface, so a source
   enumeration has no first-class home; we preserved 9 of them as `proposition` plus a
   free-form attribute qualifier, which a generator cannot machine-check.
+
+## Triage result — ACCEPTED, fixed
+
+Confirmed the catch-22: `kcf.relationship.ordering` (semantic_analyzer.py) **requires**
+`dimension` on an ORDERING edge, but `dimension` was absent from
+`KNOWN_RELATIONSHIP_QUALIFIERS`, so every valid ORDERING edge also tripped the advisory
+"qualifier 'dimension' is not recognized" warning — a qualifier a check requires can never
+be unrecognized. Added `"dimension"` to `KNOWN_RELATIONSHIP_QUALIFIERS`. Verified: an
+ORDERING edge declaring `dimension workflow` now compiles with **zero** ordering errors and
+**zero** not-recognized warnings. Regression-pinned in `run_conformance.py` (a `dimension`-in-
+whitelist assertion — the report's suggested class guard). Value-vocabulary validation
+(`workflow`/`temporal`/…) was considered but left open deliberately: the dimension vocabulary
+is open-ended, so erroring on an unlisted value would trade one false diagnostic for another.
+Advisory analyzer change only — no grammar / `model-ir-v1` / analyzer *contract* change (the
+qualifier already parsed and landed in `relationship.qualifiers`).

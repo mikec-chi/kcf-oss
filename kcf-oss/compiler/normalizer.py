@@ -132,6 +132,14 @@ def normalize(model: Model) -> dict:
                 concept["lifecycleRef"] = qualify(declaration.values["lifecycleRef"], namespace)
             if declaration.values.get("constraints"):
                 concept["constraints"] = [qualify(v, namespace) for v in declaration.values["constraints"]]
+            # `immutable;` is projected as `event.mutable` for EVENTs (below). For any
+            # other concept kind it used to parse and vanish — a silent no-op. Record it
+            # as read-only mutability so it actually carries meaning: coverage exemption
+            # (_is_exempt) and category reconciliation read `metadata.mutability`, and a
+            # generator can suppress write/delete paths. Additive (metadata is open); an
+            # explicit `mutability` already authored wins.
+            if declaration.values.get("immutable") and concept["kind"] != "EVENT":
+                concept.setdefault("metadata", {}).setdefault("mutability", "read-only")
             ir["concepts"].append(concept)
             record_source(ir["sourceMap"], concept["qualifiedName"], declaration)
             # Entity-embedded mutations project into the top-level mutations collection,
