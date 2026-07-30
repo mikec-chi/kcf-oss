@@ -14,7 +14,7 @@ PROJECT_ROOT = TOOLS_ROOT.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from compiler import compile_file, compile_text
+from compiler import compile_file, compile_recover, compile_text
 from check_compatibility import check as check_compatibility
 from confirm_synthetic import confirm as confirm_synthetic
 from coverage_report import load_coverage_model, report as coverage_report
@@ -28,6 +28,7 @@ from import_dbml import import_dbml
 from ingest import ingest as ingest_model
 from pattern_contracts import contract_role_errors, load_contracts as load_pattern_contracts, report as pattern_report, role_report
 from review_queue import by_segment as review_by_segment, review_queue
+from review_envelope import build_envelope, signing_payload, validate_envelope
 from scaffold import build_scaffold
 from source_coverage import is_complete as source_complete, source_coverage
 from verify_realization import ir_identities, verify as verify_realization
@@ -105,6 +106,36 @@ def main():
     check(automation["manualByClass"].get("needs-ir-extension", 0) >= 1, "needs-ir-extension class unexpectedly empty (overrides not loaded?)")
     check(all(entry.get("reason") for entry in automation["reclassifications"]), "a reclassification is missing its reason")
     check(0.0 <= automation["byRisk"]["high"]["automationRate"] <= 1.0, "high-risk automation rate is out of range")
+
+    # --- 89-rule IR-extension remediation ledger (evidence-derived, fail-closed) ---
+    # The ledger classifies every needs-ir-extension rule from ACTUAL evidence (IR schema, parser,
+    # normalizer, catalogue handler, fixtures), so an override can never again claim "the IR has no
+    # such field" for a field that now exists. Rebuilt live here + compared to the committed artifact so
+    # it can't silently rot, then validated + reconciled (fail on stale/mislabel/unbacked-automated).
+    from ir_extension_ledger import load_and_build as build_ir_ledger, reconcile as reconcile_ir_ledger
+    ir_ledger = build_ir_ledger()
+    validate(ir_ledger, "ir-extension-ledger-v1.schema.json")
+    committed_ledger = json.loads((SEMANTICS_ROOT / "ir-extension-status.json").read_text(encoding="utf-8"))
+    check(committed_ledger == ir_ledger, "semantics/ir-extension-status.json is stale (re-run tools/ir_extension_ledger.py)")
+    check(ir_ledger["sourceRuleCount"] == 89, f"IR-extension ledger must reconcile exactly 89 source rules, got {ir_ledger['sourceRuleCount']}")
+    ledger_ids = [e["ruleId"] for e in ir_ledger["rules"]]
+    check(len(ledger_ids) == len(set(ledger_ids)), "IR-extension ledger has duplicate rule IDs")
+    check(set(ledger_ids) <= set(catalogue_ids), f"IR-extension ledger references unknown rule IDs: {sorted(set(ledger_ids) - set(catalogue_ids))}")
+    check(all(all(k in e for k in ("schemaSupport", "parserSupport", "normalizerSupport", "requiredIr",
+                                   "handler", "targetClassification")) for e in ir_ledger["rules"]),
+          "an IR-extension ledger entry is missing evidence fields")
+    rec = reconcile_ir_ledger(ir_ledger)
+    check(not rec["stale"], f"stale needs-ir-extension override (IR field now exists): {rec['stale']}")
+    check(not rec["mislabelled"], f"IR present but rule labeled ir-missing: {rec['mislabelled']}")
+    check(not rec["automatedWithoutEvidence"], f"ledger marks a rule automated without handler+fixtures: {rec['automatedWithoutEvidence']}")
+    # Final reconciliation (Slice 12): the automation-report cross-checks the ledger against the catalogue
+    # and must surface NO contradiction (a rule the ledger calls automated that the catalogue does not, or
+    # vice versa), and its 89-rule breakdown must sum to the source count.
+    ir_recon = automation["irExtension"]
+    check(not ir_recon["contradictions"], f"ledger/catalogue enforcement contradictions: {ir_recon['contradictions']}")
+    check(ir_recon["automated"] + ir_recon["reclassified"] + ir_recon["stillBlocked"] == ir_recon["sourceRuleCount"],
+          f"IR-extension status breakdown does not sum to 89: {ir_recon}")
+
     check(len(ownership["rules"]) == 550, "legacy semantic ownership audit is incomplete")
     check(all(item["owner"] in {"semantic-core", "kcf", "dbml"} for item in ownership["rules"]), "legacy rule has no valid owner")
     valid_diagnostics = Analyzer(valid).run()
@@ -243,6 +274,22 @@ def main():
     human_claim = next(item for item in confirmed_model["assertions"] if (item.get("qualifiedName") or item["id"]) == "fin.HumanClaim")
     check(human_claim.get("reviewedBy") == "sme:jane", "confirmation altered a record it was not asked to change")
 
+    # Source/model REVISION binding (weakness #4): a confirmation is recorded against the exact source
+    # + model revisions it was made on, so a later .kcf edit cannot silently inherit the approval.
+    from confirm_synthetic import confirm as confirm_syn, source_revision as kcf_source_revision
+    src_text = "kcf model M profile business-application { namespace fin; }\n"
+    bound_model, bound_report = confirm_syn(synthetic, decisions["confirm"], decisions["reject"],
+                                            "sme:test", "2026-07-23T00:00:00Z",
+                                            source_rev=kcf_source_revision(src_text))
+    validate(bound_model, "model-ir-v1.schema.json")
+    check(bound_report["sourceRevision"] == kcf_source_revision(src_text) and bound_report["modelRevision"].startswith("sha256:"),
+          "confirmation report did not bind source + model revisions")
+    bound_claim = next(item for item in bound_model["assertions"] if (item.get("qualifiedName") or item["id"]) == "fin.SynthClaim")
+    check(bound_claim.get("confirmedAgainstSource") == kcf_source_revision(src_text),
+          "confirmed record was not stamped with the source revision it was reviewed against")
+    check(kcf_source_revision(src_text) != kcf_source_revision(src_text + "\n"),
+          "source revision must change when the .kcf source changes (drift is detectable)")
+
     pattern_contracts = load_pattern_contracts()
     contract_schema = json.loads((SCHEMAS_ROOT / "pattern-contract-v1.schema.json").read_text(encoding="utf-8"))
     for contract in pattern_contracts.values():
@@ -296,6 +343,35 @@ def main():
     check(ready_report["ready"], f"a satisfied model was assessed not-ready: {ready_report['checks']}")
     not_ready = assess_model(unproven)
     check(not not_ready["ready"], "an unproven model was assessed ready")
+
+    # Readiness LADDER (weakness #8): `ready` must not be misread as production-ready. KCF-OSS reports
+    # ONLY model-validity rungs; operational/deployment readiness is out of scope (a downstream
+    # assurance overlay owns that ladder), signalled generically via `deploymentReadiness`.
+    ladder = {rung["level"]: rung for rung in ready_report["readinessLadder"]}
+    check(ladder["codegen-ready"]["satisfied"], "a ready model was not codegen-ready on the ladder")
+    check(all(rung["scope"] == "model-validity" for rung in ready_report["readinessLadder"]),
+          "KCF-OSS readiness ladder must contain ONLY model-validity rungs (operational rungs are the overlay's)")
+    check(ready_report["deploymentReadiness"] == "not-evaluated-here",
+          "KCF-OSS must declare deployment readiness out-of-scope, never claim it")
+    check(not ladder["source-linked"]["satisfied"] and ladder["source-linked"]["unsatisfied"],
+          "source-linked must report missing evidence when no source-coverage was provided")
+
+    # Review ENVELOPE (weakness #7): the OPEN, portable review-decision contract, bound to source +
+    # model revisions. KCF-OSS validates it STRUCTURALLY only - it never authenticates or verifies.
+    unsigned_env = build_envelope(reviewer="sme", decision="accept",
+                                  construct_ids=["fin.HighValueOrderApproval"], source_revision="sha256:src-abc",
+                                  model_revision="sha256:ir-def", recorded_at="2026-07-28T00:00:00Z",
+                                  reviewer_role="Order Operations Owner", authority="fin.Approve")
+    validate(unsigned_env, "review-envelope-v1.schema.json")
+    env_result = validate_envelope(unsigned_env)
+    check(env_result["ok"] and not env_result["signed"], "unsigned envelope should validate structurally and report signed=false")
+    check(set(signing_payload(unsigned_env)) >= {"reviewer", "decision", "sourceRevision", "modelRevision"},
+          "signing payload must name the governed fields for an external verifier")
+    signed_env = {**unsigned_env, "signature": "opaque-sig", "signatureAlgorithm": "hmac-sha256"}
+    validate(signed_env, "review-envelope-v1.schema.json")
+    check(validate_envelope(signed_env)["signed"], "a signed envelope should report signed=true (still NOT verified by OSS)")
+    bad_env = {**unsigned_env, "signature": "opaque-sig"}  # signature without algorithm -> structurally invalid
+    check(not validate_envelope(bad_env)["ok"], "a signature without signatureAlgorithm must fail structural validation")
 
     review = json.loads((coverage_root / "review-source.json").read_text())
     validate(review, "model-ir-v1.schema.json")
@@ -403,19 +479,22 @@ def main():
     # R4: the identity inventory is EXHAUSTIVE - it reuses the one authoritative
     # ir_identity.model_semantic_ids, so profile/tail sections cannot be silently
     # unverified. The profiles reference model exercises all eight profile sections.
-    profiles_ir = compile_file(DOMAINS_ROOT / "profiles.kcf")
-    profile_ids = ir_identities(profiles_ir)
-    inventoried_sections = set(profile_ids.values())
-    # Each profile section's declared MEMBERS are now individually inventoried (under a
+    # Each section's declared MEMBERS are now individually inventoried (under a
     # `<section>.<key>` section label) rather than the section being one opaque identity,
     # so a manifest can account for a specific declared view/control/threat and omitting
     # them fails - report profile-members-not-identities-20260729-15. Assert every profile
-    # section is represented, by a member identity (`<section>.…`) or, when it has no
-    # enumerable members, by the opaque section identity itself.
+    # section is represented, by a member identity (section value `<section>.…`) or, when
+    # it has no enumerable members, by the opaque section identity itself.
+    profiles_ir = compile_file(DOMAINS_ROOT / "profiles.kcf")
+    profile_ids = ir_identities(profiles_ir)
+    inventoried_sections = set(profile_ids.values())
     for _section in ("integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"):
         represented = (_section in profile_ids) or any(
             value == _section or value.startswith(_section + ".") for value in inventoried_sections)
         check(represented, f"authoritative identity inventory omits profile section {_section!r}: {sorted(inventoried_sections)}")
+    # A profile section's members are accountable identities, not one opaque blob: the
+    # profiles model declares views/controls/etc., so at least one member-level identity
+    # must exist (else omission would silently pass verification again).
     check(any(str(value).count(".") >= 1 and value.split(".")[0] in
               {"integration", "security", "lineage", "architecture", "experience", "design", "analytics", "ai"}
               for value in inventoried_sections),
@@ -740,6 +819,58 @@ def main():
         validate(compiled, "model-ir-v1.schema.json")
         diagnostics = Analyzer(compiled).run()
         check(not any(item["severity"] == "error" for item in diagnostics), f"domain trial {source.name} failed: {diagnostics}")
+
+    # Bounded parser RECOVERY + structured diagnostics (weakness #3): compile_recover collects EVERY
+    # top-level parse error in one pass (not one-at-a-time) and emits machine-readable diagnostics
+    # (code/line/column/expected/suggestion). The clean path must remain byte-identical to compile_text.
+    for good in sorted(DOMAINS_ROOT.glob("*.kcf")):
+        good_text = good.read_text(encoding="utf-8")
+        rec = compile_recover(good_text, good.name)
+        check(rec["ok"] and not rec["diagnostics"], f"compile_recover reported spurious errors for {good.name}")
+        check(rec["ir"] == compile_text(good_text, good.name), f"compile_recover diverged from compile_text for {good.name}")
+    multi = ("kcf model M profile business-application {\n  namespace ops;\n"
+             "  entity A { identity id: UUID }\n"                        # missing ';'
+             "  entity B { identity id: UUID; label: String }\n"        # missing ';'
+             "  entity C { identity id: UUID; count: Int extra }\n}\n")  # missing ';'
+    rec = compile_recover(multi, "multi.kcf")
+    check(not rec["ok"] and rec["ir"] is None, "compile_recover should not produce IR for a broken model")
+    check(len(rec["diagnostics"]) >= 3,
+          f"parser recovery collected too few diagnostics (should report all 3 broken declarations): {len(rec['diagnostics'])}")
+    for d in rec["diagnostics"]:
+        check(d.get("line") and d.get("code"), f"a recovery diagnostic is missing line/code: {d}")
+    check(any(d["code"] == "parse.expected-token" and ";" in d.get("expected", []) for d in rec["diagnostics"]),
+          "recovery did not report the machine-readable expected token set")
+    # An unrecognized declaration keyword is flagged with a machine-readable expected-set + did-you-mean.
+    typo_src = ("kcf model M profile business-application {\n  namespace ops;\n"
+                "  comand PlaceOrder { }\n  entity E { identity id: UUID; }\n}\n")
+    rec_typo = compile_recover(typo_src, "typo.kcf")
+    typo = next((d for d in rec_typo["diagnostics"] if d.get("found") == "comand"), None)
+    check(typo and typo["code"] == "parse.unsupported-declaration" and "command" in (typo.get("suggestion") or ""),
+          "recovery did not flag the unknown declaration keyword with a did-you-mean suggestion")
+
+    # IR 1.1 executable-contract vocabulary (weakness #5): the new action fields must flow grammar->IR
+    # with clean camelCase keys and be typed by the IR schema (the extension that unblocks RFC-4/5).
+    contract_ir = compile_file(DOMAINS_ROOT / "executable-contract.kcf")
+    actions_by_id = {a["id"]: a for a in contract_ir["actions"]}
+    place = actions_by_id["PlaceOrder"]
+    check(place.get("idempotencyKey") == "orderId" and place.get("reversibility") == "compensatable"
+          and place.get("compensation") == "ops.CancelOrder" and place.get("transactionBoundary") == "required"
+          and place.get("preconditions") and place.get("postconditions"),
+          f"IR 1.1 executable-contract fields did not flow onto PlaceOrder: {place}")
+    check(actions_by_id["ReviseOrder"].get("expectedVersion") == "rowVersion",
+          "IR 1.1 optimistic-concurrency token (expectedVersion) did not flow")
+    purge = actions_by_id["PurgeOrder"]
+    check(purge.get("deleteBehavior") == "soft" and purge.get("retention") and purge.get("reversibility") == "human-recoverable",
+          "IR 1.1 destructive-action fields (deleteBehavior/retention/reversibility) did not flow")
+    bulk = actions_by_id["BulkCloseOrders"]
+    check(bulk.get("bulkLimit") == 1000 and bulk.get("bulkOrdering") == "unordered" and bulk.get("bulkFailurePolicy") == "continue",
+          "IR 1.1 bulk safety fields (bulkLimit/bulkOrdering/bulkFailurePolicy) did not flow")
+    # a bad enum value on a typed field must be REJECTED by the schema (proves the fields are validated,
+    # not just passed through additionalProperties).
+    bad_contract = json.loads(json.dumps(contract_ir))
+    bad_contract["actions"][0]["reversibility"] = "totally-reversible"
+    check(list(Draft202012Validator(json.loads((SCHEMAS_ROOT / "model-ir-v1.schema.json").read_text())).iter_errors(bad_contract)),
+          "the IR schema must reject an invalid reversibility enum (executable-contract fields are typed)")
 
     # Entity `category` metadata is reconciled against the derived shape (advisory,
     # warning-only). Lock that behavior: the mis-tagged Lead is flagged; the correctly

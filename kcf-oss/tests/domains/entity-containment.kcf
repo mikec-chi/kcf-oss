@@ -37,6 +37,7 @@ kcf model ContainmentDemo profile business-application {
     operation create; scope record; target Order;
     input one; output one; idempotency conditional; atomicity atomic;
     authorization shop.OrderPolicy;
+    idempotency-key requestId;
   }
   rule OrderRule { kind CONSTRAINT; condition "total is non-negative"; effect FulfillWork; applies-to Order; authority Clerk; }
   policy OrderPolicy { authority Clerk; rule OrderRule; default-conflict deny-overrides; }

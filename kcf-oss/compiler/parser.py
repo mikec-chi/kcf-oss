@@ -1,10 +1,58 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from .ast import Declaration, Model, SourceSpan
 from .lexer import Token, tokenize
+
+# The set of keywords that may open a top-level declaration inside a model body. Used both as the
+# "expected tokens" set at an unrecognized declaration and as the synchronization targets for bounded
+# error recovery (parse_collect): after a parse error we skip to the next of these at brace-depth 0.
+TOP_LEVEL_KEYWORDS = {
+    "namespace", "use", "implements", "excludes", "organization", "information", "rule", "policy",
+    "reasoning", "assertion", "identity-resolution", "knowledge-query", "skill", "capability", "unit",
+    "authority", "process", "allocation", "calendar", "route", "proposition", "predicate",
+    "formula", "function", "optimize", "distribution", "simulation", "relationship", "lifecycle",
+    "command", "query", "transform", "collection",
+}
+_DIAG_MSG_RE = re.compile(r"^(?P<src>.*?):(?P<line>\d+):(?P<col>\d+):\s*(?P<msg>.*)$", re.S)
+
+
+def all_top_level_keywords() -> set:
+    """Every keyword that may open a top-level declaration - the fixed directives plus the concept
+    kinds and profile-section keywords (resolved at call time since those tables are defined later)."""
+    return TOP_LEVEL_KEYWORDS | set(CONCEPT_KINDS) | set(_PROFILE_SPEC)
+
+
+def _nearest_keyword(word: str) -> str | None:
+    """A cheap 'did you mean' suggestion: the closest top-level keyword within edit distance 2."""
+    best, best_d = None, 3
+    for candidate in all_top_level_keywords():
+        d = _edit_distance(word, candidate, best_d)
+        if d < best_d:
+            best, best_d = candidate, d
+    return best
+
+
+def _edit_distance(a: str, b: str, ceiling: int) -> int:
+    """Levenshtein distance, early-exiting once it provably exceeds ``ceiling``."""
+    if abs(len(a) - len(b)) >= ceiling:
+        return ceiling
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        row_min = i
+        for j, cb in enumerate(b, 1):
+            cost = 0 if ca == cb else 1
+            val = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost)
+            cur.append(val)
+            row_min = min(row_min, val)
+        if row_min >= ceiling:
+            return ceiling
+        prev = cur
+    return prev[-1]
 
 
 CONCEPT_KINDS = {
@@ -96,11 +144,28 @@ _PROFILE_SPEC = {
     },
     "experience": {
         "app": ("apps", {"entry": ("entry", False), "view": ("views", True)}),
-        "view": ("views", {"entity": ("entity", False), "component": ("components", True), "action": ("actions", True)}),
+        # RFC-15: a view carries a KIND + per-kind bindings, most of which point at existing dimensions
+        # (COMPOSITION→parent/tree, LIFECYCLE→column/kanban, MEASURE→series/chart, SPATIAL→geometry/map,
+        # TEMPORAL→start/end + ORDERING→depends-on/gantt, view/measure→tile/dashboard, renderer→custom).
+        # Additive + backward-compatible: a view with no `kind` keeps today's list/detail behaviour.
+        "view": ("views", {"entity": ("entity", False), "component": ("components", True),
+                           "action": ("actions", True), "kind": ("kind", False),
+                           "parent": ("parent", False), "column": ("columns", True),
+                           "swimlane": ("swimlane", False), "series": ("series", True),
+                           "axis": ("axis", False), "chart-kind": ("chartKind", False),
+                           "geometry": ("geometry", False), "start": ("start", False),
+                           "end": ("end", False), "depends-on": ("dependsOn", False),
+                           "tile": ("tiles", True), "renderer": ("renderer", False),
+                           "section": ("sections", True)}),
         "component": ("components", {"property": ("properties", True), "slot": ("slots", True)}),
     },
     "design": {
-        "page": ("pages", {"view": ("view", False), "pattern": ("pattern", False), "section": ("sections", True)}),
+        # RFC-16: optional per-region layout hint (priority/span/min-size/collapse) overrides the
+        # automatic responsive layout; breakpoints are documented CONTAINER-relative (the view's region).
+        "page": ("pages", {"view": ("view", False), "pattern": ("pattern", False),
+                          "section": ("sections", True), "priority": ("priority", False),
+                          "span": ("span", False), "min-size": ("minSize", False),
+                          "collapse": ("collapse", False)}),
     },
     "analytics": {
         "dataset": ("datasets", {"source": ("source", False), "transform": ("transforms", True)}),
@@ -124,6 +189,7 @@ class Parser:
         self.tokens = tokenize(text)
         self.index = 0
         self.source = source
+        self.depth = 0  # brace nesting depth, maintained by advance() (used only by error recovery)
 
     @property
     def current(self) -> Token:
@@ -132,6 +198,12 @@ class Parser:
     def advance(self) -> Token:
         token = self.current
         self.index += 1
+        # Track brace nesting so bounded recovery knows when it is back at the model-body level. `{`/`}`
+        # only ever appear as their own punctuation tokens, so a value check is exact.
+        if token.value == "{":
+            self.depth += 1
+        elif token.value == "}":
+            self.depth -= 1
         return token
 
     def accept(self, value: str) -> Token | None:
@@ -139,16 +211,32 @@ class Parser:
             return self.advance()
         return None
 
+    def _perr(self, code: str, token: Token, message: str, *, expected=None,
+              found=None, suggestion=None) -> "ParseError":
+        """Build a ParseError that ALSO carries machine-readable fields (code, line, column, found,
+        expected tokens, repair suggestion) so a recovering caller can emit a structured diagnostic
+        instead of a bare string. The string message is unchanged for back-compatibility."""
+        err = ParseError(f"{self.source}:{token.line}:{token.column}: {message}")
+        err.code = code
+        err.line = token.line
+        err.column = token.column
+        err.found = token.value if found is None else found
+        err.expected = list(expected or [])
+        err.suggestion = suggestion
+        return err
+
     def expect(self, value: str) -> Token:
         token = self.current
         if token.value != value:
-            raise ParseError(f"{self.source}:{token.line}:{token.column}: expected {value!r}, found {token.value!r}")
+            raise self._perr("parse.expected-token", token,
+                             f"expected {value!r}, found {token.value!r}", expected=[value])
         return self.advance()
 
     def expect_ident(self) -> Token:
         token = self.current
         if token.kind != "IDENT":
-            raise ParseError(f"{self.source}:{token.line}:{token.column}: expected identifier, found {token.value!r}")
+            raise self._perr("parse.expected-identifier", token,
+                             f"expected identifier, found {token.value!r}", expected=["<identifier>"])
         return self.advance()
 
     def scalar(self) -> Any:
@@ -179,8 +267,34 @@ class Parser:
         model = Model(name=name, profile=profile)
         while self.current.value != "}":
             if self.current.kind == "EOF":
-                raise ParseError(f"{self.source}:{self.current.line}:{self.current.column}: unclosed model")
-            keyword = self.current.value
+                raise self._perr("parse.unclosed-model", self.current, "unclosed model", expected=["}"])
+            self._parse_top_level_item(model)
+        end = self.expect("}")
+        if self.current.kind != "EOF":
+            token = self.current
+            raise self._perr("parse.trailing-input", token,
+                             f"unexpected trailing input {token.value!r}")
+        model.span = self.span(start, end)
+        return model
+
+    def _parse_header(self) -> tuple[Token, Model]:
+        """Parse `[kcf] model <name> [profile <p>] {` and return (start_token, model)."""
+        start = self.current
+        self.accept("kcf")
+        self.expect("model")
+        name = self.expect_ident().value
+        profile = "business-application"
+        if self.accept("profile"):
+            profile = self.expect_ident().value
+        self.expect("{")
+        return start, Model(name=name, profile=profile)
+
+    def _parse_top_level_item(self, model: Model) -> None:
+        """Parse ONE top-level declaration/directive into ``model``. Raises ParseError on failure
+        (enriched via _perr for the unrecognized-declaration case). Shared by parse() and
+        parse_collect() so the recovery variant reuses the exact same dispatch."""
+        keyword = self.current.value
+        if True:
             if keyword == "namespace":
                 self.advance(); model.namespace = self.expect_ident().value; self.expect(";")
             elif keyword == "use":
@@ -241,13 +355,71 @@ class Parser:
                 model.declarations.append(self.parse_collection())
             else:
                 token = self.current
-                raise ParseError(f"{self.source}:{token.line}:{token.column}: unsupported declaration {keyword!r}")
-        end = self.expect("}")
-        if self.current.kind != "EOF":
-            token = self.current
-            raise ParseError(f"{self.source}:{token.line}:{token.column}: unexpected trailing input {token.value!r}")
-        model.span = self.span(start, end)
-        return model
+                nearest = _nearest_keyword(keyword)
+                raise self._perr("parse.unsupported-declaration", token,
+                                 f"unsupported declaration {keyword!r}",
+                                 expected=sorted(all_top_level_keywords()),
+                                 suggestion=(f"did you mean {nearest!r}?" if nearest else None))
+
+    # --- bounded error recovery -------------------------------------------------
+    def _structured(self, err: "ParseError") -> dict:
+        """Turn a ParseError into a machine-readable diagnostic. Enriched errors (via _perr) carry the
+        fields directly; plain string errors are parsed back into line/column/message."""
+        if getattr(err, "code", None):
+            diag = {"code": err.code, "line": err.line, "column": err.column, "message": str(err),
+                    "found": err.found, "expected": err.expected}
+            if err.suggestion:
+                diag["suggestion"] = err.suggestion
+            return diag
+        match = _DIAG_MSG_RE.match(str(err))
+        if match:
+            return {"code": "parse.error", "line": int(match["line"]), "column": int(match["col"]),
+                    "message": str(err), "found": None, "expected": []}
+        return {"code": "parse.error", "line": None, "column": None, "message": str(err),
+                "found": None, "expected": []}
+
+    def _synchronize(self, min_index: int) -> None:
+        """Skip to the next top-level declaration boundary so parsing can resume after an error: a
+        top-level keyword (or the model's closing brace) encountered back at the model-body depth of 1.
+        Uses the advance()-maintained ``self.depth`` so an error raised deep inside a nested block
+        correctly skips out of that block first. Guarantees forward progress past ``min_index``."""
+        keywords = all_top_level_keywords()
+        while self.index < min_index and self.current.kind != "EOF":
+            self.advance()
+        while self.current.kind != "EOF":
+            if self.depth <= 1 and (self.current.value in keywords or self.current.value == "}"):
+                return
+            self.advance()
+
+    def parse_collect(self) -> tuple[Model, list[dict]]:
+        """Like parse() but RECOVERS at top-level declaration boundaries, collecting every diagnostic
+        instead of aborting on the first. Returns (partial_model, diagnostics). A caller compiles the
+        model only when diagnostics is empty; otherwise it reports all diagnostics at once - far fewer
+        LLM/author repair round-trips than one-error-at-a-time.
+
+        Recovery is bounded to top-level boundaries: an error inside a block is reported once and the
+        rest of that block is skipped, so a second independent error in the SAME block may not be
+        surfaced until the first is fixed. Errors in DISTINCT top-level declarations are all collected."""
+        diagnostics: list[dict] = []
+        try:
+            start, model = self._parse_header()  # consumes the model's `{` -> self.depth == 1
+        except ParseError as err:
+            # header failure is unrecoverable (we don't know where the body begins)
+            return Model(name="<unparsed>", profile="business-application"), [self._structured(err)]
+        while self.current.kind != "EOF":
+            if self.depth == 1 and self.current.value == "}":
+                end = self.advance()
+                model.span = self.span(start, end)
+                return model, diagnostics
+            item_start = self.index
+            try:
+                self._parse_top_level_item(model)
+            except ParseError as err:
+                diagnostics.append(self._structured(err))
+                self._synchronize(item_start + 1)
+        diagnostics.append(self._structured(
+            self._perr("parse.unclosed-model", self.current, "unclosed model", expected=["}"])))
+        return model, diagnostics
 
     def parse_concept(self) -> Declaration:
         start = self.advance()
@@ -417,6 +589,9 @@ class Parser:
             # SPATIAL single-value members.
             elif keyword == "contained-in":
                 self.advance(); values["containedIn"] = self.expect_ident().value; self.expect(";")
+            # RFC-8 specialization: `specializes <concept>;` — the parent this concept refines.
+            elif keyword == "specializes":
+                self.advance(); values["specializes"] = self.expect_ident().value; self.expect(";")
             elif keyword == "geometry":
                 self.advance(); gkind = self.expect_ident().value; self.expect("[")
                 coords = []
@@ -1146,6 +1321,21 @@ class Parser:
                 continue
             if key in list_keys:
                 self.advance(); values[list_keys[key]].append(self.scalar()); self.expect(";")
+            elif key == "predicate":
+                # RFC-1 typed predicate: `predicate <field>;` (boolean field) OR
+                # `predicate <left> <op> <right>;` (typed comparison/logical). Projects onto `predicate`.
+                self.advance()
+                toks = []
+                while self.current.value != ";":
+                    toks.append(self.scalar())
+                if len(toks) == 1:
+                    values["predicate"] = {"field": toks[0]}
+                elif len(toks) == 3:
+                    values["predicate"] = {"left": toks[0], "operator": toks[1], "right": toks[2]}
+                else:
+                    raise ParseError(f"{self.source}:{self.current.line}:{self.current.column}: "
+                                     f"predicate must be `<field>` or `<left> <op> <right>`")
+                self.expect(";")
             elif key in key_map:
                 self.advance(); values[key_map[key]] = self.scalar(); self.expect(";")
             else:
@@ -1283,6 +1473,15 @@ class Parser:
                 qualifiers["cardinality"] = f"{first}-to-{self.expect_ident().value}" if self.accept("to") else first
             elif key in multi:
                 qualifiers.setdefault(multi[key], []).append(self.scalar())
+            elif key == "predicate":
+                # RFC-1 typed relationship predicate: `predicate <field>` | `predicate <l> <op> <r>`.
+                # Peek for an operator to disambiguate (qualifiers are space-separated, not ;-terminated).
+                left = self.scalar()
+                if self.current.value in {"gt", "lt", "ge", "le", "eq", "ne", "and", "or"}:
+                    op = self.expect_ident().value
+                    qualifiers["predicate"] = {"left": left, "operator": op, "right": self.scalar()}
+                else:
+                    qualifiers["predicate"] = {"field": left}
             else:
                 qualifiers[key] = self.scalar()
         if qualifiers:
@@ -1370,6 +1569,17 @@ class Parser:
         # pre/post-conditions or failure modes).
         condition_keys = {"precondition": "preconditions", "postcondition": "postconditions",
                           "failure-mode": "failureModes"}
+        # IR 1.1 executable-contract scalar fields: hyphenated authoring keyword -> camelCase IR key.
+        # (Each is a single `key: value;` line, so it flows through the scalar path below.)
+        contract_keys = {"expected-version": "expectedVersion", "idempotency-key": "idempotencyKey",
+                         "transaction-boundary": "transactionBoundary", "compensation": "compensation",
+                         "reversibility": "reversibility", "delete-behavior": "deleteBehavior",
+                         "retention": "retention", "bulk-limit": "bulkLimit",
+                         "bulk-ordering": "bulkOrdering", "bulk-failure": "bulkFailurePolicy",
+                         "patch-dialect": "patchDialect",  # RFC-3 action I/O contract (scalar)
+                         "returns": "returns", "pagination": "pagination",  # RFC-3 set/bulk shape
+                         "retry-classification": "retryClassification",  # RFC-4 retry
+                         "retry-backoff": "retryBackoff", "totality": "totality"}  # RFC-4 / RFC-2
         while self.current.value != "}":
             key = self.expect_ident().value
             # transaction-policy pair: `transaction <mode>, <atomicity>;`
@@ -1381,10 +1591,58 @@ class Parser:
             if key in ("consumes", "produces"):
                 dst = "inputs" if key == "consumes" else "outputs"
                 values.setdefault(dst, []).append(self.expect_ident().value); self.expect(";"); continue
+            # RFC-3 action I/O: `provide <field>;` accumulates the client-supplied input fields.
+            if key == "provide":
+                values.setdefault("provides", []).append(self.expect_ident().value); self.expect(";"); continue
+            # RFC-3 action-to-action invocation: `invoke <target> { arg <f>; handles <mode>;
+            # establishes <pre>; expects <shape>; bounded; }`. Projects onto `invocations`.
+            if key == "invoke":
+                inv: dict[str, Any] = {"target": self.expect_ident().value, "args": [], "handles": [], "establishes": []}
+                self.expect("{")
+                while self.current.value != "}":
+                    ik = self.expect_ident().value
+                    if ik == "arg":
+                        inv["args"].append(self.expect_ident().value); self.expect(";")
+                    elif ik == "handles":
+                        inv["handles"].append(self.scalar()); self.expect(";")
+                    elif ik == "establishes":
+                        inv["establishes"].append(self.scalar()); self.expect(";")
+                    elif ik == "expects":
+                        inv["expects"] = self.scalar(); self.expect(";")
+                    elif ik == "bounded":
+                        inv["bounded"] = True; self.expect(";")
+                    else:
+                        raise ParseError(f"{self.source}:{self.current.line}:{self.current.column}: unknown invoke member {ik!r}")
+                self.expect("}")
+                values.setdefault("invocations", []).append(inv); continue
+            # RFC-2 typed field lineage: `map <source> -> <target> [via <fn>] [null <behavior>]
+            # [unit <src> -> <tgt>] [lossy];` — the source/target are dotted field paths (Entity.field).
+            if key == "map":
+                mapping: dict[str, Any] = {"source": self.expect_ident().value}
+                self.expect("->")
+                mapping["target"] = self.expect_ident().value
+                while self.current.value != ";":
+                    clause = self.expect_ident().value
+                    if clause == "via":
+                        mapping["function"] = self.scalar()
+                    elif clause == "null":
+                        mapping["nullBehavior"] = self.expect_ident().value
+                    elif clause == "unit":
+                        mapping["sourceUnit"] = self.expect_ident().value
+                        self.expect("->"); mapping["targetUnit"] = self.expect_ident().value
+                    elif clause == "lossy":
+                        mapping["lossy"] = True
+                    else:
+                        raise self._perr("parse.unexpected-token", self.tokens[self.index - 1],
+                                         f"unknown field-mapping clause {clause!r}",
+                                         expected=["via", "null", "unit", "lossy", ";"])
+                values.setdefault("fieldMappings", []).append(mapping)
+                self.expect(";"); continue
             value = self.scalar()
             if key == "mutate": values["mutations"].append(value)
             elif key in cardinality_keys: values[cardinality_keys[key]] = value
             elif key in condition_keys: values.setdefault(condition_keys[key], []).append(value)
+            elif key in contract_keys: values[contract_keys[key]] = value
             else: values[key] = value
             self.expect(";")
         end = self.expect("}")
@@ -1400,6 +1658,9 @@ class Parser:
             value = self.scalar()
             if key == "key": values["keys"].append(value)
             elif key == "input": values["inputs"].append(value)
+            elif key == "project": values.setdefault("projections", []).append(value)  # RFC-2 collection projection
+            elif key == "join-key": values.setdefault("joinKeys", []).append(value)     # RFC-2 join key(s)
+            elif key == "equality-key": values.setdefault("equalityKeys", []).append(value)
             else: values[key] = value
             self.expect(";")
         end = self.expect("}")
@@ -1408,3 +1669,8 @@ class Parser:
 
 def parse(text: str, source: str = "<memory>") -> Model:
     return Parser(text, source).parse()
+
+
+def parse_collect(text: str, source: str = "<memory>") -> tuple[Model, list[dict]]:
+    """Parse with bounded recovery, returning (partial_model, structured_diagnostics)."""
+    return Parser(text, source).parse_collect()

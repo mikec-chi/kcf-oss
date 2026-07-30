@@ -44,6 +44,7 @@ kcf model CategoryDemo profile business-application {
     operation create; scope record; target Lead;
     input one; output one; idempotency conditional; atomicity atomic;
     authorization crm.LeadPolicy;
+    idempotency-key requestId;
   }
   rule LeadRule { kind CONSTRAINT; condition "title is present"; effect QualifyWork; applies-to Lead; authority SalesRep; }
   policy LeadPolicy { authority SalesRep; rule LeadRule; default-conflict deny-overrides; }

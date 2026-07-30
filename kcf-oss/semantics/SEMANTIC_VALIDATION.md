@@ -295,6 +295,14 @@ status, phase, handler when automated, and legacy aliases when applicable.
   components, and layouts MUST resolve.
 - `experience.action.invoke`: UI/experience actions MUST resolve to Action contracts
   applicable to the bound subject; hiding UI never replaces authorization.
+- `experience.view.kind`: A declared experience view `kind` MUST be one of the known
+  view kinds (list, form, tree, chart, dashboard, map, kanban, gantt, custom); a view
+  with no kind keeps default list/detail behaviour (RFC-15).
+- `experience.view.binding`: A view's KIND-specific binding MUST resolve, either declared
+  on the view or inferable from the bound entity's existing semantics (chart→MEASURE,
+  kanban→LIFECYCLE, gantt→TEMPORAL start/end, tree→self-COMPOSITION, map→SPATIAL,
+  dashboard→tiles, custom→registered renderer); list/form/tree/map/kanban/gantt need a
+  resolvable bound entity (RFC-15).
 - `experience.flow.reachability`: Required experience-flow nodes and a terminal route
   MUST be reachable from the declared entry.
 - `design.design-system.unique`: Design token, breakpoint, pattern, and constraint

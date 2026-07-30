@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "experience-view-failures",
+  "module": "KCF",
+  "namespace": "vw",
+  "concepts": [
+    {
+      "id": "Ticket",
+      "qualifiedName": "vw.Ticket",
+      "kind": "ENTITY",
+      "attributes": [
+        {"name": "id", "type": "string", "identity": true, "required": true},
+        {"name": "subject", "type": "string"}
+      ]
+    }
+  ],
+  "relationships": [],
+  "actions": [],
+  "lifecycles": [],
+  "experience": {
+    "apps": [],
+    "views": [
+      {"id": "BadKindView", "kind": "carousel", "entity": "vw.Ticket"},
+      {"id": "ChartNoSeries", "kind": "chart", "entity": "vw.Ticket"},
+      {"id": "GanttNoDates", "kind": "gantt", "entity": "vw.Ticket"},
+      {"id": "KanbanNoLifecycle", "kind": "kanban", "entity": "vw.Ticket"},
+      {"id": "TreeNoParent", "kind": "tree", "entity": "vw.Ticket"},
+      {"id": "MapNoGeometry", "kind": "map", "entity": "vw.Ticket"},
+      {"id": "CustomNoRenderer", "kind": "custom"},
+      {"id": "ListNoEntity", "kind": "list"}
+    ],
+    "flows": []
+  }
+}

@@ -1,6 +1,8 @@
 {
   "version": "1.0.0",
-  "grammarStack": "1.11.0",
-  "supportedIrVersions": ["1.0.0"],
+  "grammarStack": "1.16.0",
+  "supportedIrVersions": [
+    "1.0.0"
+  ],
   "semanticCatalogueVersion": "3.0.0"
 }

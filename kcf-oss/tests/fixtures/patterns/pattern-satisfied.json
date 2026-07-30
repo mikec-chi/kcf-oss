@@ -4,19 +4,73 @@
   "id": "AuditableSatisfied",
   "module": "KCF",
   "namespace": "core",
-  "implementedPatterns": ["core.auditable-entity"],
+  "implementedPatterns": [
+    "core.auditable-entity"
+  ],
   "concepts": [
-    {"id": "Ledger", "qualifiedName": "core.Ledger", "kind": "ENTITY", "traits": ["auditable"], "metadata": {"mutability": "read-only"}, "attributes": [
-      {"name": "ledgerId", "type": "UUID", "identity": true}
-    ]}
+    {
+      "id": "Ledger",
+      "qualifiedName": "core.Ledger",
+      "kind": "ENTITY",
+      "traits": [
+        "auditable"
+      ],
+      "metadata": {
+        "mutability": "read-only"
+      },
+      "attributes": [
+        {
+          "name": "ledgerId",
+          "type": "UUID",
+          "identity": true
+        }
+      ]
+    }
   ],
   "lifecycles": [
-    {"id": "LedgerLifecycle", "subject": "core.Ledger", "states": ["Open", "Closed"], "initial": "Open", "terminal": ["Closed"], "transitions": [
-      {"from": "Open", "to": "Closed"}
-    ]}
+    {
+      "id": "LedgerLifecycle",
+      "subject": "core.Ledger",
+      "states": [
+        "Open",
+        "Closed"
+      ],
+      "initial": "Open",
+      "terminal": [
+        "Closed"
+      ],
+      "transitions": [
+        {
+          "from": "Open",
+          "to": "Closed"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "PostEntry", "effect": "command", "operation": "update", "scope": "record", "target": "core.Ledger", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "authorization": "core.LedgerPolicy"},
-    {"id": "GetLedger", "effect": "query", "operation": "read", "scope": "record", "target": "core.Ledger", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one"}
+    {
+      "id": "PostEntry",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "core.Ledger",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "authorization": "core.LedgerPolicy",
+      "concurrency": "optimistic",
+      "expectedVersion": "version",
+      "idempotencyKey": "entryKey"
+    },
+    {
+      "id": "GetLedger",
+      "effect": "query",
+      "operation": "read",
+      "scope": "record",
+      "target": "core.Ledger",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    }
   ]
 }

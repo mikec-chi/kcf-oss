@@ -151,7 +151,8 @@
       "outputCardinality": "one",
       "idempotency": "conditional",
       "atomicity": "atomic",
-      "authorization": "pf.OrderPolicy"
+      "authorization": "pf.OrderPolicy",
+      "idempotencyKey": "requestId"
     }
   ],
   "collectionTransforms": [],
@@ -247,28 +248,28 @@
       "source": "tests/domains/profiles.kcf",
       "line": 15,
       "column": 3,
-      "endLine": 19,
+      "endLine": 20,
       "endColumn": 4
     },
     "pf.OrderRule": {
       "source": "tests/domains/profiles.kcf",
-      "line": 20,
+      "line": 21,
       "column": 3,
-      "endLine": 20,
+      "endLine": 21,
       "endColumn": 127
     },
     "pf.OrderPolicy": {
       "source": "tests/domains/profiles.kcf",
-      "line": 21,
+      "line": 22,
       "column": 3,
-      "endLine": 21,
+      "endLine": 22,
       "endColumn": 89
     },
     "order-fulfilled-by": {
       "source": "tests/domains/profiles.kcf",
-      "line": 23,
+      "line": 24,
       "column": 3,
-      "endLine": 23,
+      "endLine": 24,
       "endColumn": 142
     }
   },

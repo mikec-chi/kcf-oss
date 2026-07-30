@@ -1,0 +1,74 @@
+// RFC-15 worked example: an EXPERIENCE that declares view KINDS. Each view merely chooses a
+// projection over semantics the model already declares (LIFECYCLE->kanban, MEASURE->chart,
+// TEMPORAL->gantt, self-COMPOSITION->tree, SPATIAL->map), plus explicit custom/dashboard bindings.
+// Proves the authoring -> IR path for view kinds and is analyzer-clean (experience.view.* satisfied).
+kcf model FieldOps profile business-application {
+  namespace ops;
+
+  entity Ticket {
+    identity ticketId: UUID;
+    required subject: String;
+    optional openedAt: Date;
+    optional dueAt: Date;
+  }
+
+  entity Category {
+    identity categoryId: UUID;
+    required name: String;
+    optional parentId: UUID;
+  }
+
+  entity Store {
+    identity storeId: UUID;
+    required name: String;
+    optional location: String;
+  }
+
+  actor Dispatcher { }
+  work TriageTicket { }
+  measure TicketVolume { kind KPI; subject Ticket; }
+
+  relationship dispatcher-triages: PARTICIPATION Dispatcher -> TriageTicket strength 1.0;
+  relationship triage-changes-ticket: TRANSFORMATION TriageTicket -> Ticket strength 1.0;
+
+  lifecycle TicketLifecycle for Ticket {
+    initial Open;
+    state InProgress;
+    terminal Resolved;
+    transition Open -> InProgress;
+    transition InProgress -> Resolved;
+  }
+
+  experience {
+    app OpsConsole {
+      entry TicketList;
+      view TicketList;
+      view TicketForm;
+      view TicketBoard;
+      view TicketSchedule;
+      view VolumeChart;
+      view CategoryTree;
+      view StoreMap;
+      view HeatSpecial;
+      view ExecDashboard;
+    }
+    view TicketList { kind list; entity Ticket; }
+    view TicketForm { kind form; entity Ticket; }
+    view TicketBoard { kind kanban; entity Ticket; }
+    view TicketSchedule { kind gantt; entity Ticket; start openedAt; end dueAt; }
+    view VolumeChart { kind chart; entity Ticket; series TicketVolume; }
+    view CategoryTree { kind tree; entity Category; parent parentId; }
+    view StoreMap { kind map; entity Store; geometry location; }
+    view HeatSpecial { kind custom; renderer heatmap; }
+    view ExecDashboard { kind dashboard; entity Ticket; tile TicketVolume; }
+  }
+
+  design {
+    design-system OpsTheme {
+      token Primary: color = "#0af";
+      breakpoint Sm: 480 px;
+      breakpoint Lg: 1024 px;
+    }
+    page TicketPage { view TicketList; section Header; }
+  }
+}

@@ -50,7 +50,7 @@ def _behavioural_completeness(model: dict, diagnostics: list) -> dict:
     }
 
 
-def assess(model: dict) -> dict:
+def assess(model: dict, source_coverage: dict | None = None) -> dict:
     diagnostics = Analyzer(model).run()
     error_ids = sorted({item["rule_id"] for item in diagnostics if item["severity"] == "error"})
     valid = not error_ids
@@ -117,10 +117,69 @@ def assess(model: dict) -> dict:
         "ready": ready,
         "coverageStatus": coverage_status,
         "readyFor": ready_for,
+        "readinessLadder": _readiness_ladder(valid, ready, checks, source_coverage),
+        # Operational/deployment readiness (security review, data migration, deployment, production
+        # evidence) is out of scope for KCF-OSS and is NOT enumerated here — an external assurance
+        # overlay owns and evaluates that ladder. This is the honest de-overclaim of `ready`.
+        "deploymentReadiness": "not-evaluated-here",
         "domainComplete": "not-proven",
         "behaviourallyComplete": _behavioural_completeness(model, diagnostics),
         "checks": checks,
     }
+
+
+# The readiness LADDER (D-roadmap P1 / weakness #8): `ready: true` reads to an ordinary user as
+# "production ready", but KCF-OSS only proves MODEL-VALIDITY readiness (it compiled, it is valid, its
+# obligations are met, its source is linked/confirmed). KCF-OSS enumerates ONLY the model-validity
+# rungs — the ones derivable from the open toolchain (compile/analyze/coverage/source-trace). Anything
+# beyond codegen-handoff — security review, data-migration review, deployment review, production
+# evidence — is an OPERATIONAL assurance/deployment progression that KCF-OSS neither owns nor evaluates;
+# it is signalled generically (see `deploymentReadiness`) and left to an external assurance overlay,
+# which defines and evaluates its own ladder. KCF-OSS does not publish that operational taxonomy.
+_MODEL_VALIDITY_RUNGS = ("syntax-ready", "semantic-ready", "coverage-ready",
+                         "source-linked", "source-confirmed", "codegen-ready")
+
+
+def _readiness_ladder(valid: bool, ready: bool, checks: dict, source_coverage: dict | None) -> list:
+    """Report each MODEL-VALIDITY readiness rung with its satisfied/unsatisfied evidence. Operational/
+    deployment readiness is out of scope for KCF-OSS (see `deploymentReadiness` in the report)."""
+    def rung(level, satisfied, unsatisfied):
+        return {"level": level, "scope": "model-validity", "satisfied": bool(satisfied),
+                "unsatisfied": list(unsatisfied)}
+
+    ladder = []
+    # syntax-ready: we hold a compiled IR, so it parsed. (assess() receives an already-compiled model.)
+    ladder.append(rung("syntax-ready", True, []))
+    # semantic-ready: no analyzer errors.
+    ladder.append(rung("semantic-ready", valid,
+                       [] if valid else [f"analyzer error: {rid}" for rid in checks["validity"]["errorRuleIds"]]))
+    # coverage-ready: required obligations met + patterns proven + roles resolved.
+    cov_unmet = []
+    if checks["coverage"]["requiredGaps"]:
+        cov_unmet += [f"required gap: {gid}" for gid in checks["coverage"].get("requiredGapIds", [])]
+    cov_unmet += [f"pattern absent: {p}" for p in checks["patterns"]["requiredButAbsent"]]
+    cov_unmet += [f"pattern unproven: {p}" for p in checks["patterns"]["claimedButUnproven"]]
+    cov_unmet += [f"pattern without contract: {p}" for p in checks["patterns"]["requiredWithoutContract"]]
+    cov_unmet += [f"unknown role trait: {t}" for t in checks["roles"]["unknownTraits"]]
+    ladder.append(rung("coverage-ready", ready and not cov_unmet, cov_unmet))
+    # source-linked / source-confirmed: require a source-coverage report; if none was provided, the
+    # evidence is simply absent (not failed) - reported honestly as unsatisfied-for-lack-of-evidence.
+    if source_coverage is None:
+        ladder.append(rung("source-linked", False,
+                           ["no source-coverage report provided (run source_coverage)"]))
+        ladder.append(rung("source-confirmed", False,
+                           ["no source-coverage report provided (run source_coverage)"]))
+    else:
+        linked = bool(source_coverage.get("sourceComplete"))
+        confirmed = bool(source_coverage.get("sourceConfirmed"))
+        ladder.append(rung("source-linked", linked,
+                           [] if linked else [f"uncovered: {u}" for u in source_coverage.get("uncoveredSegments", [])[:5]]
+                           + [f"unsourced: {u}" for u in source_coverage.get("unsourcedConstructs", [])[:5]]))
+        ladder.append(rung("source-confirmed", confirmed,
+                           [] if confirmed else ["source linkage present but not governed-confirmed"]))
+    # codegen-ready: the OSS handoff bar == `ready` (valid + coverage). This is the ceiling KCF-OSS proves.
+    ladder.append(rung("codegen-ready", ready, [] if ready else ["model not yet `ready`"]))
+    return ladder
 
 
 def main() -> int:

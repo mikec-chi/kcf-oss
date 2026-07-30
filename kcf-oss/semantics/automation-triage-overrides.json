@@ -2,84 +2,40 @@
   "_comment": "Per-rule triage overrides applied by tools/automation_report.py. The keyword heuristic labels a rule 'mechanically-automatable' from its wording; these overrides correct that with hands-on review. A rule is only mechanically-automatable if it is checkable against TODAY's IR. Rules needing a new authoring/IR field are 'needs-ir-extension' (a grammar RFC); rules another gate already covers are 'already-enforced'/'enforced-elsewhere'; inherently semantic ones are 'human-judgment'. Each carries a reason.",
   "rules": {
     "action.compose.order": {
-      "manualClass": "needs-ir-extension",
-      "reason": "No IR structure for inter-action ordering/dependencies; needs an action-composition grammar."
+      "manualClass": "needs-external-facts",
+      "reason": "Sequential-vs-concurrent safety depends on runtime read/write sets; enforced by the execution engine/scheduler, not statically. Terminal: runtime-obligation."
     },
     "action.compose.saga": {
       "manualClass": "needs-ir-extension",
-      "reason": "No saga construct (forward actions / compensations / durable state) in the IR."
-    },
-    "action.concurrency.version": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no optimistic version/comparison-token field; valid models declare concurrency:optimistic without one, so a check would false-positive."
-    },
-    "action.destructive.recovery": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no recovery/rollback/backup/irreversibility field on actions."
-    },
-    "action.destructive.retention": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no retention / legal-hold / archival declaration."
+      "reason": "IR 1.1 provides actions[].compensation (forward/compensation half). Multi-step saga ordering + durable state remain unrepresented (ledger: ir-partial, RFC-5); not automatable end-to-end yet."
     },
     "action.destructive.scope": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no evaluated-target-count / preview field for destructive set actions."
+      "manualClass": "needs-external-facts",
+      "reason": "Exposing the evaluated target count/preview requires evaluating the selection at runtime ('when technically feasible'); enforced by the runtime dry-run/preview path, not the static model. Terminal class: runtime-obligation."
     },
     "action.device.safety": {
-      "manualClass": "needs-ir-extension",
-      "reason": "No device/control-command construct (capability / interlock / permissive) in the IR."
-    },
-    "action.record.create-input": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Action IR carries no field-level input specification to check required-field coverage against the target entity."
-    },
-    "action.record.create-readonly": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Action IR does not enumerate client-assigned fields, so they cannot be compared to read-only/generated attributes."
-    },
-    "action.record.delete-policy": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no delete-behavior field (hard-delete / soft-delete / archive / tombstone)."
-    },
-    "action.record.postcondition": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Postconditions are authorable but not consistently authored; better realized as a recommended coverage obligation than a validity error."
-    },
-    "action.retry.bound": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Boundedness is already schema-enforced (retry is int>=0); the backoff-policy requirement needs a backoff field the IR lacks."
-    },
-    "action.set.cascade": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no cascade-bound field, and bulk-update is a used operation, so a blanket check would false-positive on valid models."
-    },
-    "action.transaction.required": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Which invariants REQUIRE atomicity is not derivable from the IR; needs an explicit requires-transaction declaration."
-    },
-    "integration.mapping.coverage": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR integration profile has no field-level source->target mapping structure to check coverage against."
+      "manualClass": "needs-external-facts",
+      "reason": "Interlocks, current device state, acknowledgment, timeout and fail-safe behavior are runtime/hardware facts; enforced by the device runtime / safety controller at command time, not statically from the model. Terminal class: runtime-obligation."
     },
     "kcf.extension.point": {
-      "manualClass": "needs-ir-extension",
-      "reason": "No extension-point registry in the IR to validate extensions against."
+      "manualClass": "human-judgment",
+      "reason": "Requires an extension-point registry + compatibility/governance policy that does not exist as a model field; until a registry exists, extension-point compliance is a governance review decision (see docs/IR-ROADMAP.md). Terminal class: human-judgment."
     },
     "stack.governance.audit": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Advisory (SHOULD); no audit/evidence-path field on actions in the IR."
+      "manualClass": "enforced-elsewhere",
+      "reason": "An audit/evidence path is a platform capability: every security-sensitive action is journaled by the runtime/platform audit subsystem. The model cannot statically prove an evidence path exists at execution time. Terminal class: enforced-elsewhere."
     },
     "stack.name.visibility": {
-      "manualClass": "needs-ir-extension",
-      "reason": "IR has no export/visibility metadata to enforce scoped access."
+      "manualClass": "enforced-elsewhere",
+      "reason": "Export/visibility is module-packaging, enforced by the stack tooling (validate_stack.py / lint_stack.py), not the semantic model IR. Terminal class: enforced-elsewhere."
     },
     "stack.graph.cycle-policy": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Specific acyclic graphs ARE enforced (lineage.cycle, organization.hierarchy.acyclic); a general 'declared acyclic' policy would need an IR flag."
+      "manualClass": "advisory",
+      "reason": "Executable-graph acyclicity/termination is graph-authoring guidance; the executable-graph runtime/emitter rejects cycles at build/run time. Not a core-IR static check. Terminal class: advisory."
     },
     "kcf.profile.prohibited": {
-      "manualClass": "needs-ir-extension",
-      "reason": "kcf.profile.pattern-prohibited enforces prohibited PATTERNS; prohibiting arbitrary constructs needs a prohibited-construct registry the IR lacks."
+      "manualClass": "enforced-elsewhere",
+      "reason": "The prohibited-construct/pattern check is already automated as kcf.profile.pattern-prohibited; this rule is subsumed by that enforcement. Terminal class: enforced-elsewhere (superseded)."
     },
     "action.destructive.explicit": {
       "manualClass": "already-enforced",
@@ -193,281 +149,53 @@
       "manualClass": "already-enforced",
       "reason": "Enforced by kcf.profile.pattern-required."
     },
-    "stack.type.assignment": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.type.collection": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.type.condition-boolean": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.type.known": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.type.nullability": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.type.operator": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.value.finite": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.value.unit-compatible": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.time.duration": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "stack.time.window-compatible": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a type system (types/units/nullability/operators) the model IR does not carry; needs an authoring/IR extension."
-    },
-    "action.transform.loss": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.null": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.required-coverage": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.reversibility": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.source-target": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
     "action.transform.time": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.totality": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.type": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.transform.unit": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "needs-external-facts",
+      "reason": "Instant/local-time + timezone/DST conversion correctness is a runtime time-library concern, not statically checkable. Terminal: runtime-obligation."
     },
     "action.transform.version": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.aggregate-type": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.equality": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.field-resolution": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.join-fanout": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.join-type": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.map-cardinality": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.order-total": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.projection-unique": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.collection.set-compatibility": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.failure": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.input": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.output": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.precondition": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.recursion": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.resolved": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.invoke.transaction": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.record.exists-output": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.record.key": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.record.patch-format": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.record.precondition": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.record.update-fields": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "enforced-elsewhere",
+      "reason": "Transform/schema version compatibility + migrations is a CROSS-REVISION fact enforced by the delta/migration tooling (like kcf.concept.version). Terminal: enforced-elsewhere."
     },
     "action.set.input-shape": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.set.limit": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.set.order": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.set.output-shape": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.set.pagination": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.set.partial-failure": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "enforced-elsewhere",
+      "reason": "A bulk operation targets a single entity type, so its input schema uniformity is guaranteed by that entity's type (enforced by the schema/emitter); tagged-variant inputs would need a separate multi-type construct. Terminal: enforced-elsewhere."
     },
     "action.event.commit-order": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "needs-external-facts",
+      "reason": "Emit-only-on-commit is a runtime delivery guarantee; enforced by the transactional outbox in the emitted runtime (ASOS outbox), not by static model checking. Terminal class: runtime-obligation."
     },
     "action.event.duplicate": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "needs-external-facts",
+      "reason": "At-least-once duplication is a runtime delivery property; enforced by the consumer inbox / idempotency ledger in the emitted runtime. Terminal class: runtime-obligation."
     },
     "action.event.payload": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.concurrency.lost-update": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.idempotency.conditional": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "action.retry.classification": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "needs-external-facts",
+      "reason": "Emitted event payload conformance (before/after semantics + classification/minimization at emit time) is a runtime fact, enforced by the outbox/emitter runtime \u2014 consistent with the other event.* rules (commit-order/duplicate). Terminal: runtime-obligation."
     },
     "action.transaction.external": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "integration.contract.schema": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "integration.protocol": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "integration.retry.idempotency": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.concept.kind-compatible": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "needs-external-facts",
+      "reason": "Whether a target system can actually provide atomicity is a runtime/topology fact the model cannot know statically. The IR-checkable slice (claiming atomicity under an incompatible transactionBoundary) is enforced by action.transaction.required; genuine cross-system atomicity is a runtime obligation of the transaction/saga coordinator (outbox/compensation/reconciliation). Terminal class: runtime-obligation."
     },
     "kcf.concept.trait": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "human-judgment",
+      "reason": "Which traits are permitted for a given concept kind requires a per-kind trait-permission taxonomy that does not exist; until then it is a modeling-review judgment. Terminal: human-judgment."
     },
     "kcf.concept.version": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "enforced-elsewhere",
+      "reason": "Semantic-version compliance (breaking->major, additive->minor, clarify->patch) is a CROSS-REVISION fact: it compares a model against its prior version. It is enforced by the delta/migration tooling (kcf migrate / IR delta), not the single-model analyzer. Terminal class: enforced-elsewhere."
     },
     "kcf.profile.relationship": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.relationship.canonical": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.relationship.condition": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.relationship.inverse": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.relationship.participation": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "kcf.relationship.transitivity": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
-    },
-    "lineage.binding.schema": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "human-judgment",
+      "reason": "Judging that a profile's relationship restriction is 'at least as strict' as the base definition is a profile-authoring judgment; no comparable machine-checkable strictness ordering exists in the IR. Terminal class: human-judgment."
     },
     "lineage.complete": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "advisory",
+      "reason": "'Every derived item SHOULD have a lineage path' is a SHOULD-level recommendation surfaced as guidance, not a hard static error. Terminal: advisory."
     },
     "stack.graph.dead-end": {
-      "manualClass": "needs-ir-extension",
-      "reason": "Requires a construct/field the IR does not define; needs an authoring/IR extension (grammar RFC)."
+      "manualClass": "advisory",
+      "reason": "A nonterminal node with no outgoing path is a graph-authoring warning per graph kind (SHOULD); surfaced by the emitter/runtime, not the core-IR analyzer. Terminal class: advisory."
     },
     "organization.accountability.distinct": {
       "manualClass": "human-judgment",

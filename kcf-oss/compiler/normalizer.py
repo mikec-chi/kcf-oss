@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 from .ast import Model
-from .parser import parse
+from .parser import parse, parse_collect
 from .source_map import record_source
 
 
@@ -100,7 +100,7 @@ def normalize(model: Model) -> dict:
             # Single reference fields (qualified): MEASURE unit/period, ACTOR
             # communication, TEMPORAL calendar, SPATIAL contained-in, INTENT time-horizon.
             for key in ("unitRef", "periodRef", "communicationRef",
-                        "containedIn", "calendarRef", "timeHorizon"):
+                        "containedIn", "calendarRef", "timeHorizon", "specializes"):
                 if declaration.values.get(key): concept[key] = qualify(declaration.values[key], namespace)
             # ACTOR capabilities/skills + WORK required capabilities/skills + EVENT
             # subject/source/observer/trigger/affect-lifecycle/evidence — qualified
@@ -423,6 +423,19 @@ def normalize(model: Model) -> dict:
 
 def compile_text(text: str, source: str = "<memory>") -> dict:
     return normalize(parse(text, source))
+
+
+def compile_recover(text: str, source: str = "<memory>") -> dict:
+    """Compile with bounded parser recovery (weakness #3). Returns
+    ``{ok, ir, diagnostics}``: when the source parses cleanly ``ok`` is True, ``ir`` is the compiled
+    model, and ``diagnostics`` is empty; when it does not, ``ok`` is False, ``ir`` is None, and
+    ``diagnostics`` lists EVERY parse error found in one pass (each a structured
+    ``{code, line, column, message, found, expected, suggestion?}``) - so an author or LLM fixes them
+    together instead of one repetitive round-trip per error."""
+    model, diagnostics = parse_collect(text, source)
+    if diagnostics:
+        return {"ok": False, "ir": None, "diagnostics": diagnostics}
+    return {"ok": True, "ir": normalize(model), "diagnostics": []}
 
 
 def compile_file(path: Path) -> dict:

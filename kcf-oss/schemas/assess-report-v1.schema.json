@@ -17,7 +17,26 @@
     "readyFor": {
       "type": "array",
       "items": {"type": "string"},
-      "description": "The downstream steps this model is ready for - currently codegen-handoff and review only. NOT a safety/deployment gate: `ready` does not imply security-review, deployment-review, or production readiness (those are a future readyFor ladder). See docs/CONCEPTS.md."
+      "description": "The downstream steps this model is ready for - currently codegen-handoff and review only. NOT a safety/deployment gate: `ready` does not imply security-review, deployment, or production readiness. Operational/deployment readiness is out of scope for KCF-OSS (see `deploymentReadiness`) and is evaluated by an external assurance overlay. See docs/CONCEPTS.md."
+    },
+    "readinessLadder": {
+      "type": "array",
+      "description": "Explicit MODEL-VALIDITY readiness rungs (derivable from the open toolchain) so `ready` is not misread as production-ready. KCF-OSS enumerates only model-validity rungs; operational/deployment readiness is out of scope (see `deploymentReadiness`) and its ladder is defined + evaluated by an external assurance overlay, not published here.",
+      "items": {
+        "type": "object",
+        "required": ["level", "scope", "satisfied", "unsatisfied"],
+        "properties": {
+          "level": {"type": "string"},
+          "scope": {"const": "model-validity"},
+          "satisfied": {"type": "boolean"},
+          "unsatisfied": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "deploymentReadiness": {
+      "const": "not-evaluated-here",
+      "description": "KCF-OSS does not evaluate operational/deployment readiness (security review, data migration, deployment, production evidence) - that is an external assurance overlay's responsibility. Always 'not-evaluated-here', so `ready` is never mistaken for a deployment gate."
     },
     "domainComplete": {
       "enum": ["not-proven"],

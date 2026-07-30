@@ -5,38 +5,190 @@
   "module": "KCF",
   "namespace": "support",
   "profile": "business-application",
-  "profiles": ["business-application"],
+  "profiles": [
+    "business-application"
+  ],
   "concepts": [
-    {"id": "Customer", "qualifiedName": "support.Customer", "kind": "ENTITY", "metadata": {"mutability": "read-only"}, "attributes": [
-      {"name": "customerId", "type": "UUID", "identity": true},
-      {"name": "name", "type": "String", "required": true}
-    ]},
-    {"id": "Agent", "qualifiedName": "support.Agent", "kind": "ACTOR"},
-    {"id": "Ticket", "qualifiedName": "support.Ticket", "kind": "ENTITY", "attributes": [
-      {"name": "ticketId", "type": "UUID", "identity": true},
-      {"name": "subject", "type": "String", "required": true},
-      {"name": "priority", "type": "String"}
-    ]}
+    {
+      "id": "Customer",
+      "qualifiedName": "support.Customer",
+      "kind": "ENTITY",
+      "metadata": {
+        "mutability": "read-only"
+      },
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Agent",
+      "qualifiedName": "support.Agent",
+      "kind": "ACTOR"
+    },
+    {
+      "id": "Ticket",
+      "qualifiedName": "support.Ticket",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "ticketId",
+          "type": "UUID",
+          "identity": true
+        },
+        {
+          "name": "subject",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "type": "String"
+        }
+      ]
+    }
   ],
   "relationships": [
-    {"id": "customer-raises-ticket", "rootKind": "ASSOCIATION", "source": "support.Customer", "target": "support.Ticket"},
-    {"id": "agent-handles-ticket", "rootKind": "PARTICIPATION", "source": "support.Agent", "target": "support.Ticket"}
+    {
+      "id": "customer-raises-ticket",
+      "rootKind": "ASSOCIATION",
+      "source": "support.Customer",
+      "target": "support.Ticket"
+    },
+    {
+      "id": "agent-handles-ticket",
+      "rootKind": "PARTICIPATION",
+      "source": "support.Agent",
+      "target": "support.Ticket"
+    }
   ],
   "lifecycles": [
-    {"id": "TicketLifecycle", "subject": "support.Ticket", "states": ["Open", "InProgress", "Resolved", "Closed"], "initial": "Open", "terminal": ["Closed"], "transitions": [
-      {"from": "Open", "to": "InProgress", "action": "ResolveTicket"},
-      {"from": "InProgress", "to": "Resolved", "action": "ResolveTicket"},
-      {"from": "Resolved", "to": "Closed"}
-    ]}
+    {
+      "id": "TicketLifecycle",
+      "subject": "support.Ticket",
+      "states": [
+        "Open",
+        "InProgress",
+        "Resolved",
+        "Closed"
+      ],
+      "initial": "Open",
+      "terminal": [
+        "Closed"
+      ],
+      "transitions": [
+        {
+          "from": "Open",
+          "to": "InProgress",
+          "action": "ResolveTicket"
+        },
+        {
+          "from": "InProgress",
+          "to": "Resolved",
+          "action": "ResolveTicket"
+        },
+        {
+          "from": "Resolved",
+          "to": "Closed"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "CreateTicket", "effect": "command", "operation": "create", "scope": "record", "target": "support.Ticket", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "authorization": "support.TicketPolicy"},
-    {"id": "GetTicket", "effect": "query", "operation": "read", "scope": "record", "target": "support.Ticket", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one"},
-    {"id": "ResolveTicket", "effect": "command", "operation": "update", "scope": "record", "target": "support.Ticket", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "concurrency": "optimistic", "authorization": "support.TicketPolicy", "mutations": ["priority"]},
-    {"id": "DeleteTicket", "effect": "command", "operation": "delete", "scope": "record", "target": "support.Ticket", "selection": "identity", "inputCardinality": "one", "outputCardinality": "zero", "idempotency": "conditional", "atomicity": "atomic", "authorization": "support.TicketPolicy"},
-    {"id": "BulkAssignTickets", "effect": "command", "operation": "bulk-update", "scope": "set", "target": "support.Ticket", "selection": "predicate", "inputCardinality": "many", "outputCardinality": "many", "idempotency": "conditional", "atomicity": "best-effort", "concurrency": "optimistic", "authorization": "support.TicketPolicy"}
+    {
+      "id": "CreateTicket",
+      "effect": "command",
+      "operation": "create",
+      "scope": "record",
+      "target": "support.Ticket",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "support.TicketPolicy",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "GetTicket",
+      "effect": "query",
+      "operation": "read",
+      "scope": "record",
+      "target": "support.Ticket",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    },
+    {
+      "id": "ResolveTicket",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "support.Ticket",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "authorization": "support.TicketPolicy",
+      "mutations": [
+        "priority"
+      ],
+      "expectedVersion": "version",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "DeleteTicket",
+      "effect": "command",
+      "operation": "delete",
+      "scope": "record",
+      "target": "support.Ticket",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "zero",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "support.TicketPolicy",
+      "idempotencyKey": "requestId",
+      "deleteBehavior": "soft",
+      "reversibility": "human-recoverable",
+      "retention": "retain for 30 days",
+      "expectedVersion": "version"
+    },
+    {
+      "id": "BulkAssignTickets",
+      "effect": "command",
+      "operation": "bulk-update",
+      "scope": "set",
+      "target": "support.Ticket",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "conditional",
+      "atomicity": "best-effort",
+      "concurrency": "optimistic",
+      "authorization": "support.TicketPolicy",
+      "expectedVersion": "version",
+      "idempotencyKey": "requestId",
+      "bulkLimit": 1000,
+      "bulkOrdering": "unordered",
+      "bulkFailurePolicy": "continue",
+      "returns": "count"
+    }
   ],
   "collectionTransforms": [
-    {"id": "TicketProjection", "operation": "project", "inputSchema": "support.Ticket", "outputSchema": "support.TicketView"}
+    {
+      "id": "TicketProjection",
+      "operation": "project",
+      "inputSchema": "support.Ticket",
+      "outputSchema": "support.TicketView"
+    }
   ]
 }

@@ -16,6 +16,7 @@ kcf model ProfilePlatform profile business-application {
     operation create; scope record; target Order;
     input one; output one; idempotency conditional; atomicity atomic;
     authorization pf.OrderPolicy;
+    idempotency-key requestId;
   }
   rule OrderRule { kind CONSTRAINT; condition "total is non-negative"; effect FulfillOrder; applies-to Order; authority Ops; }
   policy OrderPolicy { authority Ops; rule OrderRule; default-conflict deny-overrides; }

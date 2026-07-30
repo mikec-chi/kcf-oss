@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "_comment": "RFC-1 IR type-system registry (data foundation). The primitive/unit vocabulary the analyzer resolves attribute types, default compatibility, and value/duration safety against. Domain-neutral: extend `primitives` only with genuinely primitive scalar types, never domain concepts (those are declared as entities/concepts in the model and resolve automatically).",
+  "primitives": [
+    "String", "Text", "Char",
+    "Integer", "Int", "Long", "Decimal", "Float", "Double", "Number",
+    "Money", "Currency", "Percentage", "Ratio",
+    "Boolean", "Bool",
+    "UUID", "ID", "Identifier",
+    "Date", "DateTime", "Timestamp", "Time", "Duration", "Interval",
+    "Email", "URL", "URI", "Phone",
+    "JSON", "Object", "Binary", "Blob", "Bytes",
+    "IPAddress", "GeoPoint", "Color", "Locale", "MimeType"
+  ],
+  "numericPrimitives": [
+    "Integer", "Int", "Long", "Decimal", "Float", "Double", "Number",
+    "Money", "Currency", "Percentage", "Ratio"
+  ],
+  "temporalPrimitives": ["Date", "DateTime", "Timestamp", "Time", "Duration", "Interval"],
+  "defaultRuntimeTypes": {
+    "String": ["str"], "Text": ["str"], "Char": ["str"],
+    "Email": ["str"], "URL": ["str"], "URI": ["str"], "Phone": ["str"],
+    "UUID": ["str"], "ID": ["str"], "Identifier": ["str"],
+    "Color": ["str"], "Locale": ["str"], "MimeType": ["str"], "IPAddress": ["str"],
+    "Integer": ["int"], "Int": ["int"], "Long": ["int"],
+    "Decimal": ["int", "float"], "Float": ["int", "float"], "Double": ["int", "float"],
+    "Number": ["int", "float"], "Money": ["int", "float"], "Currency": ["int", "float"],
+    "Percentage": ["int", "float"], "Ratio": ["int", "float"],
+    "Boolean": ["bool"], "Bool": ["bool"],
+    "Date": ["str"], "DateTime": ["str"], "Timestamp": ["str", "int"], "Time": ["str"],
+    "Duration": ["str", "int", "float"], "Interval": ["str", "int", "float"],
+    "JSON": ["dict", "list", "str"], "Object": ["dict"]
+  },
+  "unitFamilies": {
+    "time": ["ms", "millisecond", "milliseconds", "s", "sec", "second", "seconds", "min", "minute", "minutes", "hour", "hours", "hr", "day", "days", "week", "weeks", "month", "months", "quarter", "quarters", "year", "years"],
+    "currency": ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "CHF", "currency"],
+    "mass": ["mg", "g", "gram", "grams", "kg", "kilogram", "tonne", "ton", "lb", "oz"],
+    "length": ["mm", "cm", "m", "meter", "metre", "km", "in", "inch", "ft", "foot", "yd", "mi", "mile"],
+    "ratio": ["percent", "%", "ratio", "bps", "basis-point", "fraction"],
+    "count": ["count", "each", "unit", "item", "items"]
+  }
+}

@@ -200,7 +200,8 @@
       "outputCardinality": "one",
       "idempotency": "conditional",
       "atomicity": "atomic",
-      "authorization": "shop.OrderPolicy"
+      "authorization": "shop.OrderPolicy",
+      "idempotencyKey": "requestId"
     }
   ],
   "collectionTransforms": [],
@@ -324,21 +325,21 @@
       "source": "tests/domains/entity-containment.kcf",
       "line": 36,
       "column": 3,
-      "endLine": 40,
+      "endLine": 41,
       "endColumn": 4
     },
     "shop.OrderRule": {
       "source": "tests/domains/entity-containment.kcf",
-      "line": 41,
+      "line": 42,
       "column": 3,
-      "endLine": 41,
+      "endLine": 42,
       "endColumn": 128
     },
     "shop.OrderPolicy": {
       "source": "tests/domains/entity-containment.kcf",
-      "line": 42,
+      "line": 43,
       "column": 3,
-      "endLine": 42,
+      "endLine": 43,
       "endColumn": 91
     }
   }

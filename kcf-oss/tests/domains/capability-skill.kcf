@@ -59,6 +59,9 @@ kcf model CapabilitySkill profile business-application {
     idempotency conditional;
     atomicity atomic;
     authorization cs.OpsPolicy;
+    concurrency optimistic;
+    expected-version rowVersion;
+    idempotency-key requestId;
   }
 
   rule OpsRule {

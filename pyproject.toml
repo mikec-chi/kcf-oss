@@ -25,7 +25,7 @@ name = "kcf-oss"
 # grammar-stack 1.11.0, IR model-ir-v1 1.0.0, semantic-rule catalogue 3.0.0 (see
 # docs/VERSIONING.md and config/compatibility-matrix.json). check_handoff.py asserts this
 # distribution version equals the grammar-stack version, so it cannot drift again.
-version = "1.11.0"
+version = "1.16.0"
 description = "KCF — the open knowledge-coding standard: grammars, a reference compiler, a semantic analyzer, and coverage/source-governance tooling for producing a normalized, validated, coverage-assessed semantic IR. Stops at the IR: code generation is an LLM prompt pack, not a deterministic emitter."
 readme = "README.md"
 requires-python = ">=3.10"

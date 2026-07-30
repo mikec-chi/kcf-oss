@@ -178,7 +178,10 @@
       "outputCardinality": "one",
       "idempotency": "conditional",
       "atomicity": "atomic",
-      "authorization": "cs.OpsPolicy"
+      "authorization": "cs.OpsPolicy",
+      "concurrency": "optimistic",
+      "expectedVersion": "rowVersion",
+      "idempotencyKey": "requestId"
     }
   ],
   "collectionTransforms": [],
@@ -190,12 +193,12 @@
     {
       "id": "EscalateTicket",
       "qualifiedName": "cs.EscalateTicket",
-      "mode": "may-escalate",
-      "subject": "cs.Engineer",
-      "target": "cs.Ticket",
       "when": [
         "ticket age exceeds SLA"
-      ]
+      ],
+      "mode": "may-escalate",
+      "subject": "cs.Engineer",
+      "target": "cs.Ticket"
     }
   ],
   "processes": [],
@@ -351,21 +354,21 @@
       "source": "tests/domains/capability-skill.kcf",
       "line": 51,
       "column": 3,
-      "endLine": 62,
+      "endLine": 65,
       "endColumn": 4
     },
     "cs.OpsRule": {
       "source": "tests/domains/capability-skill.kcf",
-      "line": 64,
+      "line": 67,
       "column": 3,
-      "endLine": 70,
+      "endLine": 73,
       "endColumn": 4
     },
     "cs.OpsPolicy": {
       "source": "tests/domains/capability-skill.kcf",
-      "line": 72,
+      "line": 75,
       "column": 3,
-      "endLine": 76,
+      "endLine": 79,
       "endColumn": 4
     }
   }

@@ -81,6 +81,7 @@ kcf model OrderManagement profile business-application {
     idempotency conditional;
     transaction required, atomic;
     authorization shop.OrderPolicy;
+    idempotency-key requestId;
   }
 
   query GetOrder {

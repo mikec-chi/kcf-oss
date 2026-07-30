@@ -293,7 +293,8 @@
       "idempotency": "conditional",
       "transactionMode": "required",
       "atomicity": "atomic",
-      "authorization": "shop.OrderPolicy"
+      "authorization": "shop.OrderPolicy",
+      "idempotencyKey": "requestId"
     },
     {
       "id": "GetOrder",
@@ -494,35 +495,35 @@
       "source": "tests/domains/entity-rich.kcf",
       "line": 70,
       "column": 3,
-      "endLine": 84,
+      "endLine": 85,
       "endColumn": 4
     },
     "GetOrder": {
       "source": "tests/domains/entity-rich.kcf",
-      "line": 86,
+      "line": 87,
       "column": 3,
-      "endLine": 93,
+      "endLine": 94,
       "endColumn": 4
     },
     "OpenOrders": {
       "source": "tests/domains/entity-rich.kcf",
-      "line": 95,
+      "line": 96,
       "column": 3,
-      "endLine": 101,
+      "endLine": 102,
       "endColumn": 4
     },
     "shop.OrderStatusRule": {
       "source": "tests/domains/entity-rich.kcf",
-      "line": 103,
+      "line": 104,
       "column": 3,
-      "endLine": 109,
+      "endLine": 110,
       "endColumn": 4
     },
     "shop.OrderPolicy": {
       "source": "tests/domains/entity-rich.kcf",
-      "line": 111,
+      "line": 112,
       "column": 3,
-      "endLine": 115,
+      "endLine": 116,
       "endColumn": 4
     }
   }

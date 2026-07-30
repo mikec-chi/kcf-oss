@@ -1,0 +1,407 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "FieldOps",
+  "module": "KCF",
+  "namespace": "ops",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Ticket",
+      "qualifiedName": "ops.Ticket",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "ticketId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "subject",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "openedAt",
+          "type": "Date",
+          "required": false
+        },
+        {
+          "name": "dueAt",
+          "type": "Date",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "Category",
+      "qualifiedName": "ops.Category",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "categoryId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "parentId",
+          "type": "UUID",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "Store",
+      "qualifiedName": "ops.Store",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "storeId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "location",
+          "type": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "Dispatcher",
+      "qualifiedName": "ops.Dispatcher",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "TriageTicket",
+      "qualifiedName": "ops.TriageTicket",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "TicketVolume",
+      "qualifiedName": "ops.TicketVolume",
+      "kind": "MEASURE",
+      "references": [],
+      "conceptKind": "KPI",
+      "subjects": [
+        "ops.Ticket"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "dispatcher-triages",
+      "rootKind": "PARTICIPATION",
+      "source": "ops.Dispatcher",
+      "target": "ops.TriageTicket",
+      "strength": 1.0,
+      "definition": "dispatcher-triages"
+    },
+    {
+      "id": "triage-changes-ticket",
+      "rootKind": "TRANSFORMATION",
+      "source": "ops.TriageTicket",
+      "target": "ops.Ticket",
+      "strength": 1.0,
+      "definition": "triage-changes-ticket"
+    }
+  ],
+  "lifecycles": [
+    {
+      "id": "TicketLifecycle",
+      "subject": "ops.Ticket",
+      "states": [
+        "Open",
+        "InProgress",
+        "Resolved"
+      ],
+      "initial": "Open",
+      "terminal": [
+        "Resolved"
+      ],
+      "transitions": [
+        {
+          "from": "Open",
+          "to": "InProgress"
+        },
+        {
+          "from": "InProgress",
+          "to": "Resolved"
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "collectionTransforms": [],
+  "events": [],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [],
+  "policies": [],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "ops.Ticket": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 8,
+      "column": 3,
+      "endLine": 13,
+      "endColumn": 4
+    },
+    "ops.Category": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 15,
+      "column": 3,
+      "endLine": 19,
+      "endColumn": 4
+    },
+    "ops.Store": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 21,
+      "column": 3,
+      "endLine": 25,
+      "endColumn": 4
+    },
+    "ops.Dispatcher": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 27,
+      "column": 3,
+      "endLine": 27,
+      "endColumn": 23
+    },
+    "ops.TriageTicket": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 28,
+      "column": 3,
+      "endLine": 28,
+      "endColumn": 24
+    },
+    "ops.TicketVolume": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 29,
+      "column": 3,
+      "endLine": 29,
+      "endColumn": 53
+    },
+    "dispatcher-triages": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 31,
+      "column": 3,
+      "endLine": 31,
+      "endColumn": 90
+    },
+    "triage-changes-ticket": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 32,
+      "column": 3,
+      "endLine": 32,
+      "endColumn": 90
+    },
+    "TicketLifecycle": {
+      "source": "tests/domains/experience-views.kcf",
+      "line": 34,
+      "column": 3,
+      "endLine": 40,
+      "endColumn": 4
+    }
+  },
+  "experience": {
+    "apps": [
+      {
+        "id": "OpsConsole",
+        "entry": "TicketList",
+        "views": [
+          "TicketList",
+          "TicketForm",
+          "TicketBoard",
+          "TicketSchedule",
+          "VolumeChart",
+          "CategoryTree",
+          "StoreMap",
+          "HeatSpecial",
+          "ExecDashboard"
+        ]
+      }
+    ],
+    "views": [
+      {
+        "id": "TicketList",
+        "kind": "list",
+        "entity": "Ticket"
+      },
+      {
+        "id": "TicketForm",
+        "kind": "form",
+        "entity": "Ticket"
+      },
+      {
+        "id": "TicketBoard",
+        "kind": "kanban",
+        "entity": "Ticket"
+      },
+      {
+        "id": "TicketSchedule",
+        "kind": "gantt",
+        "entity": "Ticket",
+        "start": "openedAt",
+        "end": "dueAt"
+      },
+      {
+        "id": "VolumeChart",
+        "kind": "chart",
+        "entity": "Ticket",
+        "series": [
+          "TicketVolume"
+        ]
+      },
+      {
+        "id": "CategoryTree",
+        "kind": "tree",
+        "entity": "Category",
+        "parent": "parentId"
+      },
+      {
+        "id": "StoreMap",
+        "kind": "map",
+        "entity": "Store",
+        "geometry": "location"
+      },
+      {
+        "id": "HeatSpecial",
+        "kind": "custom",
+        "renderer": "heatmap"
+      },
+      {
+        "id": "ExecDashboard",
+        "kind": "dashboard",
+        "entity": "Ticket",
+        "tiles": [
+          "TicketVolume"
+        ]
+      }
+    ]
+  },
+  "design": {
+    "systems": [
+      {
+        "id": "OpsTheme",
+        "tokens": [
+          {
+            "id": "Primary",
+            "tokenKind": "color",
+            "value": "#0af"
+          }
+        ],
+        "breakpoints": [
+          {
+            "id": "Sm",
+            "value": 480,
+            "unit": "px"
+          },
+          {
+            "id": "Lg",
+            "value": 1024,
+            "unit": "px"
+          }
+        ],
+        "patterns": []
+      }
+    ],
+    "pages": [
+      {
+        "id": "TicketPage",
+        "view": "TicketList",
+        "sections": [
+          "Header"
+        ]
+      }
+    ]
+  }
+}

@@ -261,7 +261,10 @@
       "outputCardinality": "one",
       "idempotency": "conditional",
       "atomicity": "atomic",
-      "authorization": "fulfillment.TenderPolicy"
+      "authorization": "fulfillment.TenderPolicy",
+      "concurrency": "optimistic",
+      "expectedVersion": "rowVersion",
+      "idempotencyKey": "requestId"
     }
   ],
   "collectionTransforms": [],
@@ -533,7 +536,7 @@
       "source": "tests/domains/event-driven-system.kcf",
       "line": 109,
       "column": 3,
-      "endLine": 120,
+      "endLine": 123,
       "endColumn": 4
     }
   }

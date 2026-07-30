@@ -12,6 +12,19 @@ from jsonschema import Draft202012Validator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODEL_SCHEMA = PROJECT_ROOT / "schemas" / "model-ir-v1.schema.json"
+TYPE_SYSTEM_PATH = PROJECT_ROOT / "config" / "type-system.json"
+
+
+def _load_type_system() -> dict:
+    """RFC-1 primitive/unit registry (data foundation). Loaded once; falls back to an empty
+    registry if absent so the analyzer degrades gracefully rather than crashing."""
+    try:
+        return json.loads(TYPE_SYSTEM_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"primitives": [], "numericPrimitives": [], "defaultRuntimeTypes": {}, "unitFamilies": {}}
+
+
+_TYPE_SYSTEM = _load_type_system()
 
 
 KINDS = {
@@ -80,6 +93,11 @@ ORGANIZATION_KINDS = {"ORGANIZATION", "UNIT", "DEPARTMENT", "TEAM", "POSITION"}
 INFORMATION_KINDS = {"DOCUMENT", "MESSAGE", "RECORD", "MODEL", "EVIDENCE", "INSTRUCTION", "REPORT", "SEMANTIC_PACKET"}
 RULE_KINDS = {"CONSTRAINT", "PERMISSION", "PROHIBITION", "OBLIGATION", "ELIGIBILITY", "CLASSIFICATION", "DERIVATION", "DECISION", "EXCEPTION"}
 REASONING_KINDS = {"CLAIM", "FACT", "HYPOTHESIS", "ASSUMPTION", "INFERENCE", "EXPLANATION", "RECOMMENDATION", "CONTRADICTION"}
+# RFC-15: the closed set of EXPERIENCE view kinds. A view with no `kind` keeps today's list/detail
+# behaviour (additive, backward-compatible), so the kind check only fires when a kind is declared.
+VIEW_KINDS = {"list", "form", "tree", "chart", "dashboard", "map", "kanban", "gantt", "custom"}
+_VIEW_GEO_TYPES = {"geo", "geometry", "point", "geopoint", "location"}
+_VIEW_DATE_TYPES = {"date", "datetime", "timestamp"}
 EPISTEMIC_STATUSES = {"asserted", "inferred", "disputed", "superseded", "retracted", "unknown"}
 
 
@@ -181,9 +199,14 @@ class Analyzer:
             root = rel.get("rootKind")
             if root not in ROOT_RELATIONSHIPS:
                 self.report("error", "kcf.relationship.root-kind", rid, f"Invalid root relationship kind {root!r}.")
+            def _hashable(v):
+                if isinstance(v, list):
+                    return tuple(_hashable(x) for x in v)
+                if isinstance(v, dict):
+                    return tuple(sorted((k, _hashable(val)) for k, val in v.items()))
+                return v
             qualifier_key = tuple(sorted(
-                (k, tuple(v) if isinstance(v, list) else v)
-                for k, v in (rel.get("qualifiers", {}) or {}).items()
+                (k, _hashable(v)) for k, v in (rel.get("qualifiers", {}) or {}).items()
             ))
             key = (rel.get("definition"), source, target, qualifier_key)
             if key in seen:
@@ -360,12 +383,641 @@ class Analyzer:
             if operation == "replace" and effect == "command" and not action.get("inputs"):
                 self.report("error", "action.record.replace-complete", aid, "Replace must supply the mutable fields it writes (declare inputs).")
 
+    def check_action_execution_semantics(self):
+        """RFC-4 executable-contract enforcement over the IR 1.1 concurrency/idempotency/transaction
+        vocabulary. Having the field is not enforcement — these rules verify the field is present and
+        internally consistent when the action's declared semantics require it."""
+        # Read-modify-write on a single record: the outcome depends on the value already stored, so a
+        # concurrent writer can be silently lost unless a conflict strategy is declared.
+        READ_MODIFY_WRITE = {"update", "upsert", "patch", "replace"}
+        SET_SCOPES = {"set", "batch", "stream", "window"}
+        for action in self.model.get("actions", []):
+            aid = action.get("id", "<action>")
+            operation = action.get("operation")
+            effect = action.get("effect")
+            scope = action.get("scope")
+            concurrency = action.get("concurrency")
+            expected_version = action.get("expectedVersion")
+            has_version_token = isinstance(expected_version, str) and expected_version.strip() != ""
+            # action.concurrency.version — optimistic concurrency MUST identify a version/comparison
+            # token; declaring the mode without the token leaves the conflict check unspecified.
+            if concurrency == "optimistic" and not has_version_token:
+                self.report("error", "action.concurrency.version", aid,
+                            "Optimistic concurrency must declare a non-empty version/comparison token (expectedVersion).")
+            # action.concurrency.lost-update — a read-modify-write command must either PREVENT lost
+            # updates (a concurrency mechanism or a version token) or EXPLICITLY ACCEPT them
+            # (concurrency: none). Saying nothing at all is a silent race.
+            if operation in READ_MODIFY_WRITE and effect == "command" and scope == "record":
+                if concurrency is None and not has_version_token:
+                    self.report("error", "action.concurrency.lost-update", aid,
+                                "Read-modify-write action must declare a concurrency mechanism / expectedVersion, "
+                                "or explicitly accept lost updates (concurrency: none).")
+            # action.idempotency.conditional — a conditionally-idempotent command MUST name the key that
+            # makes repetition safe; without it the "conditional" claim is unverifiable at runtime.
+            if action.get("idempotency") == "conditional":
+                key = action.get("idempotencyKey")
+                if not (isinstance(key, str) and key.strip() != ""):
+                    self.report("error", "action.idempotency.conditional", aid,
+                                "Conditionally-idempotent command must declare the idempotencyKey that makes repetition safe.")
+            # action.transaction.required — a declared transaction boundary must be COMPATIBLE with the
+            # action's atomicity: a required boundary contradicts best-effort atomicity, and an atomic
+            # set command cannot deliver atomicity with no/absent transaction support.
+            boundary = action.get("transactionBoundary")
+            atomicity = action.get("atomicity")
+            if boundary in {"required", "requires-new"} and atomicity == "best-effort":
+                self.report("error", "action.transaction.required", aid,
+                            "Required transaction boundary is incompatible with best-effort atomicity.")
+            elif effect == "command" and scope in SET_SCOPES and atomicity == "atomic" and boundary in {"not-supported", "none"}:
+                self.report("error", "action.transaction.required", aid,
+                            "Atomic set command declares a transaction boundary that cannot provide atomicity.")
+
+    def check_destructive_bulk_semantics(self):
+        """RFC-5 executable-contract enforcement for data-loss and unbounded-bulk safety over the IR 1.1
+        destructive (deleteBehavior/reversibility/retention/compensation) and bulk
+        (bulkLimit/bulkOrdering/bulkFailurePolicy) vocabulary. The fields exist; these rules require them
+        to be present and mutually consistent whenever the operation makes loss or a runaway bulk possible."""
+        DESTRUCTIVE = {"delete", "bulk-delete"}
+        RECOVERABLE_BEHAVIOR = {"soft", "archive"}
+        RECOVERABLE_REVERSIBILITY = {"reversible", "human-recoverable", "compensatable"}
+        for action in self.model.get("actions", []):
+            aid = action.get("id", "<action>")
+            operation = action.get("operation")
+            effect = action.get("effect")
+            if operation in DESTRUCTIVE and effect == "command":
+                behavior = action.get("deleteBehavior")
+                reversibility = action.get("reversibility")
+                retention = action.get("retention")
+                compensation = action.get("compensation")
+                # action.record.delete-policy — the delete semantics must be explicit, not implied.
+                if not behavior:
+                    self.report("error", "action.record.delete-policy", aid,
+                                "Destructive action must declare a delete policy (deleteBehavior: hard/soft/restrict/cascade/archive).")
+                # action.destructive.recovery — whether/how the loss can be undone must be explicit and
+                # internally consistent with the delete policy.
+                if not reversibility:
+                    self.report("error", "action.destructive.recovery", aid,
+                                "Destructive action must declare its reversibility (recovery semantics).")
+                else:
+                    if behavior == "hard" and reversibility in {"reversible", "human-recoverable"}:
+                        self.report("error", "action.destructive.recovery", aid,
+                                    "A hard delete cannot also be declared reversible/human-recoverable.")
+                    if reversibility == "compensatable" and not (isinstance(compensation, str) and compensation.strip()):
+                        self.report("error", "action.destructive.recovery", aid,
+                                    "A compensatable destructive action must name the compensation that recovers it.")
+                # action.destructive.retention — a recoverable delete must state how long recovery is possible.
+                recoverable = (behavior in RECOVERABLE_BEHAVIOR) or (reversibility in RECOVERABLE_REVERSIBILITY)
+                if recoverable and not (isinstance(retention, str) and retention.strip()):
+                    self.report("error", "action.destructive.retention", aid,
+                                "A recoverable destructive action must declare a retention window (how long recovery is possible).")
+            if operation in SET_MUTATIONS and effect == "command":
+                # action.set.limit — an unbounded bulk mutation is a runaway; it must declare a positive bound.
+                limit = action.get("bulkLimit")
+                if not isinstance(limit, int) or isinstance(limit, bool) or limit <= 0:
+                    self.report("error", "action.set.limit", aid,
+                                "Bulk mutation must declare a positive bulkLimit (bound on affected records).")
+                # action.set.order — apply order determines observable outcome under concurrency; be explicit.
+                if not action.get("bulkOrdering"):
+                    self.report("error", "action.set.order", aid,
+                                "Bulk mutation must declare bulkOrdering (ordered/unordered).")
+                # action.set.partial-failure — the mid-batch failure contract must be explicit and consistent.
+                failure = action.get("bulkFailurePolicy")
+                if not failure:
+                    self.report("error", "action.set.partial-failure", aid,
+                                "Bulk mutation must declare a partial-failure policy (bulkFailurePolicy).")
+                elif failure == "atomic" and action.get("atomicity") == "best-effort":
+                    self.report("error", "action.set.partial-failure", aid,
+                                "An atomic bulk-failure policy is incompatible with best-effort atomicity.")
+
+    def check_type_system(self):
+        """RFC-1 (type system) — the parts checkable against today's IR via the primitive/unit registry
+        (config/type-system.json): type resolution, nullability at declaration, default/type
+        compatibility, finite numerics, and nonnegative/advancing durations. The expression-level RFC-1
+        rules (operator typing, condition-boolean, unit-compatibility across mappings, window
+        compatibility) need the RFC-2 typed field-mapping / expression IR to have anything to read, and
+        remain ir-partial until then."""
+        ts = _TYPE_SYSTEM
+        primitives = set(ts.get("primitives", []))
+        runtime_types = ts.get("defaultRuntimeTypes", {})
+        # A type resolves if it is a primitive or a declared concept identity (qualified or short).
+        declared, declared_short = set(), set()
+        for c in self.model.get("concepts", []):
+            for key in (c.get("id"), c.get("qualifiedName")):
+                if key:
+                    declared.add(key); declared_short.add(str(key).split(".")[-1])
+        for c in self.model.get("concepts", []):
+            cid = c.get("id", "<concept>")
+            for a in c.get("attributes", []) or []:
+                if not isinstance(a, dict):
+                    continue
+                t, an = a.get("type"), a.get("name", "<attr>")
+                subj = f"{cid}.{an}"
+                # stack.type.known — every declared type must resolve.
+                if t is not None and t not in primitives and t not in declared and t.split(".")[-1] not in (primitives | declared_short):
+                    self.report("error", "stack.type.known", subj,
+                                f"Attribute type {t!r} does not resolve to a primitive or a declared type.")
+                # stack.type.nullability — a required/identity value must not default to null.
+                if (a.get("required") or a.get("identity")) and "default" in a and a.get("default") is None:
+                    self.report("error", "stack.type.nullability", subj,
+                                "A required/identity attribute must not declare a null default.")
+                # stack.type.assignment — a default value must be compatible with the destination type.
+                if "default" in a and a.get("default") is not None and t in runtime_types:
+                    if type(a["default"]).__name__ not in runtime_types[t]:
+                        self.report("error", "stack.type.assignment", subj,
+                                    f"Default value {a['default']!r} is not type-compatible with {t}.")
+                # stack.type.collection — a collection-cardinality attribute's default must be a collection.
+                if a.get("cardinality") in {"many", "set", "one-or-many", "zero-or-many"} \
+                        and "default" in a and a.get("default") is not None and not isinstance(a["default"], list):
+                    self.report("error", "stack.type.collection", subj,
+                                f"A collection-cardinality attribute must default to a collection, not {type(a['default']).__name__}.")
+            # stack.value.finite — numbers used for execution/thresholds/weights/probabilities.
+            for f in ("threshold", "target", "tolerance", "weight", "probability"):
+                v = c.get(f)
+                if isinstance(v, (int, float)) and not isinstance(v, bool) and not math.isfinite(v):
+                    self.report("error", "stack.value.finite", cid, f"{f!r} must be a finite number.")
+            # stack.time.duration — a declared duration must advance time (be strictly positive).
+            dv = c.get("durationValue")
+            if isinstance(dv, dict) and isinstance(dv.get("value"), (int, float)) and not isinstance(dv.get("value"), bool):
+                if dv["value"] <= 0:
+                    self.report("error", "stack.time.duration", cid,
+                                "A declared duration must be greater than zero (it must advance time).")
+
+    def check_action_invocation(self):
+        """RFC-3 action-to-action invocation contract — over the `invocations` on an action. Each
+        invocation resolves to one canonical target action and must satisfy that target's declared input,
+        failure, precondition, and transaction contract; direct recursion must be bounded."""
+        actions = self.model.get("actions", [])
+        by_id = {}
+        for a in actions:
+            for k in {a.get("id"), str(a.get("id")).split(".")[-1]}:  # set → no double-append when id == short
+                if k:
+                    by_id.setdefault(k, []).append(a)
+        for action in actions:
+            aid = action.get("id", "<action>")
+            for inv in action.get("invocations", []) or []:
+                target_name = inv.get("target")
+                matches = by_id.get(target_name) or by_id.get(str(target_name).split(".")[-1]) or []
+                # invoke.resolved — must resolve to exactly one canonical action contract.
+                if len(matches) != 1:
+                    self.report("error", "action.invoke.resolved", aid,
+                                f"Invoked action {target_name!r} resolves to {len(matches)} contracts (must be exactly one).")
+                    continue
+                target = matches[0]
+                # invoke.input — supplied args must cover the target's declared required inputs (`provides`).
+                required_inputs = set(target.get("provides") or [])
+                missing = required_inputs - set(inv.get("args") or [])
+                if missing:
+                    self.report("error", "action.invoke.input", aid,
+                                f"Invocation of {target_name!r} is missing required input(s): {sorted(missing)}.")
+                # invoke.output — a declared `expects` shape must match the target's declared `returns`.
+                if inv.get("expects") and target.get("returns") and inv["expects"] != target["returns"]:
+                    self.report("error", "action.invoke.output", aid,
+                                f"Invocation expects {inv['expects']!r} but {target_name!r} returns {target['returns']!r}.")
+                # invoke.failure — the target's declared failure modes must be handled or propagated.
+                unhandled = set(target.get("failureModes") or []) - set(inv.get("handles") or [])
+                if unhandled:
+                    self.report("error", "action.invoke.failure", aid,
+                                f"Invocation of {target_name!r} does not handle failure mode(s): {sorted(unhandled)}.")
+                # invoke.precondition — the target's preconditions must be established by the caller.
+                unmet = set(target.get("preconditions") or []) - set(inv.get("establishes") or [])
+                if unmet:
+                    self.report("error", "action.invoke.precondition", aid,
+                                f"Invocation of {target_name!r} does not establish precondition(s): {sorted(unmet)}.")
+                # invoke.recursion — direct recursion must be explicitly bounded.
+                if str(target_name).split(".")[-1] == str(aid).split(".")[-1] and not inv.get("bounded"):
+                    self.report("error", "action.invoke.recursion", aid,
+                                "Recursive invocation must declare a bounded/terminating strategy.")
+                # invoke.transaction — a required target boundary is incompatible with a non-supporting caller.
+                if target.get("transactionBoundary") in {"required", "requires-new"} and action.get("transactionBoundary") in {"not-supported", "none"}:
+                    self.report("error", "action.invoke.transaction", aid,
+                                f"Invocation of {target_name!r} needs a transaction, but the caller declares transactionBoundary {action.get('transactionBoundary')!r}.")
+
+    def check_misc_contracts(self):
+        """Consolidated small contracts: RFC-4 retry bound/classification, RFC-2 transform totality,
+        RFC-6 participation/governance distinctness — each checkable against additive fields / existing IR."""
+        GOVERNANCE_QUALIFIERS = {"governs", "authority", "governance"}
+        PARTICIPATION_QUALIFIERS = {"participates", "performs", "member"}
+        for action in self.model.get("actions", []):
+            aid = action.get("id", "<action>")
+            retry = action.get("retry")
+            if isinstance(retry, int) and retry > 0:
+                # action.retry.bound — a bounded retry must declare its backoff policy.
+                if not action.get("retryBackoff"):
+                    self.report("error", "action.retry.bound", aid, "A retrying action must declare a bounded backoff policy (retry-backoff).")
+                # action.retry.classification — retries must distinguish transient from permanent failures.
+                if not action.get("retryClassification"):
+                    self.report("error", "action.retry.classification", aid, "A retrying action must classify which failures are retryable (retry-classification).")
+            # action.transform.totality — a transform that declares field mappings must declare its totality.
+            if action.get("effect") == "transform" and action.get("fieldMappings") and not action.get("totality"):
+                self.report("error", "action.transform.totality", aid, "A transform with field mappings must declare its totality (total or partial).")
+        for rel in self.model.get("relationships", []):
+            rid = rel.get("id", "<relationship>")
+            q = rel.get("qualifiers") or {}
+            root = rel.get("rootKind")
+            # kcf.relationship.participation — participation and governance must remain distinct.
+            if root == "PARTICIPATION" and any(k in q for k in GOVERNANCE_QUALIFIERS):
+                self.report("error", "kcf.relationship.participation", rid, "A participation relationship must not carry governance semantics.")
+            if root == "GOVERNANCE" and any(k in q for k in PARTICIPATION_QUALIFIERS):
+                self.report("error", "kcf.relationship.participation", rid, "A governance relationship must not carry participation semantics.")
+
+    def check_predicate_typing(self):
+        """RFC-1 typed predicates — `stack.type.condition-boolean` (a condition must evaluate to boolean)
+        and `stack.type.operator` (operators must accept compatible operand types), plus
+        `kcf.relationship.condition`, over the structured `predicate` on rules/relationships. Prose
+        conditions stay unchecked (they need NL parsing); the structured predicate is the checkable form."""
+        ts = _TYPE_SYSTEM
+        numeric = set(ts.get("numericPrimitives", []))
+        temporal = set(ts.get("temporalPrimitives", []))
+        COMPARISON, EQUALITY, LOGICAL = {"gt", "lt", "ge", "le"}, {"eq", "ne"}, {"and", "or"}
+        KNOWN = COMPARISON | EQUALITY | LOGICAL
+        BOOLEAN = {"Boolean", "Bool"}
+        attrs_of = {}
+        for c in self.model.get("concepts", []):
+            t = {a.get("name"): a.get("type") for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            for k in (c.get("id"), c.get("qualifiedName")):
+                if k:
+                    attrs_of[k] = t; attrs_of[str(k).split(".")[-1]] = t
+
+        def field_type(field, scopes):
+            for s in scopes:
+                tbl = attrs_of.get(s) or attrs_of.get(str(s).split(".")[-1])
+                if tbl and field in tbl:
+                    return tbl[field]
+            return None
+
+        def literal_type(v):
+            if isinstance(v, bool):
+                return "Boolean"
+            if isinstance(v, (int, float)):
+                return "Number"
+            return None  # string right-operand is ambiguous (field ref or string literal) — not asserted
+
+        def operand_errors(subject, pred, scopes):
+            """Emit stack.type.operator diagnostics; return True if a bare field is a non-boolean condition."""
+            if not isinstance(pred, dict):
+                return False
+            if "field" in pred:
+                ft = field_type(pred["field"], scopes)
+                return ft is not None and ft not in BOOLEAN
+            left, op, right = pred.get("left"), pred.get("operator"), pred.get("right")
+            if op not in KNOWN:
+                self.report("error", "stack.type.operator", subject, f"Unknown operator {op!r} in predicate.")
+                return False
+            lt = field_type(left, scopes)
+            rt = field_type(right, scopes) if isinstance(right, str) else literal_type(right)
+            if op in COMPARISON:
+                if lt is not None and lt not in numeric and lt not in temporal:
+                    self.report("error", "stack.type.operator", subject, f"Operator {op!r} needs a comparable (numeric/temporal) left operand, got {lt}.")
+                if rt is not None and rt not in numeric and rt not in temporal:
+                    self.report("error", "stack.type.operator", subject, f"Operator {op!r} needs a comparable right operand, got {rt}.")
+            elif op in EQUALITY:
+                if lt and rt and lt != rt and not (lt in numeric and rt in numeric):
+                    self.report("error", "stack.type.operator", subject, f"Operator {op!r} needs same-type operands, got {lt} and {rt}.")
+            elif op in LOGICAL:
+                if lt is not None and lt not in BOOLEAN:
+                    self.report("error", "stack.type.operator", subject, f"Operator {op!r} needs boolean operands, got {lt}.")
+            return False
+
+        for rule in self.model.get("rules", []):
+            if rule.get("predicate"):
+                rid = rule.get("id", "<rule>")
+                if operand_errors(rid, rule["predicate"], rule.get("appliesTo", [])):
+                    self.report("error", "stack.type.condition-boolean", rid,
+                                f"Rule condition {rule['predicate'].get('field')!r} is not boolean.")
+        for rel in self.model.get("relationships", []):
+            q = rel.get("qualifiers") or {}
+            if q.get("predicate"):
+                rid = rel.get("id", "<relationship>")
+                if operand_errors(rid, q["predicate"], [rel.get("source"), rel.get("target")]):
+                    self.report("error", "kcf.relationship.condition", rid,
+                                f"Relationship condition {q['predicate'].get('field')!r} is not boolean.")
+
+    def check_specialization_lineage(self):
+        """RFC-8 (specialization + lineage binding) — the crisp subset. `kcf.concept.trait` needs a
+        per-kind trait-permission taxonomy and `lineage.complete` needs a 'derived concept' marker (and
+        is SHOULD-level); `kcf.concept.version` is a cross-revision/migration fact (enforced by the
+        delta/migration tooling, reclassified enforced-elsewhere)."""
+        concepts = self.model.get("concepts", [])
+        kind_of, ids = {}, set()
+        for c in concepts:
+            for k in (c.get("id"), c.get("qualifiedName")):
+                if k:
+                    kind_of[k] = c.get("kind"); kind_of[str(k).split(".")[-1]] = c.get("kind"); ids.add(k); ids.add(str(k).split(".")[-1])
+        # kcf.concept.kind-compatible — a specialization must preserve its parent's primary kind.
+        for c in concepts:
+            parent = c.get("specializes")
+            if not parent:
+                continue
+            pkind = kind_of.get(parent) or kind_of.get(str(parent).split(".")[-1])
+            if pkind is None:
+                self.report("error", "kcf.concept.kind-compatible", c.get("id", "<concept>"),
+                            f"Specialized parent {parent!r} does not resolve to a declared concept.")
+            elif pkind != c.get("kind"):
+                self.report("error", "kcf.concept.kind-compatible", c.get("id", "<concept>"),
+                            f"Specialization must preserve the primary kind: {c.get('kind')} specializes {pkind}.")
+        # lineage.binding.schema — a binding's bound source and target must resolve to declared schemas.
+        lineage = self.model.get("lineage", {})
+        # declared identities a binding may reference: concepts + integration endpoints/adapters + datasets.
+        bindable = set(ids)
+        for ep in self.model.get("integration", {}).get("endpoints", []):
+            bindable.add(ep.get("id"))
+        for ep in self.model.get("integration", {}).get("adapters", []):
+            bindable.add(ep.get("id"))
+        for section in ("datasets",):
+            for item in self.model.get(section, []) or []:
+                bindable.add(item.get("id"))
+        for binding in lineage.get("bindings", []):
+            for role in ("source", "target"):
+                ref = binding.get(role)
+                if ref is not None and ref not in bindable and str(ref).split(".")[-1] not in bindable:
+                    self.report("error", "lineage.binding.schema", binding.get("id", "<binding>"),
+                                f"Lineage binding {role} {ref!r} does not resolve to a declared schema/endpoint.")
+
+    def check_relationship_reasoning(self):
+        """RFC-6 (relationship reasoning) — the crisp, checkable subset over the open relationship
+        `qualifiers` (canonical/inverse/transitive). `kcf.relationship.condition` needs the boolean
+        expression IR (shared with stack.type.condition-boolean) and `kcf.relationship.participation`
+        needs a governance/participation verb taxonomy; both stay ir-missing."""
+        TRANSITIVE_CAPABLE = {"ORDERING", "DEPENDENCY", "COMPOSITION", "CLASSIFICATION", "CAUSATION"}
+        rels = self.model.get("relationships", [])
+        by_id = {r.get("id"): r for r in rels}
+
+        def is_false(v):
+            return v is False or (isinstance(v, str) and v.lower() == "false")
+
+        def is_true(v):
+            return v is True or (isinstance(v, str) and v.lower() == "true")
+
+        def short(x):
+            return str(x).split(".")[-1] if x is not None else x
+
+        for r in rels:
+            rid = r.get("id", "<relationship>")
+            q = r.get("qualifiers") or {}
+            # kcf.relationship.canonical — a non-canonical direction must name the inverse it derives from.
+            if is_false(q.get("canonical")) and not q.get("inverse"):
+                self.report("error", "kcf.relationship.canonical", rid,
+                            "A non-canonical relationship must name the `inverse` (canonical direction) it is derived from.")
+            # kcf.relationship.inverse — a named inverse must exist and reverse the roles.
+            inv = q.get("inverse")
+            if inv:
+                other = by_id.get(inv) or by_id.get(short(inv))
+                if other is None:
+                    self.report("error", "kcf.relationship.inverse", rid,
+                                f"Declared inverse {inv!r} does not resolve to a declared relationship.")
+                elif short(other.get("source")) != short(r.get("target")) or short(other.get("target")) != short(r.get("source")):
+                    self.report("error", "kcf.relationship.inverse", rid,
+                                f"Inverse {inv!r} must express the same relationship with reversed roles (source/target swapped).")
+            # kcf.relationship.transitivity — transitive inference is valid only for compatible modes.
+            if is_true(q.get("transitive")) and r.get("rootKind") not in TRANSITIVE_CAPABLE:
+                self.report("error", "kcf.relationship.transitivity", rid,
+                            f"Transitive inference is not valid for a {r.get('rootKind')} relationship.")
+
+    def check_action_io_contract(self):
+        """RFC-3 (record action I/O contracts) — the field-level input/output + selection contract for
+        record CRUD, checkable against today's IR (selection/mutations/preconditions/postconditions) plus
+        the additive `provides`/`patchDialect` fields. `invoke.*` (action-to-action invocation) and most
+        `set.*` need an invocation / bulk-shape construct that does not exist yet and stay ir-missing."""
+        UNIQUE = {"identity", "keys"}
+        KEYED = {"read", "replace", "update", "patch", "delete"}
+        attrs_of = {}
+        for c in self.model.get("concepts", []):
+            table = {a.get("name"): a for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            for k in (c.get("id"), c.get("qualifiedName")):
+                if k:
+                    attrs_of[k] = table; attrs_of[str(k).split(".")[-1]] = table
+        for action in self.model.get("actions", []):
+            if action.get("scope") != "record":
+                continue
+            aid = action.get("id", "<action>")
+            op, eff, sel = action.get("operation"), action.get("effect"), action.get("selection")
+            table = attrs_of.get(action.get("target")) or attrs_of.get(str(action.get("target")).split(".")[-1]) or {}
+            # action.record.key — a single-record op must not target a NON-unique selection (a predicate
+            # silently makes it set-scoped). Uniqueness is the rule's subject; a missing selection is a
+            # separate contract-completeness concern.
+            if op in KEYED and sel is not None and sel not in UNIQUE:
+                self.report("error", "action.record.key", aid, f"{op} on a record must use a provably-unique selection (identity/keys), not {sel!r} (which is set-scoped).")
+            # action.record.update-fields — a declared mutation must stay inside the target's real,
+            # non-identity fields (mutating identity or an unknown field is "outside the set").
+            if op == "update" and eff == "command":
+                for m in (action.get("mutations") or []):
+                    a = table.get(m)
+                    if table and a is None:
+                        self.report("error", "action.record.update-fields", aid, f"update mutates {m!r}, which is not a field of the target.")
+                    elif a is not None and a.get("identity"):
+                        self.report("error", "action.record.update-fields", aid, f"update must not mutate the identity field {m!r}.")
+            # action.record.exists-output — exists returns a single boolean, never record data.
+            if op == "exists" and (eff == "command" or action.get("outputCardinality") not in (None, "one")):
+                self.report("error", "action.record.exists-output", aid, "exists must be a query returning a single boolean, not record data.")
+            # action.record.precondition — a destructive record command must declare a guard.
+            if op == "delete" and eff == "command" and not action.get("preconditions") and not action.get("expectedVersion"):
+                self.report("error", "action.record.precondition", aid,
+                            "a destructive record command must declare a precondition guard (precondition or expected-version).")
+            # action.record.postcondition — a mutation that states preconditions must state its postconditions.
+            if eff == "command" and action.get("preconditions") and not action.get("postconditions"):
+                self.report("error", "action.record.postcondition", aid,
+                            "a mutation that declares preconditions must also declare its postconditions.")
+            # action.record.create-input / create-readonly — enforced when the create declares `provides`.
+            if op == "create" and action.get("provides") is not None:
+                provides = set(action["provides"])
+                for name, a in table.items():
+                    if a.get("required") and not a.get("identity") and name not in provides:
+                        self.report("error", "action.record.create-input", aid, f"create must provide required field {name!r}.")
+                for p in provides:
+                    a = table.get(p)
+                    if a is not None and a.get("identity"):
+                        self.report("error", "action.record.create-readonly", aid, f"create must not accept the generated/identity field {p!r}.")
+            # action.record.patch-format — patch must name its dialect (path/op/value validation contract).
+            if op == "patch" and not action.get("patchDialect"):
+                self.report("error", "action.record.patch-format", aid, "patch must declare its patch dialect (patch-dialect).")
+        # RFC-3 set/bulk shape (scope set/batch/stream/window).
+        SET_SCOPES = {"set", "batch", "stream", "window"}
+        for action in self.model.get("actions", []):
+            if action.get("scope") not in SET_SCOPES:
+                continue
+            aid, op, eff = action.get("id", "<action>"), action.get("operation"), action.get("effect")
+            # action.set.output-shape — a set command must declare what it returns.
+            if eff == "command" and not action.get("returns"):
+                self.report("error", "action.set.output-shape", aid,
+                            "A set/bulk command must declare its result shape (returns: records/keys/count/per-item/none).")
+            # action.set.pagination — a large/unbounded query must declare pagination or bounded materialization.
+            if eff == "query" and not action.get("pagination"):
+                self.report("error", "action.set.pagination", aid,
+                            "A large/unbounded query must declare pagination/streaming/bounded behavior.")
+            # action.set.cascade — a bulk cascade must be bounded (a specific selection) and authorized.
+            if op in {"bulk-delete", "bulk-update"} and action.get("deleteBehavior") == "cascade":
+                if action.get("selection") in (None, "all"):
+                    self.report("error", "action.set.cascade", aid,
+                                "A bulk cascade must be bounded by a specific selection (not 'all'/unbounded).")
+                if not action.get("authorization"):
+                    self.report("error", "action.set.cascade", aid, "A bulk cascade must be authorized.")
+
+    def check_transform_lineage(self):
+        """RFC-2 (typed field-level lineage) — enforced over an action's `fieldMappings` when present
+        (additive/opt-in: a transform with no mappings is unconstrained here). Once a transform declares
+        typed lineage it must be complete + type/unit/null consistent. This also supplies the RFC-1
+        `stack.value.unit-compatible` check its first real reader."""
+        ts = _TYPE_SYSTEM
+        numeric = set(ts.get("numericPrimitives", []))
+        WIDE = {"Decimal", "Float", "Double", "Number", "Money", "Currency", "Percentage", "Ratio"}
+        NARROW = {"Integer", "Int", "Long"}
+        unit_family = {}
+        for fam, units in ts.get("unitFamilies", {}).items():
+            for u in units:
+                unit_family[u] = fam
+        # field index: short/qualified concept name -> {attribute name -> attribute dict}
+        fields, short_of = {}, {}
+        for c in self.model.get("concepts", []):
+            attrs = {a.get("name"): a for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            for key in (c.get("id"), c.get("qualifiedName")):
+                if key:
+                    fields[key] = attrs; short_of[str(key).split(".")[-1]] = attrs
+
+        def resolve(path, fallback_entities):
+            """(entity, field) -> attribute dict or None. A dotted path names its entity; a bare field
+            resolves against the action's single relevant entity."""
+            if "." in path:
+                ent, _, fld = path.rpartition(".")
+                table = fields.get(ent) or short_of.get(ent.split(".")[-1])
+                return (table or {}).get(fld)
+            for ent in fallback_entities:
+                table = fields.get(ent) or short_of.get(str(ent).split(".")[-1])
+                if table and path in table:
+                    return table[path]
+            return None
+
+        for action in self.model.get("actions", []):
+            mappings = action.get("fieldMappings")
+            if not mappings:
+                continue
+            aid = action.get("id", "<action>")
+            inputs = action.get("inputs") or []
+            outputs = (action.get("outputs") or []) + ([action["target"]] if action.get("target") else [])
+            covered = set()
+            for m in mappings:
+                src_path, tgt_path = m.get("source", ""), m.get("target", "")
+                covered.add(tgt_path.split(".")[-1] if "." in tgt_path else tgt_path)
+                src = resolve(src_path, inputs + outputs)
+                tgt = resolve(tgt_path, outputs)
+                # action.transform.source-target — both endpoints must resolve to a declared field.
+                if src is None or tgt is None:
+                    missing = "source" if src is None else "target"
+                    self.report("error", "action.transform.source-target", aid,
+                                f"Field-mapping {missing} {m.get(missing) or m.get('source')!r} does not resolve to a declared attribute.")
+                    continue
+                st, tt = src.get("type"), tgt.get("type")
+                fn = m.get("function")
+                # action.transform.type — incompatible source/target types need an explicit function.
+                compatible = (st == tt) or (st in numeric and tt in numeric) or bool(fn)
+                if not compatible:
+                    self.report("error", "action.transform.type", aid,
+                                f"Mapping {src_path}->{tgt_path}: type {st} is not compatible with {tt} (declare a `via` function).")
+                # action.transform.loss — a wide->narrow numeric mapping must be marked lossy.
+                if st in WIDE and tt in NARROW and not m.get("lossy"):
+                    self.report("error", "action.transform.loss", aid,
+                                f"Mapping {src_path}->{tgt_path} narrows {st}->{tt} and must be marked `lossy`.")
+                # action.transform.null — a required target must not receive a nullable source by propagation.
+                if tgt.get("required") and not src.get("required") and m.get("nullBehavior", "propagate") == "propagate":
+                    self.report("error", "action.transform.null", aid,
+                                f"Mapping {src_path}->{tgt_path}: required target receives a nullable source (set nullBehavior default/error).")
+                # action.transform.unit / stack.value.unit-compatible — units must share a family or convert.
+                su, tu = m.get("sourceUnit"), m.get("targetUnit")
+                if su and tu and unit_family.get(su) != unit_family.get(tu) and not fn:
+                    self.report("error", "action.transform.unit", aid,
+                                f"Mapping {src_path}->{tgt_path}: units {su}/{tu} are not compatible (declare a conversion `via`).")
+                    self.report("error", "stack.value.unit-compatible", aid,
+                                f"Incompatible units {su}/{tu} mapped without an explicit conversion.")
+            # action.transform.required-coverage — every required output field must be produced.
+            for ent in outputs:
+                table = fields.get(ent) or short_of.get(str(ent).split(".")[-1]) or {}
+                for name, a in table.items():
+                    # identity/system-generated fields are not produced by a source mapping.
+                    if a.get("required") and not a.get("identity") and name not in covered:
+                        self.report("error", "action.transform.required-coverage", aid,
+                                    f"Required output field {ent}.{name} is not produced by any field mapping.")
+            # action.transform.reversibility — a reversible transform's mappings must be lossless + injective.
+            if action.get("reversibility") == "reversible":
+                targets = [m.get("target") for m in mappings]
+                if any(m.get("lossy") for m in mappings) or len(targets) != len(set(targets)):
+                    self.report("error", "action.transform.reversibility", aid,
+                                "A reversible transform cannot contain lossy or many-to-one field mappings.")
+
     def check_collection_transforms(self):
+        _coll_attrs, _coll_types = {}, {}
+        for c in self.model.get("concepts", []):
+            t = {a.get("name") for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            ty = {a.get("name"): a.get("type") for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            for k in (c.get("id"), c.get("qualifiedName")):
+                if k:
+                    _coll_attrs[k] = t; _coll_attrs[str(k).split(".")[-1]] = t
+                    _coll_types[k] = ty; _coll_types[str(k).split(".")[-1]] = ty
+        _AGG_FNS = {"count", "sum", "avg", "min", "max", "first", "last", "median", "stddev"}
+
+        def _attrs(ref):
+            return _coll_attrs.get(ref) or _coll_attrs.get(str(ref).split(".")[-1]) or set()
+
+        def _types(ref):
+            return _coll_types.get(ref) or _coll_types.get(str(ref).split(".")[-1]) or {}
+        _unit_family = {}
+        for fam, units in _TYPE_SYSTEM.get("unitFamilies", {}).items():
+            for u in units:
+                _unit_family[u] = fam
         for transform in self.model.get("collectionTransforms", []):
             tid = transform.get("id", "<collection-transform>")
             operation = transform.get("operation")
             if operation not in COLLECTION_OPERATIONS:
                 self.report("error", "action.collection.input-schema", tid, f"Unknown collection operation {operation!r}.")
+            # --- RFC-2 collection-pipeline typed rules (crisp subset checkable against the IR) ---
+            attrs = _coll_attrs.get(transform.get("inputSchema")) or _coll_attrs.get(str(transform.get("inputSchema")).split(".")[-1]) or set()
+            projections = transform.get("projections") or []
+            # action.collection.projection-unique — projected output names must be unique.
+            if len(projections) != len(set(projections)):
+                self.report("error", "action.collection.projection-unique", tid, "Projected output field names must be unique.")
+            # action.collection.field-resolution — projected fields must exist in the input schema.
+            for f in projections:
+                if attrs and f not in attrs:
+                    self.report("error", "action.collection.field-resolution", tid, f"Projected field {f!r} does not exist at this pipeline stage.")
+            # action.collection.map-cardinality — map preserves count; flat-map must declare zero-to-many.
+            if operation == "flat-map" and not transform.get("expands"):
+                self.report("error", "action.collection.map-cardinality", tid, "flat-map must declare zero-to-many output cardinality (expands).")
+            if operation == "map" and transform.get("expands"):
+                self.report("error", "action.collection.map-cardinality", tid, "map must preserve item count and cannot declare expansion.")
+            # action.collection.order-total — a sort must provide a total order (a sort field or key).
+            if operation == "sort" and not (transform.get("sort") or transform.get("keys")):
+                self.report("error", "action.collection.order-total", tid, "A required sort must provide a total order (sort field or tie-breaker key).")
+            # action.collection.aggregate-type — a declared aggregate function must be known.
+            if operation == "aggregate" and transform.get("aggregate") is not None and transform.get("aggregate") not in _AGG_FNS:
+                self.report("error", "action.collection.aggregate-type", tid, f"Unknown aggregate function {transform.get('aggregate')!r}.")
+            inputs = transform.get("inputs") or []
+            # action.collection.join-type — a join needs join key(s) present + type-compatible in both inputs.
+            if operation == "join":
+                join_keys = transform.get("joinKeys") or []
+                if not join_keys:
+                    self.report("error", "action.collection.join-type", tid, "A join must declare its join key(s).")
+                elif len(inputs) == 2:
+                    lt, rt = _types(inputs[0]), _types(inputs[1])
+                    for jk in join_keys:
+                        if lt and rt and jk in lt and jk in rt and lt[jk] != rt[jk]:
+                            self.report("error", "action.collection.join-type", tid,
+                                        f"Join key {jk!r} has incompatible types across inputs ({lt[jk]} vs {rt[jk]}).")
+                # action.collection.join-fanout — a join should declare its expected cardinality (fanout).
+                if not transform.get("expectedCardinality"):
+                    self.report("error", "action.collection.join-fanout", tid,
+                                "A join must declare its expected cardinality (fanout risk).")
+            # stack.time.window-compatible — a window and its slide/frequency must use compatible units.
+            wu, su = transform.get("windowUnit"), transform.get("slideUnit")
+            if wu and su and _unit_family.get(wu) != _unit_family.get(su):
+                self.report("error", "stack.time.window-compatible", tid,
+                            f"Window unit {wu!r} and slide unit {su!r} are not compatible.")
+            # action.collection.equality — set/dedup operations must define equality/key semantics.
+            if operation in {"distinct", "intersect", "except", "deduplicate"} and not (transform.get("keys") or transform.get("equalityKeys")):
+                self.report("error", "action.collection.equality", tid,
+                            f"{operation} must define equality/key semantics (keys or equality-key).")
+            # action.collection.set-compatibility — union/intersect/except inputs must share a schema.
+            if operation in {"union", "intersect", "except"} and len(inputs) >= 2:
+                shapes = [frozenset(_attrs(i)) for i in inputs if _attrs(i)]
+                if len(set(shapes)) > 1:
+                    self.report("error", "action.collection.set-compatibility", tid,
+                                f"{operation} inputs must have compatible schemas.")
             if not transform.get("inputSchema"):
                 self.report("error", "action.collection.input-schema", tid, "Collection transformation requires an input schema.")
             if not transform.get("outputSchema"):
@@ -435,6 +1087,43 @@ class Analyzer:
                 self.report("error", "stack.value.range", policy.get("id", "<retry-policy>"), "Retry attempts must be a nonnegative integer.")
             if attempts and not policy.get("requiresIdempotency"):
                 self.report("error", "action.retry.side-effects", policy.get("id", "<retry-policy>"), "Retry policy must require idempotency or duplicate protection.")
+            # RFC-7 integration.retry.idempotency — a retrying integration needs a declared safety mechanism.
+            if isinstance(attempts, int) and attempts > 1 and not policy.get("requiresIdempotency") \
+                    and not policy.get("compensation") and not policy.get("duplicateSuppression"):
+                self.report("error", "integration.retry.idempotency", policy.get("id", "<retry-policy>"),
+                            "A retrying integration must require idempotency, duplicate suppression, or compensation.")
+        # RFC-7 integration.protocol — an adapter must declare a complete protocol binding.
+        adapter_by_id = {a.get("id"): a for a in integration.get("adapters", [])}
+        for adapter in integration.get("adapters", []):
+            if not adapter.get("protocol") or not adapter.get("serialization"):
+                self.report("error", "integration.protocol", adapter.get("id", "<adapter>"),
+                            "Adapter must declare a protocol and serialization (the endpoint binding is otherwise unverifiable).")
+        # RFC-7 integration.contract.schema — an endpoint operation must resolve to a declared action.
+        action_ids = {a.get("id") for a in self.model.get("actions", [])}
+        action_short = {str(a.get("id")).split(".")[-1] for a in self.model.get("actions", [])}
+        for endpoint in integration.get("endpoints", []):
+            op = endpoint.get("operation")
+            if op is not None and op not in action_ids and str(op).split(".")[-1] not in action_short:
+                self.report("error", "integration.contract.schema", endpoint.get("id", "<endpoint>"),
+                            f"Endpoint operation {op!r} does not resolve to a declared action contract.")
+        # RFC-7 integration.mapping.coverage — required fields of a modeled target must be mapped.
+        attrs_of = {}
+        for c in self.model.get("concepts", []):
+            table = {a.get("name"): a for a in (c.get("attributes") or []) if isinstance(a, dict)}
+            for k in (c.get("id"), c.get("qualifiedName")):
+                if k:
+                    attrs_of[k] = table; attrs_of[str(k).split(".")[-1]] = table
+        for mapping in integration.get("mappings", []):
+            tgt = mapping.get("to")
+            table = attrs_of.get(tgt) or attrs_of.get(str(tgt).split(".")[-1])
+            if not table:
+                continue  # external schema (not a modeled concept) — no required-field info to check
+            covered = {fm.get("to") for fm in mapping.get("fieldMaps", [])}
+            covered |= set(mapping.get("defaults", {})) | set(mapping.get("omit", []))
+            for name, a in table.items():
+                if a.get("required") and not a.get("identity") and name not in covered:
+                    self.report("error", "integration.mapping.coverage", mapping.get("id", "<mapping>"),
+                                f"Required target field {tgt}.{name} has no source mapping, default, or omission policy.")
 
     def check_security(self):
         security = self.model.get("security", {})
@@ -514,6 +1203,7 @@ class Analyzer:
             for action in view.get("actions", []):
                 if action not in actions:
                     self.report("error", "experience.action.invoke", view.get("id", "<view>"), f"Invoked action {action!r} does not resolve.")
+            self._check_view_kind(view)
         for flow in experience.get("flows", []):
             nodes = {item.get("id") for item in flow.get("nodes", [])}
             if flow.get("entry") not in nodes:
@@ -527,6 +1217,105 @@ class Analyzer:
             if flow.get("entry") in nodes:
                 for node in nodes - self.reachable(graph, flow.get("entry")):
                     self.report("warning", "experience.flow.reachability", f"{flow.get('id')}.{node}", "Experience-flow node is unreachable.")
+
+    # ---- RFC-15 view-kind validation (OSS authoring contract; a downstream UI emitter is the
+    # consumer that realizes the same bindings — the two must agree). A binding "resolves"
+    # if it is either declared on the view OR inferable from the bound entity's existing semantics,
+    # exactly as the emitter infers it, so a view "merely chooses a projection". ---------------------
+
+    def _view_entity(self, view):
+        ref = view.get("entity")
+        if not ref:
+            return None
+        local = ref.rsplit(".", 1)[-1]
+        for concept in self.model.get("concepts", []):
+            qn, cid = concept.get("qualifiedName"), concept.get("id")
+            if ref in (qn, cid) or (qn or cid or "").rsplit(".", 1)[-1] == local:
+                return concept
+        return None
+
+    def _entity_has_lifecycle(self, entity):
+        local = (entity.get("qualifiedName") or entity.get("id") or "").rsplit(".", 1)[-1]
+        for lc in self.model.get("lifecycles", []):
+            ref = lc.get("subject") or lc.get("target") or ""
+            if ref.rsplit(".", 1)[-1] == local and (lc.get("states") or []):
+                return True
+        return False
+
+    def _entity_has_measure(self, entity):
+        local = (entity.get("qualifiedName") or entity.get("id") or "").rsplit(".", 1)[-1]
+        for concept in self.model.get("concepts", []):
+            if concept.get("kind") != "MEASURE":
+                continue
+            subjects = concept.get("subjects") or ([concept["subject"]] if concept.get("subject") else [])
+            if any((s or "").rsplit(".", 1)[-1] == local for s in subjects):
+                return True
+        return False
+
+    def _entity_self_parent(self, entity):
+        ent = entity.get("qualifiedName") or entity.get("id") or ""
+        local = ent.rsplit(".", 1)[-1]
+        for rel in self.model.get("relationships", []):
+            if rel.get("rootKind") == "COMPOSITION" \
+                    and (rel.get("source") or "").rsplit(".", 1)[-1] == local \
+                    and (rel.get("target") or "").rsplit(".", 1)[-1] == local:
+                return True
+        for ref in (entity.get("namedReferences") or []):
+            if (ref.get("target") or "").rsplit(".", 1)[-1] == local:
+                return True
+        return False
+
+    def _entity_geometry(self, entity):
+        if entity.get("geometry"):
+            return True
+        return any(str(a.get("type", "")).lower() in _VIEW_GEO_TYPES for a in (entity.get("attributes") or []))
+
+    def _entity_date_attrs(self, entity):
+        return [a.get("name") for a in (entity.get("attributes") or [])
+                if str(a.get("type", "")).lower() in _VIEW_DATE_TYPES]
+
+    def _check_view_kind(self, view):
+        kind = view.get("kind")
+        if kind is None:
+            return  # additive/back-compat: no kind → today's list/detail behaviour, nothing to check
+        vid = view.get("id", "<view>")
+        if kind not in VIEW_KINDS:
+            self.report("error", "experience.view.kind", vid,
+                        f"Unknown view kind {kind!r}; expected one of {sorted(VIEW_KINDS)}.")
+            return
+        entity = self._view_entity(view)
+        needs_entity = kind in ("list", "form", "tree", "map", "kanban", "gantt")
+        if needs_entity and entity is None:
+            self.report("error", "experience.view.binding", vid,
+                        f"View kind {kind!r} needs a bound `entity` that resolves to a declared concept.")
+            return
+        if kind == "chart" and not (view.get("series") or (entity and self._entity_has_measure(entity))):
+            self.report("error", "experience.view.binding", vid,
+                        "Chart view needs a `series` binding or a MEASURE on the bound entity.")
+        elif kind == "dashboard" and not (view.get("tiles") or (entity and self._entity_has_measure(entity))):
+            self.report("error", "experience.view.binding", vid,
+                        "Dashboard view needs `tile` bindings (views/measures).")
+        elif kind == "tree" and not (view.get("parent") or self._entity_self_parent(entity)):
+            self.report("error", "experience.view.binding", vid,
+                        "Tree view needs a `parent` binding or a self-COMPOSITION reference on the entity.")
+        elif kind == "map" and not (view.get("geometry") or self._entity_geometry(entity)):
+            self.report("error", "experience.view.binding", vid,
+                        "Map view needs a `geometry` binding or a SPATIAL attribute on the entity.")
+        elif kind == "kanban" and not (view.get("columns") or self._entity_has_lifecycle(entity)):
+            self.report("error", "experience.view.binding", vid,
+                        "Kanban view needs `column` bindings or a LIFECYCLE on the entity.")
+        elif kind == "gantt":
+            dates = self._entity_date_attrs(entity) if entity else []
+            start = view.get("start") or (dates[0] if dates else None)
+            end = view.get("end") or (dates[1] if len(dates) > 1 else None)
+            if not (start and end):
+                self.report("error", "experience.view.binding", vid,
+                            "Gantt view needs `start` and `end` bindings or two TEMPORAL date attributes on the entity.")
+        elif kind == "custom":
+            renderer = view.get("renderer")
+            if not renderer or not str(renderer).replace("-", "").replace("_", "").isalnum():
+                self.report("error", "experience.view.binding", vid,
+                            "Custom view needs a registered alphanumeric `renderer` id (governance requires a vetted renderer).")
 
     def check_design(self):
         design = self.model.get("design", {})
@@ -1357,6 +2146,16 @@ class Analyzer:
         self.check_relationships()
         self.check_lifecycles()
         self.check_actions()
+        self.check_action_execution_semantics()
+        self.check_destructive_bulk_semantics()
+        self.check_type_system()
+        self.check_transform_lineage()
+        self.check_action_io_contract()
+        self.check_relationship_reasoning()
+        self.check_specialization_lineage()
+        self.check_predicate_typing()
+        self.check_misc_contracts()
+        self.check_action_invocation()
         self.check_collection_transforms()
         self.check_processes()
         self.check_integration()

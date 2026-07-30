@@ -35,6 +35,8 @@ kcf model CustomerService profile business-application {
     atomicity atomic;
     concurrency optimistic;
     authorization customer.CustomerUpdatePolicy;
+    expected-version rowVersion;
+    idempotency-key requestId;
   }
 
   command CreateCustomer {
@@ -46,6 +48,7 @@ kcf model CustomerService profile business-application {
     idempotency conditional;
     atomicity atomic;
     authorization customer.CustomerUpdatePolicy;
+    idempotency-key requestId;
   }
 
   query GetCustomer {
@@ -67,6 +70,11 @@ kcf model CustomerService profile business-application {
     idempotency conditional;
     atomicity atomic;
     authorization customer.CustomerUpdatePolicy;
+    idempotency-key requestId;
+    delete-behavior soft;
+    reversibility human-recoverable;
+    retention "retain soft-deleted customers for 30 days";
+    expected-version rowVersion;
   }
 
   command BulkUpdateCustomers {
@@ -80,6 +88,11 @@ kcf model CustomerService profile business-application {
     atomicity best-effort;
     concurrency optimistic;
     authorization customer.CustomerUpdatePolicy;
+    expected-version rowVersion;
+    idempotency-key requestId;
+    bulk-limit 1000;
+    bulk-ordering unordered;
+    bulk-failure continue; returns count;
   }
 
   command UpsertCustomer {
@@ -92,6 +105,9 @@ kcf model CustomerService profile business-application {
     idempotency conditional;
     atomicity atomic;
     authorization customer.CustomerUpdatePolicy;
+    concurrency optimistic;
+    expected-version rowVersion;
+    idempotency-key requestId;
   }
 
   collection ActiveCustomers {

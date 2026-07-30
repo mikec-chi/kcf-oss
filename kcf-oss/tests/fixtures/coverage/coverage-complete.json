@@ -5,28 +5,142 @@
   "module": "KCF",
   "namespace": "fin",
   "profile": "business-application",
-  "profiles": ["business-application"],
+  "profiles": [
+    "business-application"
+  ],
   "concepts": [
-    {"id": "Clerk", "qualifiedName": "fin.Clerk", "kind": "ACTOR"},
-    {"id": "Invoice", "qualifiedName": "fin.Invoice", "kind": "ENTITY", "attributes": [
-      {"name": "invoiceId", "type": "UUID", "identity": true},
-      {"name": "amount", "type": "Decimal", "required": true}
-    ]}
+    {
+      "id": "Clerk",
+      "qualifiedName": "fin.Clerk",
+      "kind": "ACTOR"
+    },
+    {
+      "id": "Invoice",
+      "qualifiedName": "fin.Invoice",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "invoiceId",
+          "type": "UUID",
+          "identity": true
+        },
+        {
+          "name": "amount",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    }
   ],
   "lifecycles": [
-    {"id": "InvoiceLifecycle", "subject": "fin.Invoice", "states": ["Draft", "Issued", "Paid"], "initial": "Draft", "terminal": ["Paid"], "transitions": [
-      {"from": "Draft", "to": "Issued"},
-      {"from": "Issued", "to": "Paid"}
-    ]}
+    {
+      "id": "InvoiceLifecycle",
+      "subject": "fin.Invoice",
+      "states": [
+        "Draft",
+        "Issued",
+        "Paid"
+      ],
+      "initial": "Draft",
+      "terminal": [
+        "Paid"
+      ],
+      "transitions": [
+        {
+          "from": "Draft",
+          "to": "Issued"
+        },
+        {
+          "from": "Issued",
+          "to": "Paid"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "CreateInvoice", "effect": "command", "operation": "create", "scope": "record", "target": "fin.Invoice", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "authorization": "fin.InvoicePolicy"},
-    {"id": "GetInvoice", "effect": "query", "operation": "read", "scope": "record", "target": "fin.Invoice", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one"},
-    {"id": "IssueInvoice", "effect": "command", "operation": "update", "scope": "record", "target": "fin.Invoice", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "authorization": "fin.InvoicePolicy"},
-    {"id": "DeleteInvoice", "effect": "command", "operation": "delete", "scope": "record", "target": "fin.Invoice", "selection": "identity", "inputCardinality": "one", "outputCardinality": "zero", "idempotency": "conditional", "atomicity": "atomic", "authorization": "fin.InvoicePolicy"},
-    {"id": "BulkIssueInvoices", "effect": "command", "operation": "bulk-update", "scope": "set", "target": "fin.Invoice", "selection": "predicate", "inputCardinality": "many", "outputCardinality": "many", "idempotency": "conditional", "atomicity": "best-effort", "concurrency": "optimistic", "authorization": "fin.InvoicePolicy"}
+    {
+      "id": "CreateInvoice",
+      "effect": "command",
+      "operation": "create",
+      "scope": "record",
+      "target": "fin.Invoice",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "fin.InvoicePolicy",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "GetInvoice",
+      "effect": "query",
+      "operation": "read",
+      "scope": "record",
+      "target": "fin.Invoice",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    },
+    {
+      "id": "IssueInvoice",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "fin.Invoice",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "fin.InvoicePolicy",
+      "concurrency": "optimistic",
+      "expectedVersion": "version",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "DeleteInvoice",
+      "effect": "command",
+      "operation": "delete",
+      "scope": "record",
+      "target": "fin.Invoice",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "zero",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "fin.InvoicePolicy",
+      "idempotencyKey": "requestId",
+      "deleteBehavior": "soft",
+      "reversibility": "human-recoverable",
+      "retention": "retain for 30 days",
+      "expectedVersion": "version"
+    },
+    {
+      "id": "BulkIssueInvoices",
+      "effect": "command",
+      "operation": "bulk-update",
+      "scope": "set",
+      "target": "fin.Invoice",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "conditional",
+      "atomicity": "best-effort",
+      "concurrency": "optimistic",
+      "authorization": "fin.InvoicePolicy",
+      "expectedVersion": "version",
+      "idempotencyKey": "requestId",
+      "bulkLimit": 1000,
+      "bulkOrdering": "unordered",
+      "bulkFailurePolicy": "continue",
+      "returns": "count"
+    }
   ],
   "collectionTransforms": [
-    {"id": "InvoiceProjection", "operation": "project", "inputSchema": "fin.Invoice", "outputSchema": "fin.InvoiceView"}
+    {
+      "id": "InvoiceProjection",
+      "operation": "project",
+      "inputSchema": "fin.Invoice",
+      "outputSchema": "fin.InvoiceView"
+    }
   ]
 }

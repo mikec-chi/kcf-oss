@@ -5,16 +5,45 @@
   "module": "KCF",
   "namespace": "fin",
   "profile": "business-application",
-  "profiles": ["business-application"],
+  "profiles": [
+    "business-application"
+  ],
   "concepts": [
-    {"id": "Invoice", "qualifiedName": "fin.Invoice", "kind": "ENTITY", "attributes": [
-      {"name": "invoiceId", "type": "UUID", "identity": true}
-    ]},
-    {"id": "LineItem", "qualifiedName": "fin.LineItem", "kind": "ENTITY", "attributes": [
-      {"name": "description", "type": "String"}
-    ]}
+    {
+      "id": "Invoice",
+      "qualifiedName": "fin.Invoice",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "invoiceId",
+          "type": "UUID",
+          "identity": true
+        }
+      ]
+    },
+    {
+      "id": "LineItem",
+      "qualifiedName": "fin.LineItem",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "description",
+          "type": "String"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "IssueInvoice", "effect": "command", "operation": "update", "scope": "record", "target": "fin.Invoice", "inputCardinality": "one", "outputCardinality": "one"}
+    {
+      "id": "IssueInvoice",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "fin.Invoice",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "concurrency": "optimistic",
+      "expectedVersion": "version"
+    }
   ]
 }

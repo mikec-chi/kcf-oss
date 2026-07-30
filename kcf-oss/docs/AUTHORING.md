@@ -14,6 +14,7 @@ kcf model CustomerService profile business-application {
   entity Customer {
     identity customerId: UUID;
     required name: String;
+    optional status: String;
   }
 
   event CustomerUpdated immutable;
@@ -33,7 +34,10 @@ kcf model CustomerService profile business-application {
     output one;
     mutate status;
     idempotency conditional;
+    idempotency-key requestId;
     atomicity atomic;
+    concurrency optimistic;
+    expected-version rowVersion;
     authorization customer.ArchivePolicy;
   }
 }

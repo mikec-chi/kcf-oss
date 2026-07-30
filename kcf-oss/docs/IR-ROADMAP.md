@@ -184,11 +184,11 @@ condition needs, and `ruleKind` already names the intended semantics (`CONSTRAIN
 Additive grammar/IR + analyzer + codegen change, so it lands via a **Grammar RFC + VERSIONING**
 decision, never silently. Three questions the report flags for that RFC: (1) whether a parsed
 `conditionAst` sits **beside** the string (additive, lazy migration) or replaces it; (2) operand
-resolution — the **same problem as report `20260729-10`**, already fixed for MATH by resolving
-`ref` leaves, and it should be solved once for both (an unresolvable operand makes a parsed
-condition no better than a string); (3) how far the expression language goes — a real government
-rule set needed only comparison / equality / boolean / membership, i.e. the existing math grammar
-plus comparison operators. This is the single highest-leverage behavioural extension.
+resolution — the **same problem as RFC-nothing / report `20260729-10`**, already fixed for MATH
+by resolving `ref` leaves, and it should be solved once for both (an unresolvable operand makes a
+parsed condition no better than a string); (3) how far the expression language goes — a real
+government rule set needed only comparison / equality / boolean / membership, i.e. the existing
+math grammar plus comparison operators. This is the single highest-leverage behavioural extension.
 
 ### RFC-14 — an action `procedure` surface (ACTION dimension) (field report `20260729-14`)
 
@@ -210,6 +210,59 @@ behaviour belongs inside KCF's boundary is a project decision, not a defect. Fil
 evidence and routed to a **Grammar RFC + VERSIONING** decision; the report proposes no production.
 (What is *not* a scope decision — that nothing told you which side of the line your model fell on —
 is fixed independently by reports `20260729-10`, `-12`, and `-13`, with no contract change.)
+
+### RFC-15 — experience `view` KIND selector + per-kind bindings (EXPERIENCE profile)
+
+**Status: DELIVERED (grammar + validation).** The EBNF (`view-def`/`view-kind`/`view-binding`) and the
+compiler parser carry the `kind` selector and per-kind bindings; the IR schema types the `kind` enum; the
+analyzer validates it (`experience.view.kind` = kind ∈ enum; `experience.view.binding` = the kind's
+binding resolves, declared or inferable from the entity's semantics — the same resolution a downstream
+UI emitter performs). A worked compile golden lives at `tests/domains/experience-views.kcf`
+and a negative fixture at `tests/fixtures/invalid/experience-view-failures.json`. The prose below is the
+original proposal, retained for rationale. Note: profile fields are authored `key value;` (no colon),
+e.g. `view Board { kind kanban; entity Ticket; }`.
+
+Today `view-def = "view", id, "{", ["entity"], {"component"}, {"action"}, "}"` — a view has no
+**kind**, so the model cannot say a view is a list vs a kanban vs a chart. The downstream renderer
+(Aurora, or any UI target) must therefore guess the projection. Additive extension: a `kind` selector
++ a per-kind binding, most of which point at semantics the model *already* declares, so a view merely
+chooses a projection:
+
+    view-def   = "view", id, "{", [ "kind", ":", view-kind, ";" ],
+                 [ "entity", ":", semantic-ref, ";" ], { view-binding }, { "action", ":", semantic-ref, ";" }, "}" ;
+    view-kind  = "list" | "form" | "tree" | "chart" | "dashboard" | "map" | "kanban" | "gantt" | "custom" ;
+    view-binding = "parent"   ":", semantic-ref, ";"      (* tree   → COMPOSITION self-ref *)
+                 | "column"   ":", semantic-ref, ";"      (* kanban → LIFECYCLE state       *)
+                 | "series"   ":", semantic-ref, ";"      (* chart  → MEASURE               *)
+                 | "geometry" ":", semantic-ref, ";"      (* map    → SPATIAL               *)
+                 | "start" ":", semantic-ref, ";" | "end" ":", semantic-ref, ";"  (* gantt → TEMPORAL *)
+                 | "depends-on" ":", semantic-ref, ";"    (* gantt  → ORDERING              *)
+                 | "tile" ":", semantic-ref, ";"          (* dashboard → view/measure       *)
+                 | "renderer" ":", string, ";" ;          (* custom → a registered renderer *)
+
+Additive + backward-compatible: a view with no `kind` keeps today's list/detail behaviour, so it lands
+via a **Grammar RFC + VERSIONING** (deprecation-free). A downstream experience emitter + the
+`aurora-view-spec-v1` contract already **consume** `view.kind` + these bindings (and infer a kind from
+the entity's semantics when absent), so the runtime path is live; this RFC formalises the *authoring*
+surface.
+
+### RFC-16 — container-relative breakpoints + optional per-region layout hint (DESIGN profile)
+
+**Status: DELIVERED (grammar).** The EBNF/parser carry the optional per-region layout hint
+(`priority`/`span`/`min-size`/`collapse`) on `page`; breakpoints are documented container-relative. The
+hint is an override — autolayout is synthesised deterministically by a downstream layout engine and is
+not analyzer-validated (it carries no cross-references). The prose below is the original proposal.
+
+The DESIGN profile already carries the autolayout inputs — `breakpoint-def`, `space`/`density` tokens,
+`pattern`, and `page { view; section }`. Two additive clarifications make it drive a professional,
+responsive UI runtime: (1) **document `breakpoint` widths as CONTAINER-relative** (the width of the
+view's own region, not the viewport — a view can render in a split-pane card), which is how a
+governed shell resolves layout per region; and (2) an **optional per-region layout hint** on
+`page-design`/`view` — `priority`, `span`, `min-size`, `collapse` — used only to *override* the
+automatic layout. Autolayout is automatic by default (synthesised deterministically from the view kind
++ field/measure inventory + these tokens), so authors rarely write layout. Additive → **Grammar RFC +
+VERSIONING**. The deterministic layout synthesis lives in a downstream layout engine and emits an
+`aurora-layout-v1` plan the shell resolves with container queries.
 
 ## Downstream guidance (reclassify — not a model requirement)
 

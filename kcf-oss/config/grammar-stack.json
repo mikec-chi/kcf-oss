@@ -1,39 +1,289 @@
 {
   "name": "kcf-oss",
-  "version": "1.11.0",
+  "version": "1.16.0",
   "irVersion": "1.0.0",
   "notation": "ISO/IEC 14977",
   "rootModule": "KCF",
   "modules": {
-    "KCF": {"file": "grammars/core/KCF-v1.0-Semantic-Metagrammar.ebnf", "start": "kcf-model", "imports": ["RELATIONSHIP"]},
-    "RELATIONSHIP": {"file": "grammars/core/RELATIONSHIP-v1.0-Relationship-Algebra.ebnf", "start": "relationship-grammar", "imports": ["KCF"]},
-    "ACTION": {"file": "grammars/core/ACTION-v1.0-Action-Contract-Grammar.ebnf", "start": "action-model", "imports": ["KCF"]},
-    "ENTITY": {"file": "grammars/dimensions/ENTITY-v1.0-Entity-Grammar.ebnf", "start": "entity-model", "imports": ["KCF"], "semanticImports": ["ACTION"]},
-    "ACTOR": {"file": "grammars/dimensions/ACTOR-v1.0-Actor-Grammar.ebnf", "start": "actor-model", "imports": ["KCF"]},
-    "WORK": {"file": "grammars/dimensions/WORK-v1.0-Work-Grammar.ebnf", "start": "work-model", "imports": ["KCF"], "semanticImports": ["ACTION"]},
-    "EVENT": {"file": "grammars/dimensions/EVENT-v1.0-Event-Grammar.ebnf", "start": "event-model", "imports": ["KCF"]},
-    "LIFECYCLE": {"file": "grammars/dimensions/LIFECYCLE-v1.0-Lifecycle-Grammar.ebnf", "start": "lifecycle-model", "imports": ["KCF"]},
-    "RULE": {"file": "grammars/dimensions/RULE-v1.0-Rule-Grammar.ebnf", "start": "rule-model", "imports": ["KCF"]},
-    "INFORMATION": {"file": "grammars/dimensions/INFORMATION-v1.0-Information-Grammar.ebnf", "start": "information-model", "imports": ["KCF"]},
-    "RESOURCE": {"file": "grammars/dimensions/RESOURCE-v1.0-Resource-Grammar.ebnf", "start": "resource-model", "imports": ["KCF"]},
-    "TEMPORAL": {"file": "grammars/dimensions/TEMPORAL-v1.0-Temporal-Grammar.ebnf", "start": "temporal-model", "imports": ["KCF"]},
-    "SPATIAL": {"file": "grammars/dimensions/SPATIAL-v1.0-Spatial-Grammar.ebnf", "start": "spatial-model", "imports": ["KCF"]},
-    "ORGANIZATION": {"file": "grammars/dimensions/ORGANIZATION-v1.0-Organization-Grammar.ebnf", "start": "organization-model", "imports": ["KCF"]},
-    "INTENT": {"file": "grammars/dimensions/INTENT-v1.0-Intent-Grammar.ebnf", "start": "intent-model", "imports": ["KCF"]},
-    "REASONING": {"file": "grammars/dimensions/REASONING-v1.0-Reasoning-Grammar.ebnf", "start": "reasoning-model", "imports": ["KCF"]},
-    "MEASURE": {"file": "grammars/dimensions/MEASURE-v1.0-Measure-Grammar.ebnf", "start": "measure-model", "imports": ["KCF"]},
-    "LOGIC": {"file": "grammars/dimensions/LOGIC-v1.0-Logic-Grammar.ebnf", "start": "logic-model", "imports": ["KCF"]},
-    "MATH": {"file": "grammars/dimensions/MATH-v1.0-Math-Grammar.ebnf", "start": "math-model", "imports": ["KCF"]},
-    "COMPILATION": {"file": "grammars/compilation/COMPILATION-v1.0-Semantic-Compilation-Grammar.ebnf", "start": "compilation-model", "imports": ["KCF"]},
-    "INTEGRATION": {"file": "grammars/profiles/operational/INTEGRATION-v1.0-Integration-Profile.ebnf", "start": "integration-model", "imports": ["KCF"], "semanticImports": ["ACTION", "WORK", "INFORMATION", "EVENT", "RESOURCE"]},
-    "SECURITY": {"file": "grammars/profiles/operational/SECURITY-v1.0-Security-Profile.ebnf", "start": "security-model", "imports": ["KCF"], "semanticImports": ["ENTITY", "RULE", "INFORMATION", "ACTOR", "WORK"]},
-    "LINEAGE": {"file": "grammars/profiles/operational/LINEAGE-v1.0-Lineage-Binding-Cost-Profile.ebnf", "start": "lineage-model", "imports": ["KCF"], "semanticImports": ["INFORMATION", "MEASURE", "ACTION"]},
-    "ARCHITECTURE": {"file": "grammars/profiles/emitters/ARCHITECTURE-v1.0-Architecture-Emitter-Profile.ebnf", "start": "architecture-model", "imports": ["KCF"], "semanticImports": ["WORK", "RESOURCE", "SECURITY"]},
-    "EXPERIENCE": {"file": "grammars/profiles/emitters/EXPERIENCE-v1.0-Experience-Emitter-Profile.ebnf", "start": "experience-model", "imports": ["KCF"], "semanticImports": ["ENTITY", "WORK", "ACTION"]},
-    "DESIGN": {"file": "grammars/profiles/emitters/DESIGN-v1.0-Design-Emitter-Profile.ebnf", "start": "design-model", "imports": ["KCF"], "semanticImports": ["EXPERIENCE"]},
-    "ANALYTICS": {"file": "grammars/profiles/emitters/ANALYTICS-v1.0-Analytics-Emitter-Profile.ebnf", "start": "analytics-model", "imports": ["KCF"], "semanticImports": ["INFORMATION", "MEASURE", "ACTION", "EXPERIENCE"]},
-    "AI": {"file": "grammars/profiles/emitters/AI-v1.0-AI-Emitter-Profile.ebnf", "start": "ai-model", "imports": ["KCF"], "semanticImports": ["INFORMATION", "MATH", "MEASURE", "REASONING", "LINEAGE", "SECURITY"]},
-    "AUTHORING": {"file": "grammars/authoring/KCF-AUTHORING-v1.2.ebnf", "start": "authoring-model", "imports": ["KCF"], "semanticImports": ["ACTION", "ENTITY", "ACTOR", "WORK", "EVENT", "LIFECYCLE", "INFORMATION", "RESOURCE", "RULE", "INTENT", "MEASURE", "ORGANIZATION", "TEMPORAL", "SPATIAL", "REASONING", "LOGIC", "MATH"]}
+    "KCF": {
+      "file": "grammars/core/KCF-v1.0-Semantic-Metagrammar.ebnf",
+      "start": "kcf-model",
+      "imports": [
+        "RELATIONSHIP"
+      ]
+    },
+    "RELATIONSHIP": {
+      "file": "grammars/core/RELATIONSHIP-v1.0-Relationship-Algebra.ebnf",
+      "start": "relationship-grammar",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "ACTION": {
+      "file": "grammars/core/ACTION-v1.0-Action-Contract-Grammar.ebnf",
+      "start": "action-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "ENTITY": {
+      "file": "grammars/dimensions/ENTITY-v1.0-Entity-Grammar.ebnf",
+      "start": "entity-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ACTION"
+      ]
+    },
+    "ACTOR": {
+      "file": "grammars/dimensions/ACTOR-v1.0-Actor-Grammar.ebnf",
+      "start": "actor-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "WORK": {
+      "file": "grammars/dimensions/WORK-v1.0-Work-Grammar.ebnf",
+      "start": "work-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ACTION"
+      ]
+    },
+    "EVENT": {
+      "file": "grammars/dimensions/EVENT-v1.0-Event-Grammar.ebnf",
+      "start": "event-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "LIFECYCLE": {
+      "file": "grammars/dimensions/LIFECYCLE-v1.0-Lifecycle-Grammar.ebnf",
+      "start": "lifecycle-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "RULE": {
+      "file": "grammars/dimensions/RULE-v1.0-Rule-Grammar.ebnf",
+      "start": "rule-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "INFORMATION": {
+      "file": "grammars/dimensions/INFORMATION-v1.0-Information-Grammar.ebnf",
+      "start": "information-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "RESOURCE": {
+      "file": "grammars/dimensions/RESOURCE-v1.0-Resource-Grammar.ebnf",
+      "start": "resource-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "TEMPORAL": {
+      "file": "grammars/dimensions/TEMPORAL-v1.0-Temporal-Grammar.ebnf",
+      "start": "temporal-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "SPATIAL": {
+      "file": "grammars/dimensions/SPATIAL-v1.0-Spatial-Grammar.ebnf",
+      "start": "spatial-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "ORGANIZATION": {
+      "file": "grammars/dimensions/ORGANIZATION-v1.0-Organization-Grammar.ebnf",
+      "start": "organization-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "INTENT": {
+      "file": "grammars/dimensions/INTENT-v1.0-Intent-Grammar.ebnf",
+      "start": "intent-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "REASONING": {
+      "file": "grammars/dimensions/REASONING-v1.0-Reasoning-Grammar.ebnf",
+      "start": "reasoning-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "MEASURE": {
+      "file": "grammars/dimensions/MEASURE-v1.0-Measure-Grammar.ebnf",
+      "start": "measure-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "LOGIC": {
+      "file": "grammars/dimensions/LOGIC-v1.0-Logic-Grammar.ebnf",
+      "start": "logic-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "MATH": {
+      "file": "grammars/dimensions/MATH-v1.0-Math-Grammar.ebnf",
+      "start": "math-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "COMPILATION": {
+      "file": "grammars/compilation/COMPILATION-v1.0-Semantic-Compilation-Grammar.ebnf",
+      "start": "compilation-model",
+      "imports": [
+        "KCF"
+      ]
+    },
+    "INTEGRATION": {
+      "file": "grammars/profiles/operational/INTEGRATION-v1.0-Integration-Profile.ebnf",
+      "start": "integration-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ACTION",
+        "WORK",
+        "INFORMATION",
+        "EVENT",
+        "RESOURCE"
+      ]
+    },
+    "SECURITY": {
+      "file": "grammars/profiles/operational/SECURITY-v1.0-Security-Profile.ebnf",
+      "start": "security-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ENTITY",
+        "RULE",
+        "INFORMATION",
+        "ACTOR",
+        "WORK"
+      ]
+    },
+    "LINEAGE": {
+      "file": "grammars/profiles/operational/LINEAGE-v1.0-Lineage-Binding-Cost-Profile.ebnf",
+      "start": "lineage-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "INFORMATION",
+        "MEASURE",
+        "ACTION"
+      ]
+    },
+    "ARCHITECTURE": {
+      "file": "grammars/profiles/emitters/ARCHITECTURE-v1.0-Architecture-Emitter-Profile.ebnf",
+      "start": "architecture-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "WORK",
+        "RESOURCE",
+        "SECURITY"
+      ]
+    },
+    "EXPERIENCE": {
+      "file": "grammars/profiles/emitters/EXPERIENCE-v1.0-Experience-Emitter-Profile.ebnf",
+      "start": "experience-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ENTITY",
+        "WORK",
+        "ACTION"
+      ]
+    },
+    "DESIGN": {
+      "file": "grammars/profiles/emitters/DESIGN-v1.0-Design-Emitter-Profile.ebnf",
+      "start": "design-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "EXPERIENCE"
+      ]
+    },
+    "ANALYTICS": {
+      "file": "grammars/profiles/emitters/ANALYTICS-v1.0-Analytics-Emitter-Profile.ebnf",
+      "start": "analytics-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "INFORMATION",
+        "MEASURE",
+        "ACTION",
+        "EXPERIENCE"
+      ]
+    },
+    "AI": {
+      "file": "grammars/profiles/emitters/AI-v1.0-AI-Emitter-Profile.ebnf",
+      "start": "ai-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "INFORMATION",
+        "MATH",
+        "MEASURE",
+        "REASONING",
+        "LINEAGE",
+        "SECURITY"
+      ]
+    },
+    "AUTHORING": {
+      "file": "grammars/authoring/KCF-AUTHORING-v1.2.ebnf",
+      "start": "authoring-model",
+      "imports": [
+        "KCF"
+      ],
+      "semanticImports": [
+        "ACTION",
+        "ENTITY",
+        "ACTOR",
+        "WORK",
+        "EVENT",
+        "LIFECYCLE",
+        "INFORMATION",
+        "RESOURCE",
+        "RULE",
+        "INTENT",
+        "MEASURE",
+        "ORGANIZATION",
+        "TEMPORAL",
+        "SPATIAL",
+        "REASONING",
+        "LOGIC",
+        "MATH"
+      ]
+    }
   },
-  "allowedTypeOnlyCycles": [["KCF", "RELATIONSHIP"]]
+  "allowedTypeOnlyCycles": [
+    [
+      "KCF",
+      "RELATIONSHIP"
+    ]
+  ]
 }

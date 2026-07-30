@@ -1,0 +1,189 @@
+kcf model OrderOperations profile business-application {
+  namespace ops;
+
+  entity Order {
+    identity orderId: UUID;
+    required total: Decimal;
+    optional note: String;
+    optional rowVersion: Integer;
+  }
+
+  entity OrderSummary {
+    identity summaryId: UUID;
+    required amount: Decimal;
+    optional memo: String;
+  }
+
+  // RFC-8 specialization: a refinement must preserve the parent's primary kind (ENTITY -> ENTITY).
+  entity PriorityOrder {
+    identity priorityOrderId: UUID;
+    specializes Order;
+    required tier: Integer;
+  }
+
+  // RFC-2 typed field lineage: a transform that declares field mappings must cover every required
+  // output field and keep each mapping type/null consistent (checked by check_transform_lineage).
+  transform SummarizeOrder {
+    operation read;
+    scope record;
+    target OrderSummary;
+    selection identity;
+    input one;
+    output one;
+    classification internal;
+    consumes Order;
+    produces OrderSummary;
+    totality partial;
+    map Order.total -> OrderSummary.amount;
+    map Order.note -> OrderSummary.memo;
+  }
+
+  actor OrderClerk { }
+  work ProcessOrderWork { }
+
+  rule OrderConstraint {
+    kind CONSTRAINT;
+    condition "total is greater than zero";
+    predicate total gt 0;
+    effect ProcessOrderWork;
+    applies-to Order;
+    authority OrderClerk;
+  }
+
+  policy OrderPolicy {
+    authority OrderClerk;
+    rule OrderConstraint;
+    default-conflict deny-overrides;
+  }
+
+  // IR 1.1 executable contract: a create command declares its idempotency key + reversibility so a
+  // retry is safe and the effect's undo semantics are explicit (on top of the existing contract).
+  command PlaceOrder {
+    operation create;
+    scope record;
+    target Order;
+    input one;
+    output one;
+    mutate total;
+    provide total;
+    idempotency conditional;
+    atomicity atomic;
+    authorization ops.OrderPolicy;
+    precondition "total is greater than zero";
+    postcondition "an Order exists in Placed state";
+    idempotency-key orderId;
+    reversibility compensatable;
+    compensation ops.CancelOrder;
+    transaction-boundary required;
+  }
+
+  // An update declares the optimistic-concurrency token it must match (prevents lost updates).
+  command ReviseOrder {
+    operation update;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+    mutate note;
+    idempotency conditional;
+    atomicity atomic;
+    concurrency optimistic;
+    authorization ops.OrderPolicy;
+    expected-version rowVersion;
+    reversibility reversible;
+    transaction-boundary required;
+    idempotency-key requestId;
+  }
+
+  // A destructive command declares delete behavior + retention (recovery), and is irreversible.
+  command PurgeOrder {
+    operation delete;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+    idempotency conditional;
+    atomicity atomic;
+    authorization ops.OrderPolicy;
+    delete-behavior soft;
+    retention "retain soft-deleted orders for 90 days";
+    reversibility human-recoverable;
+    transaction-boundary required;
+    idempotency-key requestId;
+    expected-version rowVersion;
+  }
+
+  // A bulk command declares its limit, ordering, and partial-failure policy.
+  command BulkCloseOrders {
+    operation bulk-update;
+    scope set;
+    target Order;
+    selection predicate;
+    input many;
+    output many;
+    mutate note;
+    idempotency conditional;
+    atomicity best-effort;
+    concurrency optimistic;
+    authorization ops.OrderPolicy;
+    bulk-limit 1000;
+    bulk-ordering unordered;
+    bulk-failure continue; returns count;
+    reversibility irreversible;
+    transaction-boundary supported;
+    expected-version rowVersion;
+    idempotency-key requestId;
+  }
+
+  command CancelOrder {
+    operation update;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+    mutate note;
+    idempotency conditional;
+    atomicity atomic;
+    concurrency optimistic;
+    authorization ops.OrderPolicy;
+    reversibility reversible;
+    expected-version rowVersion;
+    idempotency-key requestId;
+  }
+
+  collection OrderReport {
+    operation project;
+    inputSchema Order;
+    outputSchema Order;
+    project total;
+    project note;
+  }
+
+  query GetOrderById {
+    operation read;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+  }
+
+  command NotifyOrder {
+    operation update;
+    scope record;
+    target Order;
+    selection identity;
+    input one;
+    output one;
+    mutate note;
+    idempotency conditional;
+    idempotency-key requestId;
+    concurrency optimistic;
+    expected-version rowVersion;
+    authorization ops.OrderPolicy;
+    invoke GetOrderById { }
+  }
+}

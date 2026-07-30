@@ -222,7 +222,8 @@
       "outputCardinality": "one",
       "idempotency": "conditional",
       "atomicity": "atomic",
-      "authorization": "crm.LeadPolicy"
+      "authorization": "crm.LeadPolicy",
+      "idempotencyKey": "requestId"
     }
   ],
   "collectionTransforms": [],
@@ -369,21 +370,21 @@
       "source": "tests/domains/entity-category.kcf",
       "line": 43,
       "column": 3,
-      "endLine": 47,
+      "endLine": 48,
       "endColumn": 4
     },
     "crm.LeadRule": {
       "source": "tests/domains/entity-category.kcf",
-      "line": 48,
+      "line": 49,
       "column": 3,
-      "endLine": 48,
+      "endLine": 49,
       "endColumn": 124
     },
     "crm.LeadPolicy": {
       "source": "tests/domains/entity-category.kcf",
-      "line": 49,
+      "line": 50,
       "column": 3,
-      "endLine": 49,
+      "endLine": 50,
       "endColumn": 92
     }
   }

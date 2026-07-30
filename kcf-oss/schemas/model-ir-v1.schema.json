@@ -264,7 +264,23 @@
       "$ref": "#/$defs/openObject"
     },
     "experience": {
-      "$ref": "#/$defs/openObject"
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "views": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "kind": {
+                "description": "RFC-15: the view projection. Optional; absent → list/detail. Per-kind bindings (parent/column/series/geometry/start/end/depends-on/tile/renderer) point at existing semantic dimensions and are validated by the analyzer (experience.view.binding).",
+                "enum": ["list", "form", "tree", "chart", "dashboard", "map", "kanban", "gantt", "custom"]
+              }
+            }
+          }
+        }
+      }
     },
     "design": {
       "$ref": "#/$defs/openObject"
@@ -651,6 +667,7 @@
         "calendarRef": {"type": "string"},
         "timezone": {"type": ["string", "number"]},
         "containedIn": {"type": "string"},
+        "specializes": {"type": "string", "description": "RFC-8: the concept this one specializes/refines; its primary kind must be preserved or legally refined."},
         "geometry": {"type": "object"},
         "adjacentTo": {"type": "array", "items": {"type": "string"}},
         "jurisdictions": {"type": "array", "items": {"type": "string"}},
@@ -859,7 +876,114 @@
           "items": {
             "type": "string"
           }
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "IR 1.1 executable contract: conditions that must hold BEFORE the action may run (pre-state)."
+        },
+        "postconditions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "IR 1.1 executable contract: conditions guaranteed AFTER the action succeeds (post-state)."
+        },
+        "expectedVersion": {
+          "type": "string",
+          "description": "IR 1.1: the optimistic-concurrency / row-version token an update must match to prevent lost updates."
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "description": "IR 1.1: the field/expression that makes a command idempotent under retry (dedup key)."
+        },
+        "transactionBoundary": {
+          "enum": ["required", "requires-new", "supported", "not-supported", "none"],
+          "description": "IR 1.1: the transaction boundary this action participates in."
+        },
+        "compensation": {
+          "type": "string",
+          "description": "IR 1.1: the id of a compensating action that reverses this one (required when reversibility is 'compensatable')."
+        },
+        "reversibility": {
+          "enum": ["reversible", "compensatable", "irreversible", "human-recoverable"],
+          "description": "IR 1.1: whether the action's effect can be undone, and how."
+        },
+        "deleteBehavior": {
+          "enum": ["hard", "soft", "restrict", "cascade", "archive"],
+          "description": "IR 1.1: for a delete operation, how the record and its dependents are removed/retained."
+        },
+        "retention": {
+          "type": "string",
+          "description": "IR 1.1: the retention/recovery policy for data affected by a destructive action."
+        },
+        "bulkLimit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "IR 1.1: the maximum number of items a set/bulk operation may process in one call."
+        },
+        "bulkOrdering": {
+          "enum": ["ordered", "unordered"],
+          "description": "IR 1.1: whether a set/bulk operation must process items in order."
+        },
+        "bulkFailurePolicy": {
+          "enum": ["fail-fast", "continue", "atomic", "best-effort"],
+          "description": "IR 1.1: how a set/bulk operation handles a partial failure across items."
+        },
+        "fieldMappings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/fieldMapping"},
+          "description": "RFC-2 (additive, optional): typed field-level lineage for a transform. When present, every required field of each output must be covered and each mapping must be type/unit/null consistent."
+        },
+        "provides": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "RFC-3 (additive, optional): the client-supplied input field names of a create/update; enforced against the target's required + read-only fields when present."
+        },
+        "patchDialect": {
+          "type": "string",
+          "description": "RFC-3: the patch dialect a `patch` operation uses (e.g. json-patch, merge-patch)."
+        },
+        "returns": {
+          "enum": ["records", "keys", "count", "per-item", "none"],
+          "description": "RFC-3: the result shape a set/bulk operation returns."
+        },
+        "pagination": {
+          "enum": ["page", "cursor", "stream", "bounded", "none"],
+          "description": "RFC-3: the pagination/streaming/bounded-materialization behavior of a large query."
+        },
+        "retryBackoff": {"type": "string", "description": "RFC-4: the bounded backoff policy of a retrying action."},
+        "retryClassification": {"type": "string", "description": "RFC-4: which failure classes (transient/permanent) a retry applies to."},
+        "totality": {"enum": ["total", "partial"], "description": "RFC-2: whether a transform's field mapping is total (covers all) or partial."},
+        "invocations": {
+          "type": "array",
+          "description": "RFC-3: action-to-action invocation contracts.",
+          "items": {
+            "type": "object",
+            "required": ["target"],
+            "properties": {
+              "target": {"type": "string"},
+              "args": {"type": "array", "items": {"type": "string"}},
+              "handles": {"type": "array", "items": {"type": "string"}},
+              "establishes": {"type": "array", "items": {"type": "string"}},
+              "expects": {"type": "string"},
+              "bounded": {"type": "boolean"}
+            },
+            "additionalProperties": true
+          }
         }
+      },
+      "additionalProperties": true
+    },
+    "fieldMapping": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source": {"type": "string", "description": "Source field path (Entity.field or field) read by the transform."},
+        "target": {"type": "string", "description": "Target field path (Entity.field or field) the transform writes."},
+        "function": {"type": "string", "description": "Optional named/inline transformation applied from source to target (identity when absent)."},
+        "nullBehavior": {"enum": ["propagate", "default", "error"], "description": "How a null/absent source is handled when writing the target."},
+        "sourceUnit": {"type": "string", "description": "Unit of the source quantity (from the type-system unit registry)."},
+        "targetUnit": {"type": "string", "description": "Unit of the target quantity; must be compatible with sourceUnit or reconciled by `function`."},
+        "lossy": {"type": "boolean", "description": "The mapping intentionally narrows/drops precision or data (acknowledges an otherwise-flagged loss)."}
       },
       "additionalProperties": true
     },

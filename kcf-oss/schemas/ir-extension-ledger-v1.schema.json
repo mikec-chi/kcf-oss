@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/ir-extension-ledger-v1.schema.json",
+  "title": "KCF IR-extension remediation ledger v1",
+  "description": "Evidence-derived status for every rule that was classified needs-ir-extension. Each entry's status is derived from the IR schema, parser, normalizer, catalogue handler, and fixtures - never from the override prose alone.",
+  "type": "object",
+  "required": ["$schema", "ledgerVersion", "sourceRuleCount", "counts", "rules"],
+  "properties": {
+    "$schema": {"const": "ir-extension-ledger-v1"},
+    "ledgerVersion": {"type": "string"},
+    "sourceRuleCount": {"type": "integer"},
+    "counts": {"type": "object", "additionalProperties": {"type": "integer"}},
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "rfc", "status", "requiredIr", "authoringSyntax", "schemaSupport",
+                     "parserSupport", "normalizerSupport", "handler", "positiveFixture", "negativeFixture",
+                     "targetClassification", "overrideReason"],
+        "properties": {
+          "ruleId": {"type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"},
+          "rfc": {"type": ["string", "null"]},
+          "status": {"enum": ["ir-missing", "ir-partial", "ir-present-handler-missing",
+                              "partially-automated", "automated", "enforced-elsewhere",
+                              "runtime-obligation", "external-fact", "human-judgment", "advisory", "superseded"]},
+          "requiredIr": {"type": "array", "items": {"type": "string"}},
+          "authoringSyntax": {"type": "array", "items": {"type": "string"}},
+          "schemaSupport": {"type": "boolean"},
+          "parserSupport": {"type": "boolean"},
+          "normalizerSupport": {"type": "boolean"},
+          "handler": {"type": ["string", "null"]},
+          "positiveFixture": {"type": ["string", "null"]},
+          "negativeFixture": {"type": ["string", "null"]},
+          "targetClassification": {"enum": ["automated", "partially-automated", "enforced-elsewhere",
+                                            "runtime-obligation", "external-fact", "human-judgment",
+                                            "advisory", "superseded"]},
+          "overrideReason": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

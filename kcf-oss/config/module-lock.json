@@ -1,6 +1,6 @@
 {
   "lockVersion": "1.0.0",
-  "grammarStackVersion": "1.11.0",
+  "grammarStackVersion": "1.16.0",
   "modules": {
     "KCF": {
       "version": "1.0.0",
@@ -125,12 +125,12 @@
     "EXPERIENCE": {
       "version": "1.0.0",
       "file": "grammars/profiles/emitters/EXPERIENCE-v1.0-Experience-Emitter-Profile.ebnf",
-      "sha256": "c7ad4b94b0fc40548e004c28dd00aaea1c6dc2879f6cfad78e79f5f710ff89fb"
+      "sha256": "1f0fe6b72dc6f17f1b87a0a38fd1df45cdbf6706773e5b2f1c22042a40095adf"
     },
     "DESIGN": {
       "version": "1.0.0",
       "file": "grammars/profiles/emitters/DESIGN-v1.0-Design-Emitter-Profile.ebnf",
-      "sha256": "e97afacf4ad67bca7dc6ac765ffeb190fcbe6ceae1ef9086b37afa6e9d7b7353"
+      "sha256": "38ea8437ef9c58f5822f74f52e983864a1b471e6b0a5887cd8584bf98a732e3b"
     },
     "ANALYTICS": {
       "version": "1.0.0",
@@ -145,7 +145,7 @@
     "AUTHORING": {
       "version": "1.0.0",
       "file": "grammars/authoring/KCF-AUTHORING-v1.2.ebnf",
-      "sha256": "3dec3802f3462e3c57e70e7f54d7a04b546ac63cf96cc42808f9a9dce87c732a"
+      "sha256": "76eb9ad4780bdc777f27b83d60720ab0c63e0ae2e5753eca1040078a38a34820"
     }
   }
 }

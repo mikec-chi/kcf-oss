@@ -3,90 +3,1198 @@
   "irVersion": "1.0.0",
   "id": "InvalidModel",
   "module": "KCF",
-  "requiredPatterns": ["case.identity", "case.evidence"],
-  "recommendedPatterns": ["case.correspondence"],
-  "prohibitedPatterns": ["case.evidence-overwrite"],
-  "implementedPatterns": ["case.identity", "case.evidence-overwrite"],
-  "excludedPatterns": ["case.evidence", "unscoped.pattern"],
+  "requiredPatterns": [
+    "case.identity",
+    "case.evidence"
+  ],
+  "recommendedPatterns": [
+    "case.correspondence"
+  ],
+  "prohibitedPatterns": [
+    "case.evidence-overwrite"
+  ],
+  "implementedPatterns": [
+    "case.identity",
+    "case.evidence-overwrite"
+  ],
+  "excludedPatterns": [
+    "case.evidence",
+    "unscoped.pattern"
+  ],
   "concepts": [
-    {"id": "Thing", "qualifiedName": "demo.Thing", "kind": "UNKNOWN", "references": ["demo.Missing"]},
-    {"id": "ThingAgain", "qualifiedName": "demo.Thing", "kind": "ENTITY", "abstract": true, "instances": ["x"]},
-    {"id": "Widget", "qualifiedName": "demo.Widget", "kind": "ACTOR"}
+    {
+      "id": "Thing",
+      "qualifiedName": "demo.Thing",
+      "kind": "UNKNOWN",
+      "references": [
+        "demo.Missing"
+      ]
+    },
+    {
+      "id": "ThingAgain",
+      "qualifiedName": "demo.Thing",
+      "kind": "ENTITY",
+      "abstract": true,
+      "instances": [
+        "x"
+      ]
+    },
+    {
+      "id": "Widget",
+      "qualifiedName": "demo.Widget",
+      "kind": "ACTOR"
+    },
+    {
+      "id": "BadTypeEntity",
+      "qualifiedName": "demo.BadTypeEntity",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "ref",
+          "type": "Frobnicate"
+        },
+        {
+          "name": "code",
+          "type": "Integer",
+          "default": "not-an-int"
+        },
+        {
+          "name": "key",
+          "type": "UUID",
+          "identity": true,
+          "required": true,
+          "default": null
+        }
+      ]
+    },
+    {
+      "id": "BadMeasure",
+      "qualifiedName": "demo.BadMeasure",
+      "kind": "MEASURE",
+      "target": Infinity
+    },
+    {
+      "id": "BadDuration",
+      "qualifiedName": "demo.BadDuration",
+      "kind": "TEMPORAL",
+      "durationValue": {
+        "value": -3,
+        "unit": "month"
+      }
+    },
+    {
+      "id": "S1",
+      "qualifiedName": "demo.S1",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "sa",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "name": "sb",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "id": "D1",
+      "qualifiedName": "demo.D1",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "da",
+          "type": "Integer",
+          "required": true
+        },
+        {
+          "name": "db",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "name": "dc",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "dd",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "de",
+          "type": "Integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "qualifiedName": "demo.S2",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "amt",
+          "type": "Money",
+          "required": true
+        },
+        {
+          "name": "q",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "D2",
+      "qualifiedName": "demo.D2",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "amt",
+          "type": "Money",
+          "required": true
+        },
+        {
+          "name": "q",
+          "type": "Decimal",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "BadSpec",
+      "qualifiedName": "demo.BadSpec",
+      "kind": "ENTITY",
+      "specializes": "Widget"
+    },
+    {
+      "id": "OrphanSpec",
+      "qualifiedName": "demo.OrphanSpec",
+      "kind": "ENTITY",
+      "specializes": "Ghost"
+    },
+    {
+      "id": "CollDefault",
+      "qualifiedName": "demo.CollDefault",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "tags",
+          "type": "String",
+          "cardinality": "many",
+          "default": "notalist"
+        }
+      ]
+    }
   ],
   "relationships": [
-    {"id": "bad-rel", "definition": "performs", "rootKind": "WRONG", "source": "demo.Thing", "target": "demo.Thing", "strength": 2.0, "validFrom": "2026-12-01", "validTo": "2026-01-01"},
-    {"id": "unordered", "rootKind": "ORDERING", "source": "demo.Thing", "target": "demo.Thing", "allowSelf": true}
+    {
+      "id": "bad-rel",
+      "definition": "performs",
+      "rootKind": "WRONG",
+      "source": "demo.Thing",
+      "target": "demo.Thing",
+      "strength": 2.0,
+      "validFrom": "2026-12-01",
+      "validTo": "2026-01-01"
+    },
+    {
+      "id": "unordered",
+      "rootKind": "ORDERING",
+      "source": "demo.Thing",
+      "target": "demo.Thing",
+      "allowSelf": true
+    },
+    {
+      "id": "NonCanonicalNoInverse",
+      "rootKind": "ASSOCIATION",
+      "source": "demo.Thing",
+      "target": "demo.Widget",
+      "qualifiers": {
+        "canonical": false
+      }
+    },
+    {
+      "id": "BadInverse",
+      "rootKind": "ASSOCIATION",
+      "source": "demo.Thing",
+      "target": "demo.Widget",
+      "qualifiers": {
+        "inverse": "does-not-exist"
+      }
+    },
+    {
+      "id": "BadTransitive",
+      "rootKind": "ASSOCIATION",
+      "source": "demo.Thing",
+      "target": "demo.Widget",
+      "qualifiers": {
+        "transitive": true
+      }
+    },
+    {
+      "id": "CondRel",
+      "rootKind": "ASSOCIATION",
+      "source": "S1",
+      "target": "S1",
+      "qualifiers": {
+        "predicate": {
+          "field": "sb"
+        }
+      }
+    },
+    {
+      "id": "PartGov",
+      "rootKind": "PARTICIPATION",
+      "source": "demo.Thing",
+      "target": "demo.Widget",
+      "qualifiers": {
+        "governs": "demo.Policy"
+      }
+    }
   ],
   "lifecycles": [
-    {"id": "BadLifecycle", "states": ["A", "B"], "initial": ["A", "B"], "terminal": [], "transitions": [{"from": "A", "to": "Missing"}]}
+    {
+      "id": "BadLifecycle",
+      "states": [
+        "A",
+        "B"
+      ],
+      "initial": [
+        "A",
+        "B"
+      ],
+      "terminal": [],
+      "transitions": [
+        {
+          "from": "A",
+          "to": "Missing"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "DangerousBulk", "effect": "command", "operation": "bulk-delete", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "zero", "retry": 3, "idempotency": "non-idempotent"},
-    {"id": "KeylessUpsert", "effect": "command", "operation": "upsert", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"},
-    {"id": "SilentCreate", "effect": "command", "operation": "create", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "zero", "idempotency": "idempotent", "authorization": "demo.Policy"},
-    {"id": "TracelessTransform", "effect": "transform", "operation": "update", "scope": "record", "target": "demo.Thing", "inputCardinality": "many", "outputCardinality": "many"},
-    {"id": "BlindReplace", "effect": "command", "operation": "replace", "scope": "record", "target": "demo.Thing", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"},
-    {"id": "LeakyQuery", "effect": "query", "operation": "read", "scope": "record", "target": "demo.Thing", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one", "mutations": ["field"]},
-    {"id": "MutateActor", "effect": "command", "operation": "update", "scope": "record", "target": "demo.Widget", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "idempotent", "authorization": "demo.Policy"}
+    {
+      "id": "DangerousBulk",
+      "effect": "command",
+      "operation": "bulk-delete",
+      "scope": "record",
+      "target": "demo.Thing",
+      "inputCardinality": "many",
+      "outputCardinality": "zero",
+      "retry": 3,
+      "idempotency": "non-idempotent"
+    },
+    {
+      "id": "KeylessUpsert",
+      "effect": "command",
+      "operation": "upsert",
+      "scope": "record",
+      "target": "demo.Thing",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "SilentCreate",
+      "effect": "command",
+      "operation": "create",
+      "scope": "record",
+      "target": "demo.Thing",
+      "inputCardinality": "one",
+      "outputCardinality": "zero",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "TracelessTransform",
+      "effect": "transform",
+      "operation": "update",
+      "scope": "record",
+      "target": "demo.Thing",
+      "inputCardinality": "many",
+      "outputCardinality": "many"
+    },
+    {
+      "id": "BlindReplace",
+      "effect": "command",
+      "operation": "replace",
+      "scope": "record",
+      "target": "demo.Thing",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "LeakyQuery",
+      "effect": "query",
+      "operation": "read",
+      "scope": "record",
+      "target": "demo.Thing",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "mutations": [
+        "field"
+      ]
+    },
+    {
+      "id": "MutateActor",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "demo.Widget",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "OptimisticNoToken",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "idempotency": "idempotent",
+      "target": "demo.Thing",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "ConditionalNoKey",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "expectedVersion": "rowVersion",
+      "idempotency": "conditional",
+      "target": "demo.Thing",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "RequiredTxnBestEffort",
+      "effect": "command",
+      "operation": "bulk-update",
+      "scope": "set",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "atomicity": "best-effort",
+      "concurrency": "optimistic",
+      "expectedVersion": "rowVersion",
+      "transactionBoundary": "required",
+      "idempotency": "idempotent",
+      "target": "demo.Thing",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "SoftDeleteNoRetention",
+      "effect": "command",
+      "operation": "delete",
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "zero",
+      "atomicity": "atomic",
+      "idempotency": "idempotent",
+      "target": "demo.Thing",
+      "authorization": "demo.Policy",
+      "deleteBehavior": "soft",
+      "reversibility": "human-recoverable"
+    },
+    {
+      "effect": "transform",
+      "operation": "read",
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "classification": "internal",
+      "id": "LossyTransform",
+      "target": "D1",
+      "inputs": [
+        "S1"
+      ],
+      "outputs": [
+        "D1"
+      ],
+      "fieldMappings": [
+        {
+          "source": "S1.sa",
+          "target": "D1.da"
+        },
+        {
+          "source": "S1.missing",
+          "target": "D1.db"
+        },
+        {
+          "source": "S1.sb",
+          "target": "D1.dc"
+        },
+        {
+          "source": "S1.sb",
+          "target": "D1.de"
+        }
+      ]
+    },
+    {
+      "effect": "transform",
+      "operation": "read",
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "classification": "internal",
+      "id": "UnitTransform",
+      "target": "D2",
+      "inputs": [
+        "S2"
+      ],
+      "outputs": [
+        "D2"
+      ],
+      "reversibility": "reversible",
+      "fieldMappings": [
+        {
+          "source": "S2.amt",
+          "target": "D2.amt",
+          "sourceUnit": "USD",
+          "targetUnit": "kg"
+        },
+        {
+          "source": "S2.q",
+          "target": "D2.q",
+          "lossy": true
+        }
+      ]
+    },
+    {
+      "id": "NonUniqueRead",
+      "effect": "query",
+      "operation": "read",
+      "target": "demo.Thing",
+      "selection": "predicate",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "BadUpdate",
+      "effect": "command",
+      "operation": "update",
+      "target": "D1",
+      "selection": "identity",
+      "mutations": [
+        "da",
+        "nope"
+      ],
+      "expectedVersion": "v",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "ExistsCommand",
+      "effect": "command",
+      "operation": "exists",
+      "target": "demo.Thing",
+      "selection": "identity",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "DeleteNoGuard",
+      "effect": "command",
+      "operation": "delete",
+      "target": "demo.Thing",
+      "selection": "identity",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "PreNoPost",
+      "effect": "command",
+      "operation": "update",
+      "target": "demo.Thing",
+      "selection": "identity",
+      "preconditions": [
+        "state is open"
+      ],
+      "expectedVersion": "v",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "MissingCreateInput",
+      "effect": "command",
+      "operation": "create",
+      "target": "D1",
+      "provides": [
+        "dc"
+      ],
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "ReadonlyCreate",
+      "effect": "command",
+      "operation": "create",
+      "target": "BadTypeEntity",
+      "provides": [
+        "key"
+      ],
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "PatchNoDialect",
+      "effect": "command",
+      "operation": "patch",
+      "target": "demo.Thing",
+      "selection": "identity",
+      "scope": "record",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "BulkNoReturns",
+      "effect": "command",
+      "operation": "bulk-update",
+      "target": "demo.Thing",
+      "scope": "set",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "BigQuery",
+      "effect": "query",
+      "operation": "read",
+      "target": "demo.Thing",
+      "scope": "set",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "CascadeAll",
+      "effect": "command",
+      "operation": "bulk-delete",
+      "target": "demo.Thing",
+      "deleteBehavior": "cascade",
+      "selection": "all",
+      "returns": "count",
+      "scope": "set",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "InvTarget",
+      "effect": "query",
+      "operation": "read",
+      "target": "demo.Thing",
+      "provides": [
+        "needed"
+      ],
+      "failureModes": [
+        "timeout"
+      ],
+      "preconditions": [
+        "state open"
+      ],
+      "returns": "records",
+      "transactionBoundary": "required",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    },
+    {
+      "id": "BadInvoke",
+      "effect": "command",
+      "operation": "update",
+      "target": "demo.Thing",
+      "mutations": [],
+      "expectedVersion": "v",
+      "transactionBoundary": "not-supported",
+      "invocations": [
+        {
+          "target": "InvTarget",
+          "args": [],
+          "handles": [],
+          "establishes": [],
+          "expects": "count"
+        }
+      ],
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "GhostInvoke",
+      "effect": "command",
+      "operation": "update",
+      "target": "demo.Thing",
+      "expectedVersion": "v",
+      "invocations": [
+        {
+          "target": "Nonexistent",
+          "args": [],
+          "handles": [],
+          "establishes": []
+        }
+      ],
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    },
+    {
+      "id": "RecursiveInvoke",
+      "effect": "command",
+      "operation": "update",
+      "target": "demo.Thing",
+      "expectedVersion": "v",
+      "invocations": [
+        {
+          "target": "RecursiveInvoke",
+          "args": [],
+          "handles": [],
+          "establishes": []
+        }
+      ],
+      "scope": "record",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "idempotent",
+      "authorization": "demo.Policy"
+    }
   ],
   "collectionTransforms": [
-    {"id": "InfiniteSort", "operation": "sort", "inputSchema": "Input", "outputSchema": "Output", "bounded": false},
-    {"id": "UnknownJoin", "operation": "join", "inputSchema": "Input", "outputSchema": "Output", "inputs": ["only-one"]},
-    {"id": "UnseededSample", "operation": "sample", "inputSchema": "Input", "outputSchema": "Output"},
-    {"id": "UnboundedWindow", "operation": "window", "inputSchema": "Input", "outputSchema": "Output"}
+    {
+      "id": "InfiniteSort",
+      "operation": "sort",
+      "inputSchema": "Input",
+      "outputSchema": "Output",
+      "bounded": false
+    },
+    {
+      "id": "UnknownJoin",
+      "operation": "join",
+      "inputSchema": "Input",
+      "outputSchema": "Output",
+      "inputs": [
+        "only-one"
+      ]
+    },
+    {
+      "id": "UnseededSample",
+      "operation": "sample",
+      "inputSchema": "Input",
+      "outputSchema": "Output"
+    },
+    {
+      "id": "UnboundedWindow",
+      "operation": "window",
+      "inputSchema": "Input",
+      "outputSchema": "Output"
+    },
+    {
+      "id": "DupProject",
+      "operation": "project",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "projections": [
+        "sa",
+        "sa"
+      ]
+    },
+    {
+      "id": "BadField",
+      "operation": "project",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "projections": [
+        "ghost"
+      ]
+    },
+    {
+      "id": "BadFlatMap",
+      "operation": "flat-map",
+      "inputSchema": "S1",
+      "outputSchema": "S1"
+    },
+    {
+      "id": "BadSort",
+      "operation": "sort",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "bounded": true
+    },
+    {
+      "id": "BadAgg",
+      "operation": "aggregate",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "aggregate": "frobnicate",
+      "grain": "day",
+      "bounded": true
+    },
+    {
+      "id": "BadJoin",
+      "operation": "join",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "inputs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "BadDistinct",
+      "operation": "distinct",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "bounded": true
+    },
+    {
+      "id": "BadUnion",
+      "operation": "union",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "inputs": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "BadWindow",
+      "operation": "window",
+      "inputSchema": "S1",
+      "outputSchema": "S1",
+      "windowUnit": "hour",
+      "slideUnit": "kg"
+    }
   ],
   "processes": [
-    {"id": "BrokenProcess", "nodes": [{"id": "A", "type": "step"}], "flows": [{"from": "A", "to": "Missing"}]}
+    {
+      "id": "BrokenProcess",
+      "nodes": [
+        {
+          "id": "A",
+          "type": "step"
+        }
+      ],
+      "flows": [
+        {
+          "from": "A",
+          "to": "Missing"
+        }
+      ]
+    }
   ],
   "integration": {
-    "adapters": [{"id": "Http"}],
-    "endpoints": [{"id": "MissingAdapterEndpoint", "adapter": "NoAdapter"}],
-    "routes": [{"id": "BrokenRoute", "source": "MissingAdapterEndpoint", "target": "NoEndpoint"}],
-    "retryPolicies": [{"id": "UnsafeRetry", "attempts": 3, "requiresIdempotency": false}]
+    "adapters": [
+      {
+        "id": "NoProto"
+      },
+      {
+        "id": "GoodAdapter",
+        "protocol": "https",
+        "serialization": "json"
+      }
+    ],
+    "endpoints": [
+      {
+        "id": "BadEp",
+        "adapter": "GoodAdapter",
+        "operation": "NoSuchAction",
+        "address": "/x"
+      },
+      {
+        "id": "OrphanEp",
+        "adapter": "Nonexistent",
+        "operation": "CreateOrder",
+        "address": "/y"
+      }
+    ],
+    "retryPolicies": [
+      {
+        "id": "BadRetry",
+        "attempts": 5,
+        "requiresIdempotency": false
+      }
+    ],
+    "mappings": [
+      {
+        "id": "BadMap",
+        "from": "S1",
+        "to": "D1",
+        "fieldMaps": []
+      }
+    ]
   },
   "security": {
     "highRiskThreshold": 0.5,
-    "assets": [{"id": "Asset1"}],
-    "threats": [{"id": "Threat1"}],
-    "risks": [{"id": "Risk1", "asset": "MissingAsset", "threat": "Threat1", "likelihood": 0.8, "impact": 0.9, "level": 0.8}],
-    "controls": [{"id": "Control1"}],
-    "trustBoundaries": [{"id": "Boundary1", "crossings": ["Flow1"], "crossingControls": []}]
+    "assets": [
+      {
+        "id": "Asset1"
+      }
+    ],
+    "threats": [
+      {
+        "id": "Threat1"
+      }
+    ],
+    "risks": [
+      {
+        "id": "Risk1",
+        "asset": "MissingAsset",
+        "threat": "Threat1",
+        "likelihood": 0.8,
+        "impact": 0.9,
+        "level": 0.8
+      }
+    ],
+    "controls": [
+      {
+        "id": "Control1"
+      }
+    ],
+    "trustBoundaries": [
+      {
+        "id": "Boundary1",
+        "crossings": [
+          "Flow1"
+        ],
+        "crossingControls": []
+      }
+    ]
   },
   "lineage": {
-    "edges": [{"source": "A", "target": "B"}, {"source": "B", "target": "A"}],
-    "bindings": [{"source": "A", "target": "Target"}, {"source": "B", "target": "Target"}],
-    "costs": [{"id": "NegativeCost", "amount": -1}]
+    "edges": [
+      {
+        "source": "A",
+        "target": "B"
+      },
+      {
+        "source": "B",
+        "target": "A"
+      }
+    ],
+    "bindings": [
+      {
+        "source": "A",
+        "target": "Target"
+      },
+      {
+        "source": "B",
+        "target": "Target"
+      },
+      {
+        "id": "BadBinding",
+        "source": "Ghost",
+        "target": "demo.Thing",
+        "kind": "data"
+      }
+    ],
+    "costs": [
+      {
+        "id": "NegativeCost",
+        "amount": -1
+      }
+    ]
   },
   "architecture": {
-    "interfaces": [{"id": "KnownInterface"}],
-    "services": [{"id": "BrokenService", "interfaces": ["MissingInterface"]}],
-    "topologies": [{"id": "BrokenTopology", "nodes": [{"id": "Node1"}], "edges": [{"from": "Node1", "to": "MissingNode"}]}],
-    "deployments": [{"id": "BrokenDeployment", "target": "MissingNode"}]
+    "interfaces": [
+      {
+        "id": "KnownInterface"
+      }
+    ],
+    "services": [
+      {
+        "id": "BrokenService",
+        "interfaces": [
+          "MissingInterface"
+        ]
+      }
+    ],
+    "topologies": [
+      {
+        "id": "BrokenTopology",
+        "nodes": [
+          {
+            "id": "Node1"
+          }
+        ],
+        "edges": [
+          {
+            "from": "Node1",
+            "to": "MissingNode"
+          }
+        ]
+      }
+    ],
+    "deployments": [
+      {
+        "id": "BrokenDeployment",
+        "target": "MissingNode"
+      }
+    ]
   },
   "experience": {
-    "apps": [{"id": "BrokenApp", "entry": "MissingView", "views": ["MissingView"]}],
-    "views": [{"id": "View1", "actions": ["MissingAction"]}],
-    "flows": [{"id": "BrokenFlow", "entry": "MissingNode", "nodes": [{"id": "Node1"}], "edges": [{"from": "Node1", "to": "MissingNode"}]}]
+    "apps": [
+      {
+        "id": "BrokenApp",
+        "entry": "MissingView",
+        "views": [
+          "MissingView"
+        ]
+      }
+    ],
+    "views": [
+      {
+        "id": "View1",
+        "actions": [
+          "MissingAction"
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "id": "BrokenFlow",
+        "entry": "MissingNode",
+        "nodes": [
+          {
+            "id": "Node1"
+          }
+        ],
+        "edges": [
+          {
+            "from": "Node1",
+            "to": "MissingNode"
+          }
+        ]
+      }
+    ]
   },
   "design": {
-    "systems": [{"id": "BrokenDesign", "tokens": [{"id": "duplicate"}], "patterns": [{"id": "duplicate"}], "breakpoints": [{"id": "wide", "value": 1200}, {"id": "narrow", "value": 640}]}],
-    "pages": [{"id": "BrokenPage", "view": "MissingView"}]
+    "systems": [
+      {
+        "id": "BrokenDesign",
+        "tokens": [
+          {
+            "id": "duplicate"
+          }
+        ],
+        "patterns": [
+          {
+            "id": "duplicate"
+          }
+        ],
+        "breakpoints": [
+          {
+            "id": "wide",
+            "value": 1200
+          },
+          {
+            "id": "narrow",
+            "value": 640
+          }
+        ]
+      }
+    ],
+    "pages": [
+      {
+        "id": "BrokenPage",
+        "view": "MissingView"
+      }
+    ]
   },
   "analytics": {
-    "semanticLayers": [{"id": "Layer1"}],
-    "reports": [{"id": "BrokenReport", "layer": "MissingLayer"}],
-    "dashboards": [{"id": "BrokenDashboard", "layer": "Layer1", "actions": ["MissingAction"]}]
+    "semanticLayers": [
+      {
+        "id": "Layer1"
+      }
+    ],
+    "reports": [
+      {
+        "id": "BrokenReport",
+        "layer": "MissingLayer"
+      }
+    ],
+    "dashboards": [
+      {
+        "id": "BrokenDashboard",
+        "layer": "Layer1",
+        "actions": [
+          "MissingAction"
+        ]
+      }
+    ]
   },
   "ai": {
-    "featureSchemas": [{"id": "Features", "features": [{"id": "x"}, {"id": "x"}], "target": "missing"}],
-    "models": [{"id": "Model1"}],
-    "pipelines": [{"id": "BrokenPipeline", "steps": [{"index": 2}, {"index": 1}, {"index": 1}]}],
-    "serving": [{"id": "BrokenServing", "model": "MissingModel", "capacity": 0}]
+    "featureSchemas": [
+      {
+        "id": "Features",
+        "features": [
+          {
+            "id": "x"
+          },
+          {
+            "id": "x"
+          }
+        ],
+        "target": "missing"
+      }
+    ],
+    "models": [
+      {
+        "id": "Model1"
+      }
+    ],
+    "pipelines": [
+      {
+        "id": "BrokenPipeline",
+        "steps": [
+          {
+            "index": 2
+          },
+          {
+            "index": 1
+          },
+          {
+            "index": 1
+          }
+        ]
+      }
+    ],
+    "serving": [
+      {
+        "id": "BrokenServing",
+        "model": "MissingModel",
+        "capacity": 0
+      }
+    ]
   },
-  "events": [{"id": "ChangedHistory", "mutable": true}],
-  "resources": [{"id": "Capacity", "capacity": 1}],
-  "allocations": [{"id": "TooMuch", "resource": "Capacity", "quantity": 2}],
-  "plans": [{"id": "BadPlan", "steps": [{"index": 1}, {"index": 1}]}],
-  "runtimeRequirements": ["MissingCapability"],
-  "emitters": [{"id": "WeakEmitter", "supports": [], "unsupportedPolicy": "error"}]
+  "events": [
+    {
+      "id": "ChangedHistory",
+      "mutable": true
+    }
+  ],
+  "resources": [
+    {
+      "id": "Capacity",
+      "capacity": 1
+    }
+  ],
+  "allocations": [
+    {
+      "id": "TooMuch",
+      "resource": "Capacity",
+      "quantity": 2
+    }
+  ],
+  "plans": [
+    {
+      "id": "BadPlan",
+      "steps": [
+        {
+          "index": 1
+        },
+        {
+          "index": 1
+        }
+      ]
+    }
+  ],
+  "runtimeRequirements": [
+    "MissingCapability"
+  ],
+  "emitters": [
+    {
+      "id": "WeakEmitter",
+      "supports": [],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "rules": [
+    {
+      "id": "BadOperator",
+      "ruleKind": "CONSTRAINT",
+      "appliesTo": [
+        "S1"
+      ],
+      "predicate": {
+        "left": "sb",
+        "operator": "gt",
+        "right": 5
+      }
+    },
+    {
+      "id": "NonBoolCond",
+      "ruleKind": "CONSTRAINT",
+      "appliesTo": [
+        "S1"
+      ],
+      "predicate": {
+        "field": "sb"
+      }
+    },
+    {
+      "id": "UnknownOp",
+      "ruleKind": "CONSTRAINT",
+      "appliesTo": [
+        "S1"
+      ],
+      "predicate": {
+        "left": "sa",
+        "operator": "frobnicate",
+        "right": 1
+      }
+    }
+  ]
 }

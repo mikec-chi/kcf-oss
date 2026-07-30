@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kcf.dev/schemas/review-envelope-v1.schema.json",
+  "title": "KCF Review Envelope v1",
+  "description": "An OPEN, portable record of a human review decision over specific constructs, bound to the exact source and model revisions it was made against. KCF-OSS validates this envelope STRUCTURALLY only - it deliberately does NOT authenticate the reviewer, verify authority, or check the signature's cryptographic validity. `signature`/`signatureAlgorithm` are opaque to KCF-OSS; an external platform is responsible for identity, authority, and key trust. A structurally-valid envelope is therefore provenance metadata, NOT proof of governed approval - downstream systems must not treat an unsigned or unverified envelope as cryptographically governed.",
+  "type": "object",
+  "required": ["reviewEnvelopeVersion", "reviewer", "decision", "constructIds", "sourceRevision", "modelRevision", "recordedAt"],
+  "properties": {
+    "reviewEnvelopeVersion": {"const": "1.0.0"},
+    "reviewer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A reviewer identifier (name, subject, or opaque handle). Self-asserted at the OSS layer."
+    },
+    "reviewerRole": {
+      "type": ["string", "null"],
+      "description": "The role the reviewer is claiming to act in (e.g. 'Order Operations Owner'). Self-asserted."
+    },
+    "authority": {
+      "type": ["string", "null"],
+      "description": "The authority under which the decision is claimed (e.g. an authority/capability id). KCF-OSS records it; it does not verify the reviewer actually holds it."
+    },
+    "decision": {
+      "enum": ["accept", "reject", "needs-changes"],
+      "description": "The review disposition."
+    },
+    "constructIds": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "The stable KCF semantic identities (qualifiedName or id) this decision applies to. Empty is allowed for a whole-model decision but discouraged."
+    },
+    "sourceRevision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The revision (content hash or version) of the editable .kcf source this decision was made against. Binds the decision to exactly what was reviewed so a later source edit does not silently inherit the approval."
+    },
+    "modelRevision": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The revision (fingerprint/hash) of the compiled model IR this decision was made against."
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the decision was recorded."
+    },
+    "rationale": {
+      "type": ["string", "null"],
+      "description": "Optional free-text rationale for the decision."
+    },
+    "signature": {
+      "type": ["string", "null"],
+      "description": "An OPAQUE signature over the envelope's governed fields, produced by an external platform. KCF-OSS does not compute or verify it. Null means unsigned (provenance only)."
+    },
+    "signatureAlgorithm": {
+      "type": ["string", "null"],
+      "description": "The algorithm/keyref that produced `signature` (e.g. 'hmac-sha256', 'ed25519'), for the external verifier. Opaque to KCF-OSS."
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"signature": {"type": "string"}}, "required": ["signature"]},
+      "then": {"required": ["signatureAlgorithm"], "properties": {"signatureAlgorithm": {"type": "string", "minLength": 1}}}
+    }
+  ],
+  "additionalProperties": false
+}

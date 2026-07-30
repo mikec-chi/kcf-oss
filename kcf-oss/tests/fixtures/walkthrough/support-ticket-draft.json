@@ -5,23 +5,78 @@
   "module": "KCF",
   "namespace": "support",
   "profile": "business-application",
-  "profiles": ["business-application"],
+  "profiles": [
+    "business-application"
+  ],
   "concepts": [
-    {"id": "Customer", "qualifiedName": "support.Customer", "kind": "ENTITY", "attributes": [
-      {"name": "customerId", "type": "UUID", "identity": true},
-      {"name": "name", "type": "String", "required": true}
-    ]},
-    {"id": "Agent", "qualifiedName": "support.Agent", "kind": "ACTOR"},
-    {"id": "Ticket", "qualifiedName": "support.Ticket", "kind": "ENTITY", "attributes": [
-      {"name": "subject", "type": "String", "required": true},
-      {"name": "priority", "type": "String"}
-    ]}
+    {
+      "id": "Customer",
+      "qualifiedName": "support.Customer",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "customerId",
+          "type": "UUID",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "Agent",
+      "qualifiedName": "support.Agent",
+      "kind": "ACTOR"
+    },
+    {
+      "id": "Ticket",
+      "qualifiedName": "support.Ticket",
+      "kind": "ENTITY",
+      "attributes": [
+        {
+          "name": "subject",
+          "type": "String",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "type": "String"
+        }
+      ]
+    }
   ],
   "relationships": [
-    {"id": "customer-raises-ticket", "rootKind": "ASSOCIATION", "source": "support.Customer", "target": "support.Ticket"},
-    {"id": "agent-handles-ticket", "rootKind": "PARTICIPATION", "source": "support.Agent", "target": "support.Ticket"}
+    {
+      "id": "customer-raises-ticket",
+      "rootKind": "ASSOCIATION",
+      "source": "support.Customer",
+      "target": "support.Ticket"
+    },
+    {
+      "id": "agent-handles-ticket",
+      "rootKind": "PARTICIPATION",
+      "source": "support.Agent",
+      "target": "support.Ticket"
+    }
   ],
   "actions": [
-    {"id": "ResolveTicket", "effect": "command", "operation": "update", "scope": "record", "target": "support.Ticket", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "concurrency": "optimistic", "authorization": "support.TicketPolicy"}
+    {
+      "id": "ResolveTicket",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "support.Ticket",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "authorization": "support.TicketPolicy",
+      "expectedVersion": "version",
+      "idempotencyKey": "requestId"
+    }
   ]
 }

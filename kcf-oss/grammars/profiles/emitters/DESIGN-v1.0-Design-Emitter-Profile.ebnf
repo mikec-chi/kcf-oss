@@ -7,9 +7,12 @@ token-def = "token", identifier, ":", token-kind, "=", string, ";" ;
 breakpoint-def = "breakpoint", identifier, ":", number, semantic-ref, ";" ;
 pattern-def = "pattern", identifier, "{", { "constraint", ":", semantic-ref,
               ";" }, "}" ;
+(* RFC-16: `breakpoint` widths are CONTAINER-relative (the view's own region, not the viewport), and a
+   page may carry an optional per-region layout hint that OVERRIDES the automatic responsive layout. *)
 page-design = "page", identifier, "{", "view", ":", semantic-ref, ";",
               [ "pattern", ":", semantic-ref, ";" ],
-              { "section", ":", semantic-ref, ";" }, "}" ;
+              { "section", ":", semantic-ref, ";" }, { layout-hint }, "}" ;
+layout-hint = ( "priority" | "span" | "collapse" | "min-size" ), ":", semantic-ref, ";" ;
 token-kind = "color" | "space" | "radius" | "shadow" | "font" | "text"
            | "motion" | "density" ;
 identifier = ? KCF identifier ? ; semantic-ref = ? KCF semantic-ref ? ;

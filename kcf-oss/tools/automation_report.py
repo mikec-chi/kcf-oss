@@ -117,6 +117,41 @@ def triage(catalogue: dict, overrides: dict | None = None) -> dict:
     return {"rules": triaged}
 
 
+_LEDGER = PROJECT_ROOT / "semantics" / "ir-extension-status.json"
+_COVERAGE = PROJECT_ROOT / "semantics" / "coverage.json"
+_RECLASSIFIED_STATUSES = ("runtime-obligation", "enforced-elsewhere", "advisory", "human-judgment", "superseded")
+_BLOCKED_STATUSES = ("ir-missing", "ir-partial", "ir-present-handler-missing", "partially-automated")
+
+
+def ir_extension_reconciliation(catalogue: dict) -> dict:
+    """Reconcile the 89-rule IR-extension ledger against the catalogue's actual enforcement, and surface
+    any contradiction (a rule the ledger calls automated that the catalogue does not, or vice versa).
+    This makes the automation-report the single place the two views are cross-checked."""
+    if not _LEDGER.exists():
+        return {}
+    ledger = json.loads(_LEDGER.read_text(encoding="utf-8"))
+    automated_ids = set(json.loads(_COVERAGE.read_text(encoding="utf-8")).get("automatedRuleIds", [])) if _COVERAGE.exists() else set()
+    enforcement = {r["id"]: r.get("enforcement") for r in catalogue.get("rules", [])}
+    counts: dict[str, int] = {}
+    contradictions: list[str] = []
+    for entry in ledger.get("rules", []):
+        rid, status = entry["ruleId"], entry["status"]
+        counts[status] = counts.get(status, 0) + 1
+        catalogue_automated = rid in automated_ids and enforcement.get(rid) == "automated"
+        if status == "automated" and not catalogue_automated:
+            contradictions.append(f"{rid}: ledger=automated but catalogue does not enforce it")
+        elif status != "automated" and catalogue_automated:
+            contradictions.append(f"{rid}: catalogue automated but ledger={status}")
+    return {
+        "sourceRuleCount": ledger.get("sourceRuleCount"),
+        "byStatus": dict(sorted(counts.items())),
+        "automated": counts.get("automated", 0),
+        "reclassified": sum(counts.get(s, 0) for s in _RECLASSIFIED_STATUSES),
+        "stillBlocked": sum(counts.get(s, 0) for s in _BLOCKED_STATUSES),
+        "contradictions": sorted(contradictions),
+    }
+
+
 def report(catalogue: dict, overrides: dict | None = None) -> dict:
     triaged = triage(catalogue, overrides)["rules"]
 
@@ -158,6 +193,7 @@ def report(catalogue: dict, overrides: dict | None = None) -> dict:
         "mechanicallyAutomatableBacklog": sorted(backlog),
         "reclassifications": reclassifications,
         "untriaged": sorted(untriaged),
+        "irExtension": ir_extension_reconciliation(catalogue),
     }
 
 

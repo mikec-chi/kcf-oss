@@ -1,0 +1,540 @@
+{
+  "$schema": "../schemas/model-ir-v1.schema.json",
+  "irVersion": "1.0.0",
+  "id": "OrderOperations",
+  "module": "KCF",
+  "namespace": "ops",
+  "profile": "business-application",
+  "profiles": [
+    "business-application"
+  ],
+  "requiredPatterns": [],
+  "recommendedPatterns": [],
+  "prohibitedPatterns": [],
+  "implementedPatterns": [],
+  "excludedPatterns": [],
+  "modules": [
+    "KCF",
+    "RELATIONSHIP",
+    "ACTION",
+    "ENTITY",
+    "ACTOR",
+    "WORK",
+    "EVENT",
+    "LIFECYCLE",
+    "RULE",
+    "INFORMATION",
+    "RESOURCE",
+    "INTEGRATION",
+    "SECURITY",
+    "ARCHITECTURE",
+    "EXPERIENCE",
+    "DESIGN"
+  ],
+  "moduleVersions": {
+    "KCF": "1.0.0",
+    "RELATIONSHIP": "1.0.0",
+    "ACTION": "1.0.0",
+    "ENTITY": "1.0.0",
+    "ACTOR": "1.0.0",
+    "WORK": "1.0.0",
+    "EVENT": "1.0.0",
+    "LIFECYCLE": "1.0.0",
+    "RULE": "1.0.0",
+    "INFORMATION": "1.0.0",
+    "RESOURCE": "1.0.0",
+    "INTEGRATION": "1.0.0",
+    "SECURITY": "1.0.0",
+    "ARCHITECTURE": "1.0.0",
+    "EXPERIENCE": "1.0.0",
+    "DESIGN": "1.0.0"
+  },
+  "concepts": [
+    {
+      "id": "Order",
+      "qualifiedName": "ops.Order",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "orderId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "total",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "name": "note",
+          "type": "String",
+          "required": false
+        },
+        {
+          "name": "rowVersion",
+          "type": "Integer",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "OrderSummary",
+      "qualifiedName": "ops.OrderSummary",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "summaryId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "amount",
+          "type": "Decimal",
+          "required": true
+        },
+        {
+          "name": "memo",
+          "type": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "PriorityOrder",
+      "qualifiedName": "ops.PriorityOrder",
+      "kind": "ENTITY",
+      "references": [],
+      "attributes": [
+        {
+          "name": "priorityOrderId",
+          "type": "UUID",
+          "identity": true,
+          "required": true
+        },
+        {
+          "name": "tier",
+          "type": "Integer",
+          "required": true
+        }
+      ],
+      "specializes": "ops.Order"
+    },
+    {
+      "id": "OrderClerk",
+      "qualifiedName": "ops.OrderClerk",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "ProcessOrderWork",
+      "qualifiedName": "ops.ProcessOrderWork",
+      "kind": "WORK",
+      "references": []
+    },
+    {
+      "id": "OrderConstraint",
+      "qualifiedName": "ops.OrderConstraint",
+      "kind": "RULE",
+      "references": [
+        "ops.Order",
+        "ops.ProcessOrderWork",
+        "ops.OrderClerk"
+      ],
+      "metadata": {
+        "ruleKind": "CONSTRAINT"
+      }
+    },
+    {
+      "id": "OrderPolicy",
+      "qualifiedName": "ops.OrderPolicy",
+      "kind": "RULE",
+      "references": [
+        "ops.OrderClerk",
+        "ops.OrderConstraint"
+      ],
+      "metadata": {
+        "policy": true
+      }
+    }
+  ],
+  "relationships": [],
+  "lifecycles": [],
+  "actions": [
+    {
+      "id": "SummarizeOrder",
+      "effect": "transform",
+      "mutations": [],
+      "operation": "read",
+      "scope": "record",
+      "target": "ops.OrderSummary",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "classification": "internal",
+      "inputs": [
+        "Order"
+      ],
+      "outputs": [
+        "OrderSummary"
+      ],
+      "totality": "partial",
+      "fieldMappings": [
+        {
+          "source": "Order.total",
+          "target": "OrderSummary.amount"
+        },
+        {
+          "source": "Order.note",
+          "target": "OrderSummary.memo"
+        }
+      ]
+    },
+    {
+      "id": "PlaceOrder",
+      "effect": "command",
+      "mutations": [
+        "total"
+      ],
+      "operation": "create",
+      "scope": "record",
+      "target": "ops.Order",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "provides": [
+        "total"
+      ],
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "ops.OrderPolicy",
+      "preconditions": [
+        "total is greater than zero"
+      ],
+      "postconditions": [
+        "an Order exists in Placed state"
+      ],
+      "idempotencyKey": "orderId",
+      "reversibility": "compensatable",
+      "compensation": "ops.CancelOrder",
+      "transactionBoundary": "required"
+    },
+    {
+      "id": "ReviseOrder",
+      "effect": "command",
+      "mutations": [
+        "note"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "ops.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "authorization": "ops.OrderPolicy",
+      "expectedVersion": "rowVersion",
+      "reversibility": "reversible",
+      "transactionBoundary": "required",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "PurgeOrder",
+      "effect": "command",
+      "mutations": [],
+      "operation": "delete",
+      "scope": "record",
+      "target": "ops.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "ops.OrderPolicy",
+      "deleteBehavior": "soft",
+      "retention": "retain soft-deleted orders for 90 days",
+      "reversibility": "human-recoverable",
+      "transactionBoundary": "required",
+      "idempotencyKey": "requestId",
+      "expectedVersion": "rowVersion"
+    },
+    {
+      "id": "BulkCloseOrders",
+      "effect": "command",
+      "mutations": [
+        "note"
+      ],
+      "operation": "bulk-update",
+      "scope": "set",
+      "target": "ops.Order",
+      "selection": "predicate",
+      "inputCardinality": "many",
+      "outputCardinality": "many",
+      "idempotency": "conditional",
+      "atomicity": "best-effort",
+      "concurrency": "optimistic",
+      "authorization": "ops.OrderPolicy",
+      "bulkLimit": 1000,
+      "bulkOrdering": "unordered",
+      "bulkFailurePolicy": "continue",
+      "returns": "count",
+      "reversibility": "irreversible",
+      "transactionBoundary": "supported",
+      "expectedVersion": "rowVersion",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "CancelOrder",
+      "effect": "command",
+      "mutations": [
+        "note"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "ops.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "concurrency": "optimistic",
+      "authorization": "ops.OrderPolicy",
+      "reversibility": "reversible",
+      "expectedVersion": "rowVersion",
+      "idempotencyKey": "requestId"
+    },
+    {
+      "id": "GetOrderById",
+      "effect": "query",
+      "mutations": [],
+      "operation": "read",
+      "scope": "record",
+      "target": "ops.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one"
+    },
+    {
+      "id": "NotifyOrder",
+      "effect": "command",
+      "mutations": [
+        "note"
+      ],
+      "operation": "update",
+      "scope": "record",
+      "target": "ops.Order",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "idempotencyKey": "requestId",
+      "concurrency": "optimistic",
+      "expectedVersion": "rowVersion",
+      "authorization": "ops.OrderPolicy",
+      "invocations": [
+        {
+          "target": "GetOrderById",
+          "args": [],
+          "handles": [],
+          "establishes": []
+        }
+      ]
+    }
+  ],
+  "collectionTransforms": [
+    {
+      "id": "OrderReport",
+      "keys": [],
+      "inputs": [],
+      "operation": "project",
+      "inputSchema": "Order",
+      "outputSchema": "Order",
+      "projections": [
+        "total",
+        "note"
+      ]
+    }
+  ],
+  "events": [],
+  "resources": [],
+  "mutations": [],
+  "units": [],
+  "authorities": [],
+  "processes": [],
+  "calendars": [],
+  "routes": [],
+  "propositions": [],
+  "predicates": [],
+  "math": [],
+  "allocations": [],
+  "organizations": [],
+  "information": [],
+  "rules": [
+    {
+      "id": "OrderConstraint",
+      "appliesTo": [
+        "ops.Order"
+      ],
+      "effects": [
+        "ops.ProcessOrderWork"
+      ],
+      "exceptions": [],
+      "evidence": [],
+      "ruleKind": "CONSTRAINT",
+      "condition": "total is greater than zero",
+      "predicate": {
+        "left": "total",
+        "operator": "gt",
+        "right": 0
+      },
+      "authority": "ops.OrderClerk",
+      "qualifiedName": "ops.OrderConstraint"
+    }
+  ],
+  "policies": [
+    {
+      "id": "OrderPolicy",
+      "rules": [
+        "ops.OrderConstraint"
+      ],
+      "evidence": [],
+      "authority": "ops.OrderClerk",
+      "defaultConflict": "deny-overrides",
+      "qualifiedName": "ops.OrderPolicy"
+    }
+  ],
+  "reasoning": [],
+  "assertions": [],
+  "identityResolutions": [],
+  "knowledgeQueries": [],
+  "skills": [],
+  "capabilities": [],
+  "runtimeRequirements": [
+    "Identity",
+    "Persistence",
+    "Authorization",
+    "Audit",
+    "Transaction",
+    "UserExperience"
+  ],
+  "emitters": [],
+  "runtimeBindings": [],
+  "sourceMap": {
+    "ops.Order": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 4,
+      "column": 3,
+      "endLine": 9,
+      "endColumn": 4
+    },
+    "ops.OrderSummary": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 11,
+      "column": 3,
+      "endLine": 15,
+      "endColumn": 4
+    },
+    "ops.PriorityOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 18,
+      "column": 3,
+      "endLine": 22,
+      "endColumn": 4
+    },
+    "SummarizeOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 26,
+      "column": 3,
+      "endLine": 39,
+      "endColumn": 4
+    },
+    "ops.OrderClerk": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 41,
+      "column": 3,
+      "endLine": 41,
+      "endColumn": 23
+    },
+    "ops.ProcessOrderWork": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 42,
+      "column": 3,
+      "endLine": 42,
+      "endColumn": 28
+    },
+    "ops.OrderConstraint": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 44,
+      "column": 3,
+      "endLine": 51,
+      "endColumn": 4
+    },
+    "ops.OrderPolicy": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 53,
+      "column": 3,
+      "endLine": 57,
+      "endColumn": 4
+    },
+    "PlaceOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 61,
+      "column": 3,
+      "endLine": 78,
+      "endColumn": 4
+    },
+    "ReviseOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 81,
+      "column": 3,
+      "endLine": 97,
+      "endColumn": 4
+    },
+    "PurgeOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 100,
+      "column": 3,
+      "endLine": 116,
+      "endColumn": 4
+    },
+    "BulkCloseOrders": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 119,
+      "column": 3,
+      "endLine": 138,
+      "endColumn": 4
+    },
+    "CancelOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 140,
+      "column": 3,
+      "endLine": 155,
+      "endColumn": 4
+    },
+    "OrderReport": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 157,
+      "column": 3,
+      "endLine": 163,
+      "endColumn": 4
+    },
+    "GetOrderById": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 165,
+      "column": 3,
+      "endLine": 172,
+      "endColumn": 4
+    },
+    "NotifyOrder": {
+      "source": "tests/domains/executable-contract.kcf",
+      "line": 174,
+      "column": 3,
+      "endLine": 188,
+      "endColumn": 4
+    }
+  }
+}

@@ -44,7 +44,20 @@
         "additionalProperties": false
       }
     },
-    "untriaged": {"type": "array", "items": {"type": "string"}, "description": "Manual/profile rules with no manualClass (must be empty)."}
+    "untriaged": {"type": "array", "items": {"type": "string"}, "description": "Manual/profile rules with no manualClass (must be empty)."},
+    "irExtension": {
+      "type": "object",
+      "description": "Reconciliation of the 89-rule IR-extension ledger against the catalogue's enforcement.",
+      "properties": {
+        "sourceRuleCount": {"type": "integer"},
+        "byStatus": {"type": "object", "additionalProperties": {"type": "integer"}},
+        "automated": {"type": "integer"},
+        "reclassified": {"type": "integer"},
+        "stillBlocked": {"type": "integer"},
+        "contradictions": {"type": "array", "items": {"type": "string"}, "description": "Ledger/catalogue enforcement disagreements (must be empty)."}
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": false
 }

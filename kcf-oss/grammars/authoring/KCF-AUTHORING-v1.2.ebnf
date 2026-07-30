@@ -36,7 +36,10 @@ concept-member = attribute-decl | reference-decl | trait-decl
                | requires-capability-decl | requires-skill-decl
                | event-member | entity-member | measure-member | actor-member
                | work-member | intent-member | temporal-member | spatial-member
-               | resource-member | property-decl ;
+               | resource-member | property-decl | specialization-decl ;
+(* RFC-8 (grammar stack 1.13): a concept may specialize/refine a parent concept; the
+   parent's primary kind must be preserved or legally refined. Projects onto `specializes`. *)
+specialization-decl = "specializes", semantic-ref, ";" ;
 attribute-decl = attribute-modifier, identifier, ":", qualified-name,
                  [ "=", scalar ], [ cardinality ], { qualifier }, ";" ;
 attribute-modifier = "identity" | "required" | "optional" | "field" ;
@@ -253,7 +256,13 @@ rule-member = "applies-to", semantic-ref, ";"
             | "conflict", conflict-strategy, ";"
             | "authority", semantic-ref, ";"
             | "exception", semantic-ref, ";"
-            | "evidence", semantic-ref, ";" ;
+            | "evidence", semantic-ref, ";"
+            | typed-predicate-decl ;
+(* RFC-1 (grammar stack 1.14): a typed predicate — a bare boolean field, or a typed comparison/
+   logical `<left> <op> <right>`. Type-checked to boolean (condition) with compatible operands.
+   Also usable as a `predicate` qualifier on a relationship. Projects onto `predicate`. *)
+typed-predicate-decl = "predicate", ( identifier | identifier, predicate-op, scalar ), ";" ;
+predicate-op = "gt" | "lt" | "ge" | "le" | "eq" | "ne" | "and" | "or" ;
 policy-decl = "policy", identifier, "{", "authority", semantic-ref, ";",
               "rule", semantic-ref, ";", { "rule", semantic-ref, ";" },
               [ "default-conflict", conflict-strategy, ";" ],
@@ -353,7 +362,24 @@ transition-member = "trigger", semantic-ref, ";" | "requires-work", semantic-ref
 action-decl = action-effect, identifier, "{", action-member,
               { action-member }, "}" ;
 action-effect = "command" | "query" | "transform" ;
-action-member = identifier, scalar, ";" ;
+action-member = field-mapping | invoke-decl | identifier, scalar, ";" ;
+(* RFC-3 (grammar stack 1.15): an action-to-action invocation contract. The target must resolve to one
+   canonical action; the caller must cover its required inputs, handle its failure modes, establish its
+   preconditions, and be transaction-compatible; direct recursion must be `bounded`. *)
+invoke-decl = "invoke", identifier, "{",
+              { "arg", identifier, ";" | "handles", scalar, ";" | "establishes", scalar, ";"
+              | "expects", scalar, ";" | "bounded", ";" }, "}" ;
+(* RFC-2 (grammar stack 1.12): typed field-level lineage on a transform. Maps a source
+   field path to a target field path, optionally with a conversion function, null
+   behavior, a source->target unit pair, or a `lossy` marker. A field path is an
+   identifier, dotted for `Entity.field`. Projects onto action `fieldMappings` in the IR. *)
+field-mapping = "map", field-path, "->", field-path, { map-clause }, ";" ;
+map-clause = "via", scalar
+           | "null", null-behavior
+           | "unit", identifier, "->", identifier
+           | "lossy" ;
+field-path = identifier ;
+null-behavior = "propagate" | "default" | "error" ;
 collection-decl = "collection", identifier, "{", collection-member,
                   { collection-member }, "}" ;
 collection-member = identifier, scalar, ";" ;

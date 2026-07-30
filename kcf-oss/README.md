@@ -15,7 +15,9 @@ first app in ~3 minutes.
 Prefer the CLI? Start with **[QUICKSTART.md](QUICKSTART.md)** (a 60-second hello
 world), then **[docs/WALKTHROUGH.md](docs/WALKTHROUGH.md)** (requirements → ready
 IR → generated app) and **[docs/CONCEPTS.md](docs/CONCEPTS.md)** (the mental
-model). To turn a valid IR into an app with the LLM you choose, for your target
+model). For the complete application-development and KCF-contributor workflow,
+see **[docs/DEVELOPER-MANUAL.md](docs/DEVELOPER-MANUAL.md)**. To turn a valid IR
+into an app with the LLM you choose, for your target
 stack (the pack is stack-extensible), see
 **[codegen/](codegen/)** — or plug KCF into your chat LLM with the
 **[MCP server](mcp/)** (`kcf-mcp`). Contributing a grammar change? See

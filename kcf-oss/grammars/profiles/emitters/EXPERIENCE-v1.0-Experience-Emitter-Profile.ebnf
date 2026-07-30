@@ -4,9 +4,17 @@ experience-model = "experience", "model", identifier, "{", experience-element,
 experience-element = app-def | view-def | flow-def | component-def | binding-def ;
 app-def = "app", identifier, "{", "entry", ":", semantic-ref, ";",
           { "view", ":", semantic-ref, ";" }, "}" ;
-view-def = "view", identifier, "{", [ "entity", ":", semantic-ref, ";" ],
+(* RFC-15: a view declares a KIND + per-kind bindings, most of which point at existing dimensions
+   (COMPOSITION/LIFECYCLE/MEASURE/SPATIAL/TEMPORAL/ORDERING). Additive + backward-compatible: a view
+   with no kind keeps today's list/detail behaviour. *)
+view-def = "view", identifier, "{", [ "kind", ":", view-kind, ";" ],
+           [ "entity", ":", semantic-ref, ";" ], { view-binding },
            { "component", ":", semantic-ref, ";" },
            { "action", ":", semantic-ref, ";" }, "}" ;
+view-kind = "list" | "form" | "tree" | "chart" | "dashboard" | "map" | "kanban" | "gantt" | "custom" ;
+view-binding = ( "parent" | "column" | "swimlane" | "series" | "axis" | "chart-kind"
+               | "geometry" | "start" | "end" | "depends-on" | "tile" | "renderer" ),
+               ":", semantic-ref, ";" ;
 flow-def = "flow", identifier, "{", "entry", ":", identifier, ";",
            flow-node, { flow-node | flow-edge }, "}" ;
 flow-node = "node", identifier, ":", semantic-ref, ";" ;

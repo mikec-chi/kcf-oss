@@ -117,5 +117,8 @@ kcf model FulfillmentEvents profile event-driven-system {
     idempotency conditional;
     atomicity atomic;
     authorization fulfillment.TenderPolicy;
+    concurrency optimistic;
+    expected-version rowVersion;
+    idempotency-key requestId;
   }
 }

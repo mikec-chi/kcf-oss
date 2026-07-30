@@ -1,0 +1,1586 @@
+{
+  "$schema": "ir-extension-ledger-v1",
+  "ledgerVersion": "1.0.0",
+  "sourceRuleCount": 89,
+  "counts": {
+    "automated": 68,
+    "runtime-obligation": 8,
+    "ir-partial": 1,
+    "enforced-elsewhere": 6,
+    "human-judgment": 3,
+    "advisory": 3
+  },
+  "rules": [
+    {
+      "ruleId": "action.collection.aggregate-type",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].aggregate"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.equality",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].keys|equalityKeys"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.field-resolution",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].projections + inputSchema"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.join-fanout",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].expectedCardinality"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.join-type",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].joinKeys + inputs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.map-cardinality",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].operation|expands"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.order-total",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].sort|keys"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.projection-unique",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].projections"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.collection.set-compatibility",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].inputs schemas"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.compose.order",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Sequential-vs-concurrent safety depends on runtime read/write sets; enforced by the execution engine/scheduler, not statically. Terminal: runtime-obligation."
+    },
+    {
+      "ruleId": "action.compose.saga",
+      "rfc": "RFC-5",
+      "status": "ir-partial",
+      "requiredIr": [
+        "compensation"
+      ],
+      "authoringSyntax": [
+        "compensation"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "automated",
+      "overrideReason": "IR 1.1 provides actions[].compensation (forward/compensation half). Multi-step saga ordering + durable state remain unrepresented (ledger: ir-partial, RFC-5); not automatable end-to-end yet."
+    },
+    {
+      "ruleId": "action.concurrency.lost-update",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "expectedVersion"
+      ],
+      "authoringSyntax": [
+        "expected-version"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_execution_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.concurrency.version",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "expectedVersion"
+      ],
+      "authoringSyntax": [
+        "expected-version"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_execution_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.destructive.recovery",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "reversibility"
+      ],
+      "authoringSyntax": [
+        "reversibility"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.destructive.retention",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "retention"
+      ],
+      "authoringSyntax": [
+        "retention"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.destructive.scope",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Exposing the evaluated target count/preview requires evaluating the selection at runtime ('when technically feasible'); enforced by the runtime dry-run/preview path, not the static model. Terminal class: runtime-obligation."
+    },
+    {
+      "ruleId": "action.device.safety",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Interlocks, current device state, acknowledgment, timeout and fail-safe behavior are runtime/hardware facts; enforced by the device runtime / safety controller at command time, not statically from the model. Terminal class: runtime-obligation."
+    },
+    {
+      "ruleId": "action.event.commit-order",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Emit-only-on-commit is a runtime delivery guarantee; enforced by the transactional outbox in the emitted runtime (ASOS outbox), not by static model checking. Terminal class: runtime-obligation."
+    },
+    {
+      "ruleId": "action.event.duplicate",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "At-least-once duplication is a runtime delivery property; enforced by the consumer inbox / idempotency ledger in the emitted runtime. Terminal class: runtime-obligation."
+    },
+    {
+      "ruleId": "action.event.payload",
+      "rfc": "RFC-5",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "saga/device-safety/event change-contract constructs"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Emitted event payload conformance (before/after semantics + classification/minimization at emit time) is a runtime fact, enforced by the outbox/emitter runtime \u2014 consistent with the other event.* rules (commit-order/duplicate). Terminal: runtime-obligation."
+    },
+    {
+      "ruleId": "action.idempotency.conditional",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "idempotencyKey"
+      ],
+      "authoringSyntax": [
+        "idempotency-key"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_execution_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.failure",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.input",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.output",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.precondition",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.recursion",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.resolved",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.invoke.transaction",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "invocations"
+      ],
+      "authoringSyntax": [
+        "invoke"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_invocation",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.create-input",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "provides"
+      ],
+      "authoringSyntax": [
+        "provide"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.create-readonly",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "provides"
+      ],
+      "authoringSyntax": [
+        "provide"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.delete-policy",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "deleteBehavior"
+      ],
+      "authoringSyntax": [
+        "delete-behavior"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.exists-output",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "actions[].operation|effect|outputCardinality"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.key",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "actions[].selection"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.patch-format",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "patchDialect"
+      ],
+      "authoringSyntax": [
+        "patch-dialect"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.postcondition",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "postconditions"
+      ],
+      "authoringSyntax": [
+        "postcondition"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.precondition",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "preconditions"
+      ],
+      "authoringSyntax": [
+        "precondition"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.record.update-fields",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "actions[].mutations"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.retry.bound",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "retryBackoff"
+      ],
+      "authoringSyntax": [
+        "retry-backoff"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_misc_contracts",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.retry.classification",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "retryClassification"
+      ],
+      "authoringSyntax": [
+        "retry-classification"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_misc_contracts",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.cascade",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "actions[].deleteBehavior|selection|authorization"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.input-shape",
+      "rfc": "RFC-3",
+      "status": "enforced-elsewhere",
+      "requiredIr": [
+        "action-to-action invocation contract (invoke.*) + bulk input/output-shape & pagination construct (set.*) \u2014 the single-record I/O contract (provides/patchDialect/selection) already delivered in Slice 7"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "A bulk operation targets a single entity type, so its input schema uniformity is guaranteed by that entity's type (enforced by the schema/emitter); tagged-variant inputs would need a separate multi-type construct. Terminal: enforced-elsewhere."
+    },
+    {
+      "ruleId": "action.set.limit",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "bulkLimit"
+      ],
+      "authoringSyntax": [
+        "bulk-limit"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.order",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "bulkOrdering"
+      ],
+      "authoringSyntax": [
+        "bulk-ordering"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.output-shape",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "returns"
+      ],
+      "authoringSyntax": [
+        "returns"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.pagination",
+      "rfc": "RFC-3",
+      "status": "automated",
+      "requiredIr": [
+        "pagination"
+      ],
+      "authoringSyntax": [
+        "pagination"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_io_contract",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.set.partial-failure",
+      "rfc": "RFC-5",
+      "status": "automated",
+      "requiredIr": [
+        "bulkFailurePolicy"
+      ],
+      "authoringSyntax": [
+        "bulk-failure"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_destructive_bulk_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transaction.external",
+      "rfc": "RFC-4",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "actions[].retry (backoff + failure classification)"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Whether a target system can actually provide atomicity is a runtime/topology fact the model cannot know statically. The IR-checkable slice (claiming atomicity under an incompatible transactionBoundary) is enforced by action.transaction.required; genuine cross-system atomicity is a runtime obligation of the transaction/saga coordinator (outbox/compensation/reconciliation). Terminal class: runtime-obligation."
+    },
+    {
+      "ruleId": "action.transaction.required",
+      "rfc": "RFC-4",
+      "status": "automated",
+      "requiredIr": [
+        "transactionBoundary"
+      ],
+      "authoringSyntax": [
+        "transaction-boundary"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_action_execution_semantics",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.loss",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.null",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.required-coverage",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.reversibility",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.source-target",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.time",
+      "rfc": "RFC-2",
+      "status": "runtime-obligation",
+      "requiredIr": [
+        "collection-pipeline field lineage + transform totality/time/version \u2014 the single-record actions[].fieldMappings construct already delivered in Slice 6 (grammar stack 1.12)"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "runtime-obligation",
+      "overrideReason": "Instant/local-time + timezone/DST conversion correctness is a runtime time-library concern, not statically checkable. Terminal: runtime-obligation."
+    },
+    {
+      "ruleId": "action.transform.totality",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "totality"
+      ],
+      "authoringSyntax": [
+        "totality"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_misc_contracts",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.type",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.unit",
+      "rfc": "RFC-2",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "action.transform.version",
+      "rfc": "RFC-2",
+      "status": "enforced-elsewhere",
+      "requiredIr": [
+        "collection-pipeline field lineage + transform totality/time/version \u2014 the single-record actions[].fieldMappings construct already delivered in Slice 6 (grammar stack 1.12)"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "Transform/schema version compatibility + migrations is a CROSS-REVISION fact enforced by the delta/migration tooling (like kcf.concept.version). Terminal: enforced-elsewhere."
+    },
+    {
+      "ruleId": "integration.contract.schema",
+      "rfc": "RFC-7",
+      "status": "automated",
+      "requiredIr": [
+        "integration.endpoints[].operation"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_integration",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "integration.mapping.coverage",
+      "rfc": "RFC-7",
+      "status": "automated",
+      "requiredIr": [
+        "integration.mappings[].fieldMaps"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_integration",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "integration.protocol",
+      "rfc": "RFC-7",
+      "status": "automated",
+      "requiredIr": [
+        "integration.adapters[].protocol|serialization"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_integration",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "integration.retry.idempotency",
+      "rfc": "RFC-7",
+      "status": "automated",
+      "requiredIr": [
+        "integration.retryPolicies[].requiresIdempotency"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_integration",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.concept.kind-compatible",
+      "rfc": "RFC-8",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].specializes"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_specialization_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.concept.trait",
+      "rfc": "RFC-8",
+      "status": "human-judgment",
+      "requiredIr": [
+        "per-kind trait-permission taxonomy (kcf.concept.trait) + a derived-concept lineage marker (lineage.complete) \u2014 specialization (specializes) + lineage-binding resolution delivered in Slice 10"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "human-judgment",
+      "overrideReason": "Which traits are permitted for a given concept kind requires a per-kind trait-permission taxonomy that does not exist; until then it is a modeling-review judgment. Terminal: human-judgment."
+    },
+    {
+      "ruleId": "kcf.concept.version",
+      "rfc": "RFC-8",
+      "status": "enforced-elsewhere",
+      "requiredIr": [
+        "per-kind trait-permission taxonomy (kcf.concept.trait) + a derived-concept lineage marker (lineage.complete) \u2014 specialization (specializes) + lineage-binding resolution delivered in Slice 10"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "Semantic-version compliance (breaking->major, additive->minor, clarify->patch) is a CROSS-REVISION fact: it compares a model against its prior version. It is enforced by the delta/migration tooling (kcf migrate / IR delta), not the single-model analyzer. Terminal class: enforced-elsewhere."
+    },
+    {
+      "ruleId": "kcf.extension.point",
+      "rfc": null,
+      "status": "human-judgment",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "human-judgment",
+      "overrideReason": "Requires an extension-point registry + compatibility/governance policy that does not exist as a model field; until a registry exists, extension-point compliance is a governance review decision (see docs/IR-ROADMAP.md). Terminal class: human-judgment."
+    },
+    {
+      "ruleId": "kcf.profile.prohibited",
+      "rfc": null,
+      "status": "enforced-elsewhere",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "The prohibited-construct/pattern check is already automated as kcf.profile.pattern-prohibited; this rule is subsumed by that enforcement. Terminal class: enforced-elsewhere (superseded)."
+    },
+    {
+      "ruleId": "kcf.profile.relationship",
+      "rfc": null,
+      "status": "human-judgment",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "human-judgment",
+      "overrideReason": "Judging that a profile's relationship restriction is 'at least as strict' as the base definition is a profile-authoring judgment; no comparable machine-checkable strictness ordering exists in the IR. Terminal class: human-judgment."
+    },
+    {
+      "ruleId": "kcf.relationship.canonical",
+      "rfc": "RFC-6",
+      "status": "automated",
+      "requiredIr": [
+        "relationships[].qualifiers.canonical|inverse"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_relationship_reasoning",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.relationship.condition",
+      "rfc": "RFC-6",
+      "status": "automated",
+      "requiredIr": [
+        "relationships[].qualifiers.predicate"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_predicate_typing",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.relationship.inverse",
+      "rfc": "RFC-6",
+      "status": "automated",
+      "requiredIr": [
+        "relationships[].qualifiers.inverse + source/target"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_relationship_reasoning",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.relationship.participation",
+      "rfc": "RFC-6",
+      "status": "automated",
+      "requiredIr": [
+        "relationships[].rootKind + qualifiers"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_misc_contracts",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "kcf.relationship.transitivity",
+      "rfc": "RFC-6",
+      "status": "automated",
+      "requiredIr": [
+        "relationships[].qualifiers.transitive + rootKind"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_relationship_reasoning",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "lineage.binding.schema",
+      "rfc": "RFC-8",
+      "status": "automated",
+      "requiredIr": [
+        "lineage.bindings[].source|target"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_specialization_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "lineage.complete",
+      "rfc": "RFC-8",
+      "status": "advisory",
+      "requiredIr": [
+        "per-kind trait-permission taxonomy (kcf.concept.trait) + a derived-concept lineage marker (lineage.complete) \u2014 specialization (specializes) + lineage-binding resolution delivered in Slice 10"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "advisory",
+      "overrideReason": "'Every derived item SHOULD have a lineage path' is a SHOULD-level recommendation surfaced as guidance, not a hard static error. Terminal: advisory."
+    },
+    {
+      "ruleId": "stack.governance.audit",
+      "rfc": null,
+      "status": "enforced-elsewhere",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "An audit/evidence path is a platform capability: every security-sensitive action is journaled by the runtime/platform audit subsystem. The model cannot statically prove an evidence path exists at execution time. Terminal class: enforced-elsewhere."
+    },
+    {
+      "ruleId": "stack.graph.cycle-policy",
+      "rfc": null,
+      "status": "advisory",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "advisory",
+      "overrideReason": "Executable-graph acyclicity/termination is graph-authoring guidance; the executable-graph runtime/emitter rejects cycles at build/run time. Not a core-IR static check. Terminal class: advisory."
+    },
+    {
+      "ruleId": "stack.graph.dead-end",
+      "rfc": null,
+      "status": "advisory",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "advisory",
+      "overrideReason": "A nonterminal node with no outgoing path is a graph-authoring warning per graph kind (SHOULD); surfaced by the emitter/runtime, not the core-IR analyzer. Terminal class: advisory."
+    },
+    {
+      "ruleId": "stack.name.visibility",
+      "rfc": null,
+      "status": "enforced-elsewhere",
+      "requiredIr": [],
+      "authoringSyntax": [],
+      "schemaSupport": false,
+      "parserSupport": false,
+      "normalizerSupport": false,
+      "handler": null,
+      "positiveFixture": null,
+      "negativeFixture": null,
+      "targetClassification": "enforced-elsewhere",
+      "overrideReason": "Export/visibility is module-packaging, enforced by the stack tooling (validate_stack.py / lint_stack.py), not the semantic model IR. Terminal class: enforced-elsewhere."
+    },
+    {
+      "ruleId": "stack.time.duration",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].durationValue"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.time.window-compatible",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "collectionTransforms[].windowUnit|slideUnit"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_collection_transforms",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.assignment",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].attributes[].default"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.collection",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].attributes[].cardinality|default"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.condition-boolean",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "rules[].predicate | relationships[].qualifiers.predicate"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_predicate_typing",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.known",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].attributes[].type"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.nullability",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].attributes[].required|identity|default"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.type.operator",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "rules[].predicate.operator"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_predicate_typing",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.value.finite",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "concepts[].threshold|target|tolerance|weight|probability"
+      ],
+      "authoringSyntax": [],
+      "schemaSupport": true,
+      "parserSupport": false,
+      "normalizerSupport": true,
+      "handler": "check_type_system",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    },
+    {
+      "ruleId": "stack.value.unit-compatible",
+      "rfc": "RFC-1",
+      "status": "automated",
+      "requiredIr": [
+        "fieldMappings"
+      ],
+      "authoringSyntax": [
+        "map"
+      ],
+      "schemaSupport": true,
+      "parserSupport": true,
+      "normalizerSupport": true,
+      "handler": "check_transform_lineage",
+      "positiveFixture": "tests/fixtures/valid/transportation-ir.json",
+      "negativeFixture": "tests/fixtures/invalid/semantic-failures-ir.json",
+      "targetClassification": "automated",
+      "overrideReason": ""
+    }
+  ]
+}

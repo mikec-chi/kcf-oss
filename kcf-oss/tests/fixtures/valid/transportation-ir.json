@@ -4,26 +4,147 @@
   "id": "Transportation",
   "module": "KCF",
   "concepts": [
-    {"id": "Shipment", "qualifiedName": "transport.Shipment", "kind": "ENTITY", "references": []},
-    {"id": "LoadPlanner", "qualifiedName": "transport.LoadPlanner", "kind": "ACTOR", "references": []},
-    {"id": "TenderLoad", "qualifiedName": "transport.TenderLoad", "kind": "WORK", "references": ["transport.Shipment", "transport.LoadPlanner"]},
-    {"id": "TenderSent", "qualifiedName": "transport.TenderSent", "kind": "EVENT", "references": ["transport.Shipment"]}
+    {
+      "id": "Shipment",
+      "qualifiedName": "transport.Shipment",
+      "kind": "ENTITY",
+      "references": []
+    },
+    {
+      "id": "LoadPlanner",
+      "qualifiedName": "transport.LoadPlanner",
+      "kind": "ACTOR",
+      "references": []
+    },
+    {
+      "id": "TenderLoad",
+      "qualifiedName": "transport.TenderLoad",
+      "kind": "WORK",
+      "references": [
+        "transport.Shipment",
+        "transport.LoadPlanner"
+      ]
+    },
+    {
+      "id": "TenderSent",
+      "qualifiedName": "transport.TenderSent",
+      "kind": "EVENT",
+      "references": [
+        "transport.Shipment"
+      ]
+    }
   ],
   "relationships": [
-    {"id": "planner-performs-tender", "definition": "performs", "rootKind": "PARTICIPATION", "source": "transport.LoadPlanner", "target": "transport.TenderLoad", "strength": 1.0},
-    {"id": "tender-operates-shipment", "definition": "operatesOn", "rootKind": "TRANSFORMATION", "source": "transport.TenderLoad", "target": "transport.Shipment", "strength": 1.0}
+    {
+      "id": "planner-performs-tender",
+      "definition": "performs",
+      "rootKind": "PARTICIPATION",
+      "source": "transport.LoadPlanner",
+      "target": "transport.TenderLoad",
+      "strength": 1.0
+    },
+    {
+      "id": "tender-operates-shipment",
+      "definition": "operatesOn",
+      "rootKind": "TRANSFORMATION",
+      "source": "transport.TenderLoad",
+      "target": "transport.Shipment",
+      "strength": 1.0
+    }
   ],
   "lifecycles": [
-    {"id": "ShipmentLifecycle", "states": ["Ready", "Tendered", "Assigned"], "initial": "Ready", "terminal": ["Assigned"], "transitions": [{"from": "Ready", "to": "Tendered"}, {"from": "Tendered", "to": "Assigned"}]}
+    {
+      "id": "ShipmentLifecycle",
+      "states": [
+        "Ready",
+        "Tendered",
+        "Assigned"
+      ],
+      "initial": "Ready",
+      "terminal": [
+        "Assigned"
+      ],
+      "transitions": [
+        {
+          "from": "Ready",
+          "to": "Tendered"
+        },
+        {
+          "from": "Tendered",
+          "to": "Assigned"
+        }
+      ]
+    }
   ],
   "actions": [
-    {"id": "AssignCarrier", "effect": "command", "operation": "update", "scope": "record", "target": "transport.Shipment", "selection": "identity", "inputCardinality": "one", "outputCardinality": "one", "idempotency": "conditional", "atomicity": "atomic", "authorization": "system.AssignmentPolicy"}
+    {
+      "id": "AssignCarrier",
+      "effect": "command",
+      "operation": "update",
+      "scope": "record",
+      "target": "transport.Shipment",
+      "selection": "identity",
+      "inputCardinality": "one",
+      "outputCardinality": "one",
+      "idempotency": "conditional",
+      "atomicity": "atomic",
+      "authorization": "system.AssignmentPolicy",
+      "concurrency": "optimistic",
+      "expectedVersion": "version",
+      "idempotencyKey": "assignmentKey",
+      "transactionBoundary": "required"
+    }
   ],
-  "events": [{"id": "TenderSent", "mutable": false}],
-  "resources": [{"id": "PlannerCapacity", "capacity": 10}],
-  "allocations": [{"id": "Allocation1", "resource": "PlannerCapacity", "quantity": 2}],
-  "plans": [{"id": "TenderPlan", "steps": [{"index": 1}, {"index": 2}]}],
-  "runtimeRequirements": ["ResolvePerformer", "ValidatePreconditions"],
-  "emitters": [{"id": "WorkflowEmitter", "supports": ["ResolvePerformer", "ValidatePreconditions"], "unsupportedPolicy": "error"}],
-  "runtimeBindings": [{"id": "ResolvePerformer", "version": "1.0.0"}]
+  "events": [
+    {
+      "id": "TenderSent",
+      "mutable": false
+    }
+  ],
+  "resources": [
+    {
+      "id": "PlannerCapacity",
+      "capacity": 10
+    }
+  ],
+  "allocations": [
+    {
+      "id": "Allocation1",
+      "resource": "PlannerCapacity",
+      "quantity": 2
+    }
+  ],
+  "plans": [
+    {
+      "id": "TenderPlan",
+      "steps": [
+        {
+          "index": 1
+        },
+        {
+          "index": 2
+        }
+      ]
+    }
+  ],
+  "runtimeRequirements": [
+    "ResolvePerformer",
+    "ValidatePreconditions"
+  ],
+  "emitters": [
+    {
+      "id": "WorkflowEmitter",
+      "supports": [
+        "ResolvePerformer",
+        "ValidatePreconditions"
+      ],
+      "unsupportedPolicy": "error"
+    }
+  ],
+  "runtimeBindings": [
+    {
+      "id": "ResolvePerformer",
+      "version": "1.0.0"
+    }
+  ]
 }
